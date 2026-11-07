@@ -1,0 +1,27 @@
+name: Storybook Check
+
+# Thin trigger stub, like build-check.yml: the job body is the public
+# chrisgriffin/workflows repo's _reusable-node-ci.yml at `v1`. It reports as
+# `storybook / ci`, builds the tokens and the Storybook on every PR, and
+# deploy-pages.yml publishes the same build on a push to main.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: storybook-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  storybook:
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      packages: read
+    uses: chrisgriffin/workflows/.github/workflows/_reusable-node-ci.yml@v1
+    with:
+      node_version: "22"
+      run: npm run build:tokens && npm run build-storybook
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

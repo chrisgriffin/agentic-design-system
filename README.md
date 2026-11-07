@@ -7,9 +7,9 @@ components with CSS Modules, each with a contract, a story and a test;
 Storybook; and the [design-delta](https://github.com/chrisgriffin/design-delta)
 gate, which fails CI when code and contracts disagree.
 
-> This repo is built in layers. Today it carries the tokens and three example
-> components with contracts; Storybook, the agent hooks and the release flow
-> follow in that order.
+> This repo is built in layers. Today it carries the tokens, three example
+> components with contracts, and a Storybook with Tokens and Design Drift
+> pages; the agent hooks and the release flow follow in that order.
 
 ## Tokens
 
@@ -49,11 +49,27 @@ over `design-delta.json` and fails when the code or a stylesheet disagrees with
 a contract. Styles use only `--ads-*` custom properties; Stylelint refuses a
 literal where a token belongs.
 
+## Storybook
+
+`npm run storybook` serves the component stories plus two system pages, and
+`npm run build-storybook` writes `storybook-static/`, published to
+[GitHub Pages](https://chrisgriffin.github.io/agentic-design-system/) on every
+push to `main`.
+
+- **Tokens** renders every semantic token from the build manifest, the colors
+  in both themes side by side, and the primitive palette.
+- **Design Drift** renders `design-delta audit --json`, run when Storybook
+  starts: the same verdict `npm run verify` gates on.
+
+The toolbar's theme toggle sets `data-theme` on the preview's root, which is
+what the token CSS keys off. Docs and accessibility checks come from
+`@storybook/addon-docs` and `@storybook/addon-a11y`.
+
 ## Development
 
 ```bash
 npm install
-npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test
+npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test → build-storybook
 ```
 
 Prettier, ESLint and TypeScript come from the shared

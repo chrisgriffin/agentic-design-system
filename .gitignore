@@ -1,5 +1,6 @@
 node_modules
 tokens/css/
+storybook-static/
 .DS_Store
 *.log
 .claude/settings.local.json
