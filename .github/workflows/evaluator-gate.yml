@@ -2,7 +2,7 @@ name: Evaluator
 
 # Thin stub: the fleet's PR review loop. It grades every PR head and reports
 # as the `Evaluator` status the develop ruleset requires. A copy of the
-# template that leaves the fleet drops this file (scripts/init.mjs does).
+# template that leaves the fleet drops this file (scripts/init.mjs, #6, will).
 
 on:
   pull_request:

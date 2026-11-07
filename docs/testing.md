@@ -18,7 +18,7 @@ The tests prove that the token build emits what the components may use and nothi
 - `npm run build:tokens` — Terrazzo over `tokens/json`, then the primitive inlining; the later steps read its output.
 - `npm run prettier:check` — Prettier over everything `.prettierignore` does not exclude, in the shared `@chrisgriffin/config/prettier` style.
 - `npm run lint` — ESLint from `eslint.config.mjs`, which spreads `@chrisgriffin/config/eslint` first.
-- `npm run lint:styles` — Stylelint over every `.css` file: a color, size, font, radius, gap or motion value that is not a `--ads-*` property fails, and so does a property name the built CSS does not define.
+- `npm run lint:styles` — Stylelint over every `.css` file: a color, fill or stroke, font family, size or weight, line height, border radius, margin or padding, gap, or transition or animation duration or timing value that is not a `--ads-*` property fails (other sizes, such as `width`, are not checked), and so does a property name the built CSS does not define.
 - `npm run drift:verify` — `design-delta verify`: every contract validated, then compared with its component and stylesheet; an error-severity finding fails it.
 - `npm test` — `node --test` over `tokens/scripts/*.test.mjs`, then `vitest run` over `components/**/*.test.tsx` in jsdom.
 - `npm run build-storybook` — the Storybook build, which also runs the engine's audit for the Design Drift page.
@@ -29,7 +29,7 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 
 ## What is tested
 
-- `tokens/scripts/tokens.test.mjs` — the built CSS holds only `--ads-*` properties with no primitive and no `var()` left, both themes are present and differ, and every manifest value is a literal.
+- `tokens/scripts/tokens.test.mjs` — the built CSS declares no `--ads-primitive-*` property, has no `var()` left and declares more than 40 `--ads-*` properties, both themes are present and differ, and every manifest value is a literal.
 - `components/<name>/<name>.test.tsx` — each component renders its content and the class its stylesheet keys off, with Testing Library; CSS Module class names are unscoped in tests so an assertion can name them.
 - `design-delta verify` — not a test file but the gate's own check: the contract's props against the component's, its anatomy against the rendered tree, its token bindings against the stylesheet.
 

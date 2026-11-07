@@ -13,5 +13,4 @@
 - the branch ruleset on GitHub — `Evaluator` returns to the `develop` ruleset's required checks after merge, an admin step recorded in the PR body; `storybook / ci` is added with it.
 - `docs/`: new. `docs/architecture.md` names every directory, so a later structural change updates it.
 - `CHANGELOG.md`: new. `README.md`: the layers note and two doc links.
-- the vault's System Map section for this repo — unchanged: its summary still holds.
 - No Routine, cron or Mac-installed file.

@@ -2,7 +2,7 @@ name: Claude Mention
 
 # Thin stub: an @claude mention on an issue or PR dispatches the fleet's
 # mention responder. A copy of the template that leaves the fleet drops this
-# file (scripts/init.mjs does).
+# file (scripts/init.mjs, #6, will).
 
 on:
   issue_comment:
