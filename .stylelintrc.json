@@ -1,0 +1,46 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-css-modules"],
+  "plugins": [
+    "stylelint-value-no-unknown-custom-properties",
+    "stylelint-declaration-strict-value"
+  ],
+  "rules": {
+    "color-named": "never",
+    "csstools/value-no-unknown-custom-properties": [
+      true,
+      { "importFrom": ["tokens/css/tokens.css"] }
+    ],
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "/color$/",
+        "fill",
+        "stroke",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "line-height",
+        "/^border(-[a-z]+)*-radius$/",
+        "/^(margin|padding)(-[a-z]+)*$/",
+        "/gap$/",
+        "/^(transition|animation)-(duration|timing-function)$/"
+      ],
+      {
+        "expandShorthand": true,
+        "ignoreValues": {
+          "": [
+            "0",
+            "auto",
+            "inherit",
+            "initial",
+            "unset",
+            "none",
+            "currentcolor",
+            "transparent",
+            "normal",
+            "/^-?[\\d.]+(em|ex|ch|vh|vw|svh|dvh|%)$/"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "agentic-design-system",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A design system template an agent can build in and keep honest: DTCG tokens, component contracts, Storybook, and the design-delta gate.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisgriffin/agentic-design-system.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build:tokens": "node tokens/scripts/build-css.mjs",
+    "prettier:check": "prettier --check .",
+    "prettier:format": "prettier --write .",
+    "lint": "eslint .",
+    "lint:styles": "stylelint \"**/*.css\" --allow-empty-input",
+    "test": "node --test",
+    "verify": "npm run build:tokens && npm run prettier:check && npm run lint && npm run lint:styles && npm test"
+  },
+  "prettier": "@chrisgriffin/config/prettier",
+  "devDependencies": {
+    "@chrisgriffin/config": "github:chrisgriffin/config#v1",
+    "@terrazzo/parser": "^2.10.0",
+    "@terrazzo/plugin-css": "^2.10.0",
+    "@terrazzo/token-tools": "^2.10.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "stylelint": "^17.12.0",
+    "stylelint-config-css-modules": "^4.6.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-declaration-strict-value": "^1.12.1",
+    "stylelint-value-no-unknown-custom-properties": "^6.1.1",
+    "typescript": "~6.0.3"
+  }
+}
