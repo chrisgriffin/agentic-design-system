@@ -11,6 +11,20 @@ gate, which fails CI when code and contracts disagree.
 > components with contracts, and a Storybook with Tokens and Design Drift
 > pages; the agent hooks and the release flow follow in that order.
 
+## Starting your own
+
+```bash
+node scripts/init.mjs --name my-system --prefix my --owner my-login [--figma-file <key>]
+```
+
+One run rewrites the name, the `--ads-*` prefix and the owner everywhere they
+appear, writes the Figma file key into `design-delta.json` and the Code
+Connect stubs when given one, installs, docks the engine, runs `npm run verify`
+and then removes itself, its CI check and this section. Pass `--fleet` to keep
+`evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
+behind them; without it they are removed. Nothing is committed: read the
+diff, then commit.
+
 ## Tokens
 
 - `tokens/json/primitives/` holds literal values (a neutral ramp, one accent
