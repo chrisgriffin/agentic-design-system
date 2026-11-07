@@ -7,9 +7,9 @@ components with CSS Modules, each with a contract, a story and a test;
 Storybook; and the [design-delta](https://github.com/chrisgriffin/design-delta)
 gate, which fails CI when code and contracts disagree.
 
-> This repo is built in layers. Today it carries the tokens, three example
-> components with contracts, and a Storybook with Tokens and Design Drift
-> pages; the agent hooks and the release flow follow in that order.
+> This repo is built in layers, each a merged build: the tokens, the
+> components with contracts, the Storybook, the agent layer, and the release
+> flow. `scripts/init.mjs`, which turns a copy into a named system, is next.
 
 ## Starting your own
 
@@ -85,6 +85,9 @@ what the token CSS keys off. Docs and accessibility checks come from
 npm install
 npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test → build-storybook
 ```
+
+How the repo fits together, in prose: [docs/architecture.md](docs/architecture.md);
+how a change becomes a release: [docs/releasing.md](docs/releasing.md).
 
 Prettier, ESLint and TypeScript come from the shared
 [`@chrisgriffin/config`](https://github.com/chrisgriffin/config); Stylelint
