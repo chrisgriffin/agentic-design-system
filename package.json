@@ -18,6 +18,7 @@
     "prettier:format": "prettier --write .",
     "lint": "eslint .",
     "lint:styles": "stylelint \"**/*.css\" --allow-empty-input",
+    "scaffold": "node scripts/scaffold-component.mjs",
     "test": "node --test tokens/scripts/*.test.mjs && vitest run",
     "verify": "npm run build:tokens && npm run prettier:check && npm run lint && npm run lint:styles && npm run drift:verify && npm test",
     "drift:audit": "design-delta audit",
