@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/design-delta/schema/config.schema.json",
+  "_doc": "The design-delta engine's config, read from the project root. Contracts live beside their components; the design side is Figma with no files yet, so `verify` runs contract-to-code only until a snapshot is gathered.",
+  "design": {
+    "provider": "figma",
+    "files": []
+  },
+  "paths": {
+    "componentsDir": "components",
+    "contractsDir": "components",
+    "tokensFile": "tokens/json",
+    "styleRoots": ["tokens/css"],
+    "reportDir": ".design-delta/reports",
+    "snapshotDir": ".design-delta/snapshots",
+    "stateFile": ".design-delta/state.json"
+  },
+  "conventions": {
+    "cssVarPrefix": "--ads-",
+    "stylesSuffix": ".module.css",
+    "codeConnectSuffix": ".figma.tsx",
+    "contractSuffix": ".contract.json",
+    "nonComponentFileSuffixes": [".stories.tsx", ".test.tsx", ".figma.tsx"]
+  }
+}

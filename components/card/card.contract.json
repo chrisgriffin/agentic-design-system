@@ -1,0 +1,81 @@
+{
+  "$schema": "../../node_modules/design-delta/schema/contract.schema.json",
+  "id": "card",
+  "title": "Card",
+  "status": "published",
+  "sources": {
+    "code": {
+      "path": "components/card/card.tsx",
+      "styles": "components/card/card.module.css"
+    }
+  },
+  "props": {
+    "children": {
+      "type": "slot",
+      "_comment": "React's implicit children slot; a design tool exposes it as a named slot property."
+    },
+    "padding": {
+      "type": "enum",
+      "values": ["default", "none"],
+      "default": "default",
+      "required": false
+    }
+  },
+  "anatomy": {
+    "root": {
+      "type": "container",
+      "element": "div",
+      "codeClass": "card",
+      "content": {
+        "$prop": "children"
+      }
+    }
+  },
+  "styles": {
+    "root": {
+      "base": {
+        "borderRadius": {
+          "token": "radius.lg"
+        },
+        "background": {
+          "token": "color.bg.surface-raised"
+        },
+        "color": {
+          "token": "color.fg.default"
+        },
+        "padding": {
+          "all": {
+            "token": "inset.lg"
+          }
+        },
+        "border": {
+          "width": {
+            "token": "border.default"
+          },
+          "color": {
+            "token": "color.border.default"
+          }
+        },
+        "fontFamily": {
+          "token": "font-family.body"
+        },
+        "fontSize": {
+          "token": "font-size.md"
+        },
+        "lineHeight": {
+          "token": "line-height.body"
+        }
+      },
+      "variants": [
+        {
+          "when": {
+            "padding": "none"
+          },
+          "padding": {
+            "all": "raw(0)"
+          }
+        }
+      ]
+    }
+  }
+}

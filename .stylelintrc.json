@@ -8,7 +8,9 @@
     "color-named": "never",
     "csstools/value-no-unknown-custom-properties": [
       true,
-      { "importFrom": ["tokens/css/tokens.css"] }
+      {
+        "importFrom": ["tokens/css/tokens.css"]
+      }
     ],
     "scale-unlimited/declaration-strict-value": [
       [
@@ -40,6 +42,12 @@
             "/^-?[\\d.]+(em|ex|ch|vh|vw|svh|dvh|%)$/"
           ]
         }
+      }
+    ],
+    "selector-class-pattern": [
+      "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]+$",
+      {
+        "message": "Expected class selector to be kebab-case or camelCase (CSS Modules read camelCase as a property)"
       }
     ]
   }

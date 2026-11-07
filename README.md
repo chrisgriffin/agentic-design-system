@@ -7,8 +7,9 @@ components with CSS Modules, each with a contract, a story and a test;
 Storybook; and the [design-delta](https://github.com/chrisgriffin/design-delta)
 gate, which fails CI when code and contracts disagree.
 
-> This repo is built in layers. Today it carries the token layer; components,
-> Storybook, the agent hooks and the release flow follow in that order.
+> This repo is built in layers. Today it carries the tokens and three example
+> components with contracts; Storybook, the agent hooks and the release flow
+> follow in that order.
 
 ## Tokens
 
@@ -28,11 +29,31 @@ gate, which fails CI when code and contracts disagree.
 Token files are plain JSON with one-line diffs, so any DTCG editor works on
 them as-is.
 
+## Components
+
+Three examples under `components/`, each a directory of the same seven files:
+`name.tsx`, `name.module.css`, `name.stories.tsx`, `name.test.tsx`,
+`name.figma.tsx` (Code Connect, a placeholder file key until one exists),
+`name.contract.json` and `index.ts`.
+
+| Component | What it shows                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------ |
+| `badge`   | The minimal component, the one to copy.                                                          |
+| `button`  | Enum props with defaults, an icon slot, and a design-only `state` axis the code must not carry.  |
+| `card`    | Composition: `Card` and `Card.Header` are two contracts in one directory, each against its file. |
+
+A **contract** (`*.contract.json`) is the source of truth for a component: its
+props, its element structure and the tokens its styles bind. `npm run
+drift:verify` runs [design-delta](https://github.com/chrisgriffin/design-delta)
+over `design-delta.json` and fails when the code or a stylesheet disagrees with
+a contract. Styles use only `--ads-*` custom properties; Stylelint refuses a
+literal where a token belongs.
+
 ## Development
 
 ```bash
 npm install
-npm run verify   # build:tokens → prettier:check → lint → lint:styles → test
+npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test
 ```
 
 Prettier, ESLint and TypeScript come from the shared
