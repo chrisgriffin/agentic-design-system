@@ -24,6 +24,7 @@ The tests prove that the token build emits what the components may use and nothi
 - `npm run build-storybook` — the Storybook build, which also runs the engine's audit for the Design Drift page.
 
 `storybook-check.yml` runs the token and Storybook builds again as their own check, `storybook / ci`.
+`init-check.yml` runs `scripts/init.mjs` on the PR's checkout with sample values, as `init / ci`: the script runs the whole chain itself on the renamed copy, and the check fails when the script survives or any `--ads-` reference is left.
 
 Narrower runs while working: `npx vitest run components/badge` for one component, `npx vitest` to watch, `node --test tokens/scripts/tokens.test.mjs` for the tokens alone.
 
