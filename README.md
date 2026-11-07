@@ -77,6 +77,18 @@ Prettier, ESLint and TypeScript come from the shared
 holds every `.css` file to the token tier (a color, size or font that is not a
 `--ads-*` custom property fails).
 
+## Agent layer
+
+`.claude/settings.json` wires three hooks: `bash-guard.sh` before every Bash
+call (no force push, no push to `main`), `post-edit-check.sh` after every
+edit (Prettier, and Stylelint on CSS), and `design-delta-verify.mjs`, which
+`design-delta dock` generates and which runs the gate after every edit so an
+agent sees drift before it finishes. `.claude/skills/design-delta/` is the
+dock's stub, pointing at the installed engine's own skill.
+`npm run scaffold -- <name>` writes a new component directory in the shape of
+`components/badge` plus the contract the engine drafts from its props.
+`CLAUDE.md` is the rulebook an agent reads first.
+
 ## License
 
 MIT.
