@@ -8,5 +8,5 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["components", "tokens/scripts"]
+  "include": ["components", "tokens/scripts", ".storybook"]
 }
