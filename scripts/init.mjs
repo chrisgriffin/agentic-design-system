@@ -21,8 +21,9 @@ const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
 
 Rewrites the name, prefix and owner everywhere they appear, installs, docks the
-engine, runs npm run verify, then removes itself, its CI check and this README
-section. Nothing is committed: read the diff, then commit.`
+engine, runs npm run verify, then removes itself, its CI check, this README
+section and every docs passage marked <!-- init -->. Nothing is committed:
+read the diff, then commit.`
 
 const args = process.argv.slice(2)
 const flag = f => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined)
@@ -105,7 +106,9 @@ if (figma) {
   changed.push("design-delta.json")
 }
 
-// The README section that describes this script goes with it.
+// The README section that describes this script goes with it, and so does every
+// passage marked <!-- init --> ... <!-- /init -->: the docs that name this script
+// or its check would otherwise describe files a copy no longer has.
 const readme = path.join(root, "README.md")
 writeFileSync(
   readme,
@@ -114,6 +117,12 @@ writeFileSync(
     "",
   ),
 )
+for (const rel of walk("").filter(f => f.endsWith(".md"))) {
+  const file = path.join(root, rel)
+  const before = readFileSync(file, "utf8")
+  const after = before.replace(/<!-- init -->[\s\S]*?<!-- \/init -->/g, "")
+  if (after !== before) writeFileSync(file, after)
+}
 
 const removed = [self, ".github/workflows/init-check.yml"]
 if (!fleet)

@@ -25,6 +25,12 @@ The tests prove that the token build emits what the components may use and nothi
 
 `storybook-check.yml` runs the token and Storybook builds again as their own check, `storybook / ci`.
 
+<!-- init -->
+
+`init-check.yml` runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs the whole chain itself on the renamed checkout, and the check fails when the script survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script or its workflow.
+
+<!-- /init -->
+
 Narrower runs while working: `npx vitest run components/badge` for one component, `npx vitest` to watch, `node --test tokens/scripts/tokens.test.mjs` for the tokens alone.
 
 ## What is tested

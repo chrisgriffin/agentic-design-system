@@ -33,11 +33,17 @@ The contract declares the props, the element structure and the tokens the styles
 
 `.claude/settings.json` wires three hooks: `hooks/bash-guard.sh` before every Bash call, and after every edit `hooks/post-edit-check.sh` (Prettier, Stylelint on CSS) and `hooks/design-delta-verify.mjs`, which `design-delta dock` generates and which runs the gate. `.claude/skills/` holds the dock's two skills: `design-delta/SKILL.md` is a stub pointing at the installed engine's own skill, and `design-delta-verify/SKILL.md` carries its own instructions: run `npx design-delta verify --json`, fix what it finds, and re-run until it passes. `scripts/scaffold-component.mjs` (`npm run scaffold -- <name>`) writes a new component directory in the shape of `badge` plus the contract the engine drafts from its props. `CLAUDE.md` is the rulebook an agent reads first.
 
+<!-- init -->
+
+`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, installs, docks the engine and runs the gate, then removes itself, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
+
+<!-- /init -->
+
 ### Everything else in the repo
 
 - `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.
 - `specs/` — the Spec Kit spec, plan and tasks behind each build.
-- `.github/workflows/` — CI, the Storybook check, the Pages deploy, and the release and review-loop triggers.
+- `.github/workflows/` — CI, the Storybook check, <!-- init -->the init check, <!-- /init -->the Pages deploy, and the release and review-loop triggers.
 - `.design-delta/` — the engine's output, not tracked today: its reports and state are ignored, and a gathered snapshot of the design side will be committed under `snapshots/` once `design-delta.json` names a design file (`design.files` is empty, so none exists yet).
 
 ## How it connects

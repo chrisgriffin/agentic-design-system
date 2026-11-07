@@ -9,7 +9,7 @@ gate, which fails CI when code and contracts disagree.
 
 > This repo is built in layers, each a merged build: the tokens, the
 > components with contracts, the Storybook, the agent layer, and the release
-> flow. `scripts/init.mjs`, which turns a copy into a named system, is next.
+> flow.<!-- init --> `scripts/init.mjs`, which turns a copy into a named system, is next.<!-- /init -->
 
 ## Starting your own
 

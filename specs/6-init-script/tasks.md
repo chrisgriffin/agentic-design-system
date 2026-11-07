@@ -8,7 +8,7 @@
 
 - [x] T002 `scripts/init.mjs`.
 - [x] T003 `init-check.yml`; the README section; `CODEOWNERS`.
-- [ ] T004 Once #11 is on `develop`: merge it in, name the `init / ci` check in `docs/testing.md` and the script in `docs/architecture.md`.
+- [x] T004 Once #11 is on `develop`: merge it in, name the `init / ci` check in `docs/testing.md` and the script in `docs/architecture.md`.
 
 ## Phase 3: Green
 
