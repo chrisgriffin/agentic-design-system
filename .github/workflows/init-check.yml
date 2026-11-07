@@ -1,0 +1,30 @@
+name: Init Check
+
+# Thin stub: proves scripts/init.mjs turns a fresh copy of the template into a
+# named system that still passes the gate. The script runs the verify chain
+# itself and removes itself, this file and the two fleet-only stubs.
+# scripts/init.mjs removes this file from a copy, so a copy never runs it.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: init-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  init:
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      packages: read
+    uses: chrisgriffin/workflows/.github/workflows/_reusable-node-ci.yml@v1
+    with:
+      node_version: "22"
+      run: |
+        node scripts/init.mjs --name sample-system --prefix sds --owner sample-owner --figma-file SAMPLEKEY
+        test ! -f scripts/init.mjs
+        test "$(grep -rl -e '--ads-' --exclude-dir=node_modules --exclude-dir=storybook-static --exclude-dir=specs . | wc -l)" -eq 0
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
