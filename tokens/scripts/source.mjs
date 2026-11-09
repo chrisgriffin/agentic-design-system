@@ -35,7 +35,7 @@ function merge(into, from) {
 }
 
 /** Dot-path ids of every token in a tree. */
-export function tokenIds(node, trail = [], out = new Set()) {
+function tokenIds(node, trail = [], out = new Set()) {
   if (node && typeof node === "object" && "$value" in node)
     out.add(trail.join("."))
   else if (node && typeof node === "object")
@@ -44,7 +44,7 @@ export function tokenIds(node, trail = [], out = new Set()) {
   return out
 }
 
-export const primitives = readTier("primitives")
+const primitives = readTier("primitives")
 export const semantics = readTier("semantics")
 export const PRIMITIVE_IDS = tokenIds(primitives)
 for (const id of tokenIds(semantics))
