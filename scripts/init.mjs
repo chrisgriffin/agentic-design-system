@@ -84,7 +84,6 @@ const swaps = [
   [TEMPLATE.name, name],
   [`--${TEMPLATE.prefix}-`, `--${prefix}-`],
   [`PREFIX = "${TEMPLATE.prefix}"`, `PREFIX = "${prefix}"`],
-  [" (scripts/init.mjs does)", ""],
 ]
 if (figma) swaps.push(["FIGMA_FILE_KEY", figma])
 
