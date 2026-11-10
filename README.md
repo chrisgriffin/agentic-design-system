@@ -91,7 +91,7 @@ How the repo fits together, in prose: [docs/architecture.md](docs/architecture.m
 how a change becomes a release: [docs/releasing.md](docs/releasing.md).
 
 The design-delta engine comes from the public npm registry on a caret range
-(`^0.27.0`), so installing needs no git access or credentials and `npm ci`
+(`^0.27.0`), so installing the engine needs no git access or credentials and `npm ci`
 gets exactly the engine the lockfile records. Move to a new minor on purpose:
 `npm install design-delta@^<version>`, then `npm run verify`, and read any
 change in its findings before committing

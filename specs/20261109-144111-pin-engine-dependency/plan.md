@@ -9,9 +9,10 @@
   published `2026-11-10T03:14:33Z`, with the matching `v0.27.0` tag and GitHub
   Release. (The registry read `404` on 2026-11-09; the first publish landed
   between the two readings, which is what makes this revision possible.)
-- There is no `.npmrc` in this repo and there must not need to be: every
-  dependency is public npm, which is what keeps a fork's CI working. This
-  change moves the last non-registry dependency onto that footing.
+- There is no `.npmrc` in this repo and there must not need to be. This
+  change moves the engine onto the public registry; `@chrisgriffin/config`
+  still comes from git (`github:chrisgriffin/config#v1`), and moving it is a
+  non-goal.
 
 ## Design decisions
 

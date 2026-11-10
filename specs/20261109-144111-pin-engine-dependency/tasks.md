@@ -15,7 +15,7 @@
 ## Phase 3 — polish
 
 - [x] T007 Check `scripts/init.mjs`: if it writes or validates the engine dependency when turning a copy into a named system, update it to the registry form and extend its test. It does not: it only runs `npx design-delta dock` once the engine is installed, so nothing changed.
-- [x] T008 Confirm the install needs no credentials: `rm -rf node_modules && npm ci --ignore-scripts` succeeds with no git access in play, since nothing in the tree is fetched from git any more.
+- [x] T008 Confirm the engine needs no credentials: `rm -rf node_modules && npm ci --ignore-scripts` succeeds and the engine's lockfile entry is fetched from the registry, not git. (`@chrisgriffin/config` still resolves over `git+ssh://`; moving it is a non-goal.)
 
 ## Phase 4 — surfaces
 

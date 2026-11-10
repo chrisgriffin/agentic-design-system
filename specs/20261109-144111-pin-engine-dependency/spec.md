@@ -54,16 +54,21 @@ picks up the engine's patch releases and nothing wider.
 The trade-off is explicit: with a caret range and the committed lockfile,
 `npm ci` installs exactly the engine this template was gated against, while a
 `npm install` from scratch in a copy may take a later `0.27.x` patch. That is
-deliberate — `npm ci` is what a copy-taker and CI both run, the engine's `0.x`
-line promises no breaking change within a minor, and a copy that never receives
-an engine patch is its own failure mode. An exact pin is a one-character change
+deliberate — `npm ci` is what a copy-taker and CI both run, and a copy that
+never receives an engine patch is its own failure mode. The range does not make
+a later patch safe: the engine's own `docs/releasing.md` says its `0.x` line
+promises no compatibility, and every non-`feat` commit ships as a patch, so a
+`0.27.x` patch can reclassify findings. What holds a copy's gate still is the
+committed lockfile, and `npm ci` reads it exactly. (Corrected on review: an
+earlier revision said `0.x` promised no breaking change within a minor, which
+the engine's policy contradicts.) An exact pin is a one-character change
 if that judgment is ever revisited.
 
 ## User scenarios
 
 1. **Someone takes the template and runs `npm ci`.** npm fetches the engine
-   from the registry over HTTPS, needing no SSH key, no token and no git, and
-   gets the exact engine the template was gated against.
+   from the registry over HTTPS, needing no SSH key, no token and no git for
+   the engine, and gets the exact engine the template was gated against.
 2. **Someone takes the template and runs `npm install` from scratch**, with no
    lockfile entry to go on. They get the engine the spec names, within its
    patch line.
@@ -71,8 +76,11 @@ if that judgment is ever revisited.
    one-line change to the range with a green gate behind it, not something that
    happens to a user's copy on a Tuesday.
 4. **Someone clones the template onto a machine with no GitHub credentials at
-   all.** The install succeeds, because nothing in the dependency tree is
-   fetched from git.
+   all.** Nothing about the engine needs them: it is not fetched from git.
+   (Corrected on review: an earlier revision said nothing in the whole tree is
+   fetched from git, but `@chrisgriffin/config` still resolves over
+   `git+ssh://`, and moving it is a non-goal, so the whole install is not yet
+   credential-free.)
 
 ## Non-goals
 
