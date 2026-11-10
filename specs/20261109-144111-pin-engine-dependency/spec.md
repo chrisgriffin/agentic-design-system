@@ -35,7 +35,7 @@ registry was not an option yet. Two things changed:
   This spec's own earlier text named that release as the gate on the durable
   fix, and nothing else was holding it.
 - **The git pin could not satisfy success criterion 2 as written.** npm writes
-  `git+ssh://` into the lockfile for *any* GitHub git dependency, whatever
+  `git+ssh://` into the lockfile for _any_ GitHub git dependency, whatever
   `package.json` declares — measured here on 2026-11-09 against
   `git+https://…#eabc09d`. The only git form npm keeps as HTTPS is a codeload
   tarball URL. So pinning the git reference meant dropping criterion 2; the
@@ -79,8 +79,8 @@ if that judgment is ever revisited.
 - Any change to what the gate checks, to `design-delta.json`, or to any
   contract, token or component.
 - Vendoring the engine into this repo.
-- Moving any *other* dependency between sources.
-- Changing what the gate *expects* of the engine. The range names what is
+- Moving any _other_ dependency between sources.
+- Changing what the gate _expects_ of the engine. The range names what is
   already published, but the lockfile today pins commit `f1332b41`, which
   predates `0.27.0`'s publish, so the engine's content may well move with this
   change. That is accepted and gated, not assumed away: success criterion 3 is
