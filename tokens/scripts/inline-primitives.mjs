@@ -17,7 +17,7 @@ export function inlinePrimitives(css) {
     .replace(PRIMITIVE, "")
     .replace(/var\((--[\w-]+-primitive-[\w-]+)\)/g, (whole, name) => {
       if (!(name in values))
-        throw new Error(`build-css: no primitive declares ${name}`)
+        throw new Error(`inline-primitives: no primitive declares ${name}`)
       return values[name]
     })
   return out.replace(/\n{3,}/g, "\n\n")
