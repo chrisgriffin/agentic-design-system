@@ -85,7 +85,7 @@ what the token CSS keys off. Docs and accessibility checks come from
 ```bash
 npm install
 npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test
-npm run build-storybook   # the Storybook, built in CI only by storybook / ci
+npm run build-storybook   # the Storybook; this checkout's is built by storybook / ci on a PR, deploy-pages.yml on main
 ```
 
 How the repo fits together, in prose: [docs/architecture.md](docs/architecture.md);
