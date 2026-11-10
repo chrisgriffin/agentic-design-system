@@ -17,7 +17,7 @@
 - FR-001: `node scripts/init.mjs --name <kebab> --prefix <prefix> --owner <login> [--figma-file <key>] [--fleet]` validates its arguments, prints usage on `--help`, and refuses a bad value with exit 1.
 - FR-002: It rewrites, in every tracked text file but the lock file and `specs/`: `agentic-design-system` to the name, `--ads-` to `--<prefix>-`, the `PREFIX` constant, and the owner only where it names this repo (the repository URL, the Pages URL, `CODEOWNERS`); the shared config and the public workflows stay as they are.
 - FR-003: With `--figma-file`, it sets `design.files` in `design-delta.json` to the key and replaces `FIGMA_FILE_KEY` in every Code Connect stub.
-- FR-004: It installs when `node_modules` is absent, runs `design-delta dock`, Prettier and `npm run verify`, and only then removes itself, `init-check.yml`, the README's "Starting your own" section and, without `--fleet`, `evaluator-gate.yml` and `claude-mention.yml`. It commits nothing.
+- FR-004: It installs when `node_modules` is absent, runs `design-delta dock`, Prettier and `npm run verify` (then `npm run build-storybook`, since `specs/21-storybook-built-once/` took it out of `verify`), and only then removes itself, `init-check.yml`, the README's "Starting your own" section and, without `--fleet`, `evaluator-gate.yml` and `claude-mention.yml`. It commits nothing.
 - FR-005: `init-check.yml` runs the script on every PR's checkout with sample values and fails when `scripts/init.mjs` survives or any `--ads-` reference is left.
 - FR-006: `.github/CODEOWNERS` is the one-line owner entry; the comment that named a private repo goes.
 

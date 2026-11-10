@@ -12,7 +12,7 @@
 - `package.json` — `verify` loses `build-storybook`.
 - `scripts/init.mjs` — builds the Storybook after `verify`; the usage text and the closing message say so.
 - `.github/workflows/storybook-check.yml` — comment only: it is the Storybook gate. No job renamed, so no required check name changes and the branch rulesets are untouched.
-- `.github/workflows/build-check.yml`, `init-check.yml` — comment only where they describe what the chain runs.
+- `.github/workflows/init-check.yml` — comment only: the script runs the verify chain and the Storybook build. `build-check.yml` is unchanged: its comment names no chain step.
 - `docs/testing.md` — the verify chain is six steps; `storybook-check.yml` (`storybook / ci`) is named as the Storybook gate.
 - `CLAUDE.md` — the `verify` command line and the CI paragraph say Storybook builds only in its own check.
 - `README.md` — "Starting your own" says the script builds the Storybook after `verify`.

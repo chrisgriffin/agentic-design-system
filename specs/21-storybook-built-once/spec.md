@@ -21,9 +21,9 @@ Every pull request builds the Storybook three times: at the end of `npm run veri
 
 ## Success criteria
 
-- [ ] A push to a pull request builds this repo's Storybook in one of the build check and the Storybook check, not both. **Runnable:** `node -e "const fs=require('fs');const w='.github/workflows/storybook-check.yml';const v=JSON.parse(fs.readFileSync('package.json','utf8')).scripts.verify.includes('build-storybook');const s=fs.existsSync(w)&&fs.readFileSync(w,'utf8').includes('build-storybook');console.log(v&&s?'built twice':'built once');process.exit(v&&s?1:0)"` prints `built once` and exits 0 (prints `built twice` and exits 1 on `develop` today).
-- [ ] The init check still fails when a copy renamed by `scripts/init.mjs` cannot build its Storybook.
-- [ ] `docs/testing.md` names the one check that is the Storybook gate, and the spec passage that declared the duplication says what replaced it.
+- [x] A push to a pull request builds this repo's Storybook in one of the build check and the Storybook check, not both. **Runnable:** `node -e "const fs=require('fs');const w='.github/workflows/storybook-check.yml';const v=JSON.parse(fs.readFileSync('package.json','utf8')).scripts.verify.includes('build-storybook');const s=fs.existsSync(w)&&fs.readFileSync(w,'utf8').includes('build-storybook');console.log(v&&s?'built twice':'built once');process.exit(v&&s?1:0)"` prints `built once` and exits 0 (prints `built twice` and exits 1 on `develop` today).
+- [x] The init check still fails when a copy renamed by `scripts/init.mjs` cannot build its Storybook.
+- [x] `docs/testing.md` names the one check that is the Storybook gate, and the spec passage that declared the duplication says what replaced it.
 
 ## Out of scope
 

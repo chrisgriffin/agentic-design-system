@@ -62,10 +62,10 @@ npm run build:tokens      # tokens/json → tokens/css/tokens.css
 npm run storybook         # the stories and the two system pages
 npm run drift:verify      # every contract against its code and styles
 npm run scaffold -- name  # a new component directory plus a draft contract
-npm run verify            # the whole gate, the same chain CI runs
+npm run verify            # the gate CI runs as build / ci; Storybook builds in storybook / ci
 ```
 
-The gate CI runs, and the one to run before pushing, is `npm run verify`: `build:tokens`, `prettier:check`, `lint`, `lint:styles`, `drift:verify`, `test` and `build-storybook`, in that order.
+The gate CI runs, and the one to run before pushing, is `npm run verify`: `build:tokens`, `prettier:check`, `lint`, `lint:styles`, `drift:verify` and `test`, in that order. The Storybook builds once per pull request, in its own check, `storybook / ci` (`npm run build:tokens && npm run build-storybook`).
 
 ## Where to look next
 
