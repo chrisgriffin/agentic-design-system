@@ -7,7 +7,8 @@ import { mkdirSync, writeFileSync } from "node:fs"
 import { build, defineConfig, Logger, parse } from "@terrazzo/parser"
 
 import userConfig from "../../terrazzo.config.mjs"
-import { document, PREFIX } from "./source.mjs"
+import { inlinePrimitives } from "./inline-primitives.mjs"
+import { document } from "./source.mjs"
 
 const cwd = new URL("../../", import.meta.url)
 const logger = new Logger()
@@ -23,24 +24,6 @@ const { tokens, sources } = await parse(
   { config, logger },
 )
 const result = await build(tokens, { sources, config, logger })
-
-const PRIMITIVE = new RegExp(
-  `^\\s*(--${PREFIX}-primitive-[\\w-]+):\\s*(.+);$`,
-  "gm",
-)
-export function inlinePrimitives(css) {
-  const values = Object.fromEntries(
-    [...css.matchAll(PRIMITIVE)].map(m => [m[1], m[2]]),
-  )
-  const out = css
-    .replace(PRIMITIVE, "")
-    .replace(/var\((--[\w-]+-primitive-[\w-]+)\)/g, (whole, name) => {
-      if (!(name in values))
-        throw new Error(`build-css: no primitive declares ${name}`)
-      return values[name]
-    })
-  return out.replace(/\n{3,}/g, "\n\n")
-}
 
 for (const { filename, contents } of result.outputFiles) {
   const output = new URL(filename, config.outDir)
