@@ -44,4 +44,5 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 
 ## CI
 
-Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one. The gate is `npm run verify`; `storybook / ci` is the only check that builds this checkout's Storybook<!-- init --> (`init / ci` builds the renamed copy's)<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main` to deploy it.
+Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one.
+The gate is `npm run verify`; `storybook / ci` is the only check that builds this checkout's Storybook<!-- init --> (`init / ci` builds the renamed copy's)<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main` to deploy it.
