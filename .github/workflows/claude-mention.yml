@@ -1,8 +1,8 @@
 name: Claude Mention
 
 # Thin stub: an @claude mention on an issue or PR dispatches the fleet's
-# mention responder. A copy of the template that leaves the fleet drops this
-# file (scripts/init.mjs, #6, will).
+# mention responder. It needs the fleet's private operator, so a copy of the
+# template outside the fleet has no use for this file and deletes it.
 
 on:
   issue_comment:

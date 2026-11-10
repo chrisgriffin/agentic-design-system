@@ -1,8 +1,9 @@
 name: Evaluator
 
 # Thin stub: the fleet's PR review loop. It grades every PR head and reports
-# as the `Evaluator` status the develop ruleset requires. A copy of the
-# template that leaves the fleet drops this file (scripts/init.mjs, #6, will).
+# as the `Evaluator` status the develop ruleset requires. It needs the fleet's
+# private operator, so a copy of the template outside the fleet has no use
+# for this file and deletes it.
 
 on:
   pull_request:
