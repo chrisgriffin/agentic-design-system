@@ -26,10 +26,12 @@
    a copy receive engine patches. The trade-off is stated in `spec.md`.
 3. **Regenerate the lockfile rather than hand-editing it.** A hand-edited
    `resolved` works until someone runs `npm install`.
-4. **The findings must not move.** The engine is changing source, not version —
-   `0.27.0` is the release cut from the same line the branch build came from —
-   so any change in `drift:verify`'s output is the finding to report, not to
-   silence.
+4. **The findings must not move — and if they do, that is the result, not a
+   nuisance.** This changes where the engine comes from, but it may also change
+   which build of it runs: the lockfile pins `f1332b41`, taken before `0.27.0`
+   was published. So `drift:verify` is compared against a recorded baseline
+   (T001) and any difference is reported in the PR body, never absorbed by a
+   severity change or an `exemptions` entry.
 5. **No git fallback is left behind.** A stray `git+` entry for the engine
    anywhere in the lockfile would reintroduce the SSH path on the next install,
    so its absence is a success criterion of its own.

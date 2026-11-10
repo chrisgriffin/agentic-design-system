@@ -80,7 +80,12 @@ if that judgment is ever revisited.
   contract, token or component.
 - Vendoring the engine into this repo.
 - Moving any *other* dependency between sources.
-- Changing the engine's own version — the range names what is already published.
+- Changing what the gate *expects* of the engine. The range names what is
+  already published, but the lockfile today pins commit `f1332b41`, which
+  predates `0.27.0`'s publish, so the engine's content may well move with this
+  change. That is accepted and gated, not assumed away: success criterion 3 is
+  what catches it, and a difference in `drift:verify` gets reported, never
+  absorbed.
 
 ## Success criteria
 
