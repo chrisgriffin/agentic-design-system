@@ -15,7 +15,7 @@
 - `.github/workflows/init-check.yml` — comment only: the script runs the verify chain and the Storybook build. `build-check.yml` is unchanged: its comment names no chain step.
 - `docs/testing.md` — the verify chain is six steps; `storybook-check.yml` (`storybook / ci`) is named as the Storybook gate.
 - `CLAUDE.md` — the `verify` command line and the CI paragraph say Storybook builds only in its own check.
-- `README.md` — "Starting your own" says the script builds the Storybook after `verify`.
+- `README.md` — "Starting your own" says the script builds the Storybook after `verify`; the Development block drops `build-storybook` from the `verify` chain.
 - `docs/architecture.md` — the gate sentence lists six steps plus the Storybook check.
 - `specs/3-storybook/spec.md`, `specs/6-init-script/spec.md` — the passages that put `build-storybook` in `verify` say what replaced it (this spec).
 - cost — saves one Storybook build per pull request push (about a minute of a billed runner each); no trigger, cron or agent fire added.

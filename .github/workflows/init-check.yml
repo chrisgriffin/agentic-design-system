@@ -2,8 +2,8 @@ name: Init Check
 
 # Thin stub: proves scripts/init.mjs turns a fresh copy of the template into a
 # named system that still passes the gate. The script runs the verify chain
-# and the Storybook build itself and removes itself, this file, the docs passages marked <!-- init -->
-# and the two fleet-only stubs.
+# and the Storybook build itself and removes itself, this file, the docs
+# passages marked <!-- init --> and the two fleet-only stubs.
 # scripts/init.mjs removes this file from a copy, so a copy never runs it.
 
 on:

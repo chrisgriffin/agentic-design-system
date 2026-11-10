@@ -15,7 +15,7 @@
 - [x] T005 `.github/workflows/storybook-check.yml`, `init-check.yml`: comments say which check builds the Storybook (`build-check.yml`'s comment names no chain step, so it stays as it is); no job renamed.
 - [x] T006 `docs/testing.md`: six-step chain, `storybook / ci` named as the Storybook gate.
 - [x] T007 `CLAUDE.md`: the `verify` line and the CI paragraph.
-- [x] T008 `README.md`: "Starting your own" names the Storybook build.
+- [x] T008 `README.md`: "Starting your own" names the Storybook build; the Development block's `verify` chain drops `build-storybook`.
 - [x] T009 `docs/architecture.md`: the gate sentence.
 - [x] T010 `specs/3-storybook/spec.md`, `specs/6-init-script/spec.md`: say what replaced `verify`'s Storybook build.
 - [x] T011 Cost line recorded in the PR body; no ruleset change, recorded there too.
