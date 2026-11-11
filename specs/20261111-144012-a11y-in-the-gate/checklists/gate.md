@@ -67,7 +67,7 @@
 ## Ambiguities & Conflicts
 
 - [x] CHK033 Is there a conflict between `CLAUDE.md`'s "`components/<name>/` holds, and only holds" rule and adding a shared test helper? [Conflict, Plan § Technical context] — resolved by avoidance: the helper sits at the repo root, so that paragraph is left unamended and the argument never has to be settled.
-- [ ] CHK034 Does the spec resolve, rather than leave open, whether keyboard-interaction coverage belongs in this change? [Ambiguity, Spec § Out of scope] — **left open, deliberately.** The out-of-scope section settles it for this ticket and calls it "worth having, and a separate ticket", but no such ticket exists yet. Open because the follow-up is genuinely unfiled, not because the spec is wrong; the PM pass reports it rather than filing speculatively against a cap.
+- [ ] CHK034 Does the spec resolve, rather than leave open, whether keyboard-interaction coverage belongs in this change? [Ambiguity, Spec § Out of scope] — **left open, deliberately.** The out-of-scope section settles it for this ticket and calls it "worth having, and a separate ticket", but no such ticket exists yet. Open because the follow-up is genuinely unfiled, not because the spec is wrong. It is reported rather than filed speculatively.
 
 ## Notes
 
