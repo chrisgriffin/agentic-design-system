@@ -11,7 +11,7 @@
   "include": [
     "components",
     "tokens/scripts",
-    ".storybook",
+    ".storybook/**/*",
     "types",
     "vitest.setup.ts"
   ]

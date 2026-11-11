@@ -15,6 +15,9 @@ Run `npx tsc --noEmit` at the start and after every phase: it is the spec's runn
 - [x] T004 Add `"vitest.setup.ts"` to `tsconfig.json`'s `include`, then run `npx tsc --noEmit`: it exits 0 and prints no `error TS` line.
 - [x] T005 Fix any error that T003 or T004 surfaced which is not one of the original twelve, by supplying the declaration or program entry it is missing (FR-006), then confirm nothing was silenced: `! grep -rn "@ts-ignore\|@ts-expect-error" components tokens/scripts .storybook types *.ts` exits 0, and `tsconfig.json`'s `include` lost no entry.
 
+- [x] T023 Replace `".storybook"` in `include` with `".storybook/**/*"` (a bare dot-directory adds no file), confirm `npx tsc --listFilesOnly` lists `.storybook/`'s files, and fix its five errors by supplying what is missing (FR-006): `@types/node` as a dev dependency, `tokens/scripts/build-manifest.d.mts`, and `declare module "*.css" {}` in `types/css-modules.d.ts`.
+- [x] T024 Keep one `*.module.css` declaration: delete it from `.storybook/globals.d.ts`, leaving `types/css-modules.d.ts`'s read-only one, and point `__TOKEN_MANIFEST__` at `build-manifest.d.mts`'s `TokenManifest`.
+
 ## Phase 3 — the gate runs it
 
 - [x] T006 Add `"typecheck": "tsc --noEmit"` to `package.json`'s `scripts`, and run `npm run typecheck` on its own.
@@ -25,7 +28,7 @@ Run `npx tsc --noEmit` at the start and after every phase: it is the spec's runn
 
 One task per `## Surfaces touched` line in the plan, in its order.
 
-- [x] T009 `tsconfig.json` — `include` names `types` and `vitest.setup.ts` (done in T003/T004; tick only once both are in the committed file).
+- [x] T009 `tsconfig.json` — `include` names `types`, `vitest.setup.ts` and `.storybook/**/*` (done in T003/T004/T023; tick only once all are in the committed file).
 - [x] T010 `types/css-modules.d.ts` — the new file exists, and `docs/architecture.md`'s directory list gains `types/` so CI's `Check docs/` step passes.
 - [x] T011 `package.json` — the `typecheck` script exists and `verify` runs it as its seventh step.
 - [x] T012 `docs/testing.md` — "these six in order" becomes seven with the `typecheck` bullet, and `Adding a test` says `vitest.setup.ts` is in the TypeScript program.
@@ -40,5 +43,5 @@ One task per `## Surfaces touched` line in the plan, in its order.
 
 ## Phase 5 — polish
 
-- [x] T021 Run the full gate: `npm run verify`, then `npm run build-storybook`, both green. `.storybook` is in the program, so a Storybook type error would surface in T007.
+- [x] T021 Run the full gate: `npm run verify`, then `npm run build-storybook`, both green. `.storybook` is in the program through T023, so a Storybook type error surfaces in `npm run typecheck`.
 - [x] T022 Confirm `git status` is clean of generated output: `tokens/css/tokens.css` is byte-identical to the branch point, since no token source changed.

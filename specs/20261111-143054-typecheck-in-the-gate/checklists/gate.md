@@ -57,7 +57,7 @@
 
 - [x] CHK025 Is the assumption that `@chrisgriffin/config/tsconfig.json`'s strictness is the intended level stated rather than implied? [Assumption, Spec § Out of scope] — the out-of-scope section states that the inherited strictness level is what is being enforced, not raised.
 - [x] CHK026 Is the assumption documented that `scripts/init.mjs` needs no change, and is it clear what would prove it wrong? [Assumption, Tasks §T017] — T017 states the assumption and names `init / ci` as what would disprove it.
-- [x] CHK027 Is it stated that no new dependency is required, so a reviewer is not left to infer it? [Dependency, Gap, Plan § Technical context] — closed: the plan now states it and that `package-lock.json` does not move.
+- [x] CHK027 Is it stated that no new dependency is required, so a reviewer is not left to infer it? [Dependency, Gap, Plan § Technical context] — closed: the plan states it. Corrected in review: bringing `.storybook` into the program needed `@types/node`, so the plan now names that one dev dependency and what `package-lock.json` gains.
 
 ## Ambiguities & Conflicts
 
