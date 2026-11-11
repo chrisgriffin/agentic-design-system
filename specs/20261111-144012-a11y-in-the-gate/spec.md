@@ -18,8 +18,8 @@ That matters more here than in an ordinary app. This is a public template, and `
 
 ## Functional requirements
 
-- FR-001: Every component under `components/` has an automated accessibility assertion that runs under `npm test`, covering its default rendering and each distinct visual variant its contract declares with `code` props.
-- FR-002: The assertion runs `axe-core` against the rendered DOM in jsdom and fails on any violation, reporting the rule id and the element for each.
+- FR-001: Each of the three component directories — `badge`, `button`, `card` — has an automated accessibility assertion that runs under `npm test`, covering its default rendering and each distinct variant its contract declares as a `code` prop. `card-header` has a contract but no directory of its own and is only ever rendered inside a `Card`, so its coverage is the `card` test's.
+- FR-002: The assertion runs `axe-core` against the rendered DOM in jsdom and fails on any violation it reports, printing the rule id and the element for each. One rule is excepted: `color-contrast`, which jsdom cannot evaluate because it has no layout or computed colour. It is switched off explicitly, so the output records that it did not run rather than implying it passed.
 - FR-003: `axe-core` is a direct `devDependency` with an explicit range, not relied on as a transitive one, so an upstream change to `@storybook/addon-a11y` cannot remove it.
 - FR-004: `scripts/scaffold-component.mjs`'s test template includes the accessibility assertion, so a scaffolded component is covered from its first commit.
 - FR-005: The assertion helper lives in one place that every component test imports, so adding a component means one import and one call, not a copied block.
