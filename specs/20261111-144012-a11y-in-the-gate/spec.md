@@ -28,7 +28,7 @@ That matters more here than in an ordinary app. This is a public template, and `
 
 ## Success criteria
 
-- [ ] **Runnable:** `npx vitest run components` exits 0 and its output names an accessibility test for each of `badge`, `button` and `card`. Red on `develop` today, where `npx vitest run components` passes with 5 tests and no accessibility test exists: `grep -rl "axe" components/` prints nothing.
+- [ ] **Runnable:** `node -e 'const fs=require("fs");const miss=["badge","button","card"].filter(n=>!fs.readFileSync(`components/${n}/${n}.test.tsx`,"utf8").includes("expectNoViolations"));if(miss.length){console.error("no accessibility assertion in: "+miss.join(", "));process.exit(1)}' && npx vitest run components` exits 0. Red on `develop` today, where it exits 1 printing `no accessibility assertion in: badge, button, card`. The plain `npx vitest run components` is deliberately not the runnable line: it already exits 0 with five class-name tests, so it would prove nothing.
 - [ ] Breaking a component's accessible name fails `npm run verify`, and the failure names the component and the axe rule. Record the failure output in the pull request.
 - [ ] `npm run scaffold -- scratch-thing` writes a test file containing the accessibility assertion; the scaffolded directory is deleted again before committing.
 - [ ] `axe-core` appears in `package.json`'s `devDependencies`.

@@ -2,11 +2,11 @@
 
 Spec: `specs/20261111-144012-a11y-in-the-gate/spec.md` · Plan: `plan.md` in the same folder.
 
-The spec's runnable line is `npx vitest run components`. It is red today in the sense that it passes with 5 tests and no accessibility test exists — `grep -rl "axe" components/` prints nothing. T001 records that baseline.
+The spec's runnable line checks that each of `badge`, `button` and `card` calls `expectNoViolations` and that the suite then passes. It exits 1 today, printing `no accessibility assertion in: badge, button, card`. T001 records that baseline.
 
 ## Phase 1 — setup
 
-- [ ] T001 Record the baseline: `npx vitest run components` (5 tests, 3 files) and `grep -rl "axe" components/` (no output). Both go in the pull request.
+- [ ] T001 Record the baseline: the spec's runnable line, exiting 1 and naming all three components, plus `npx vitest run components` (5 tests, 3 files). Both go in the pull request.
 - [ ] T002 Add `axe-core` to `devDependencies` with `^4.14.0`, run `npm install`, and confirm `package-lock.json` now records it as a direct dependency.
 
 ## Phase 2 — foundational: the shared helper
