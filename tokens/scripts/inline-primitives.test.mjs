@@ -31,3 +31,40 @@ test("an undeclared primitive throws", () => {
     /no primitive declares --ads-primitive-nope/,
   )
 })
+
+test("#23 a primitive aliasing another inlines to its final value", () => {
+  const out = inlinePrimitives(`:root {
+  --ads-primitive-a: #fff;
+  --ads-primitive-b: var(--ads-primitive-a);
+  --ads-primitive-c: var(--ads-primitive-b);
+  --ads-x: var(--ads-primitive-b);
+  --ads-y: var(--ads-primitive-c);
+}
+`)
+  assert.match(out, /--ads-x: #fff;/)
+  assert.match(out, /--ads-y: #fff;/)
+  assert.doesNotMatch(out, /primitive/)
+})
+
+test("#23 a reference cycle between primitives throws, naming it", () => {
+  assert.throws(
+    () =>
+      inlinePrimitives(`:root {
+  --ads-primitive-a: var(--ads-primitive-b);
+  --ads-primitive-b: var(--ads-primitive-a);
+  --ads-x: var(--ads-primitive-a);
+}
+`),
+    /primitive reference cycle: --ads-primitive-a -> --ads-primitive-b -> --ads-primitive-a/,
+  )
+})
+
+test("#23 a primitive referencing itself throws", () => {
+  assert.throws(
+    () =>
+      inlinePrimitives(
+        ":root {\n  --ads-primitive-a: var(--ads-primitive-a);\n  --ads-x: var(--ads-primitive-a);\n}\n",
+      ),
+    /primitive reference cycle: --ads-primitive-a -> --ads-primitive-a/,
+  )
+})
