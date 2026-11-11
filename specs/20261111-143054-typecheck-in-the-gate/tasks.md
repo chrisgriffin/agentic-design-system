@@ -33,7 +33,7 @@ One task per `## Surfaces touched` line in the plan, in its order.
 - [ ] T014 `CLAUDE.md` — the Commands block lists `npm run typecheck` and its `verify` line says the gate typechecks. Keep every line inside the file's character cap.
 - [ ] T015 `docs/architecture.md` — the gate sentence lists seven steps (the directory list is T010).
 - [ ] T016 `.github/workflows/build-check.yml` — confirm no change is needed: it runs `npm run verify` and names no chain step, so `build / ci` keeps its name and the branch ruleset needs no edit. Say so in the PR body.
-- [ ] T017 `scripts/init.mjs` — confirm its `--ads-` sweep and its removal list need no `types/` entry, and say so in the PR body. Change it only if a run of `init-check.yml`'s own script proves otherwise.
+- [ ] T017 `scripts/init.mjs` — read its sweep and removal lists and confirm `types/css-modules.d.ts` needs no entry (it holds no `--ads-` reference and no `<!-- init -->` marker), and say so in the PR body. Do not run the script on this checkout: it renames in place. `init / ci` runs it on the pull request, so that check, not a local run, is what proves the claim; if it fails, fix `scripts/init.mjs` here.
 - [ ] T018 cost — confirm in the PR body that no trigger, cron, agent fire or scheduled function is added, and `tsc` adds only seconds inside the existing `build / ci` job.
 - [ ] T019 `docs/adr/` — confirm no ADR is owed: this enforces strictness the repo already configured. Say so in the PR body.
 - [ ] T020 none else — confirm in the PR body: no reusable workflow body in chrisgriffin/workflows touched, no required check renamed, nothing published changed, and no rule newly stated in a second doc.
