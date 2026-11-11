@@ -90,6 +90,13 @@ npm run verify   # build:tokens → prettier:check → lint → lint:styles → 
 How the repo fits together, in prose: [docs/architecture.md](docs/architecture.md);
 how a change becomes a release: [docs/releasing.md](docs/releasing.md).
 
+The design-delta engine comes from the public npm registry on a caret range
+(`^0.27.0`), so installing the engine needs no git access or credentials and `npm ci`
+gets exactly the engine the lockfile records. Move to a new minor on purpose:
+`npm install design-delta@^<version>`, then `npm run verify`, and read any
+change in its findings before committing
+([ADR-003](docs/adr/ADR-003-engine-from-the-registry.md)).
+
 Prettier, ESLint and TypeScript come from the shared
 [`@chrisgriffin/config`](https://github.com/chrisgriffin/config); Stylelint
 holds every `.css` file to the token tier (a color, size or font that is not a
