@@ -11,7 +11,7 @@ The token source has two tiers: primitives (a neutral ramp, one accent ramp, a s
 
 ## Decision
 
-`npm run build:tokens` emits only the semantic tier. A post-pass in `tokens/scripts/build-css.mjs` replaces every `var(--ads-primitive-*)` with its value and drops the primitive declarations; `tokens/scripts/tokens.test.mjs` fails when a primitive or a `var()` is left. A new value starts as a primitive aliased by a semantic token, never as a semantic literal.
+`npm run build:tokens` emits only the semantic tier. A post-pass, `inlinePrimitives` in `tokens/scripts/inline-primitives.mjs` (run by `tokens/scripts/build-css.mjs`), replaces every `var(--ads-primitive-*)` with its final value, following a primitive that aliases another, and drops the primitive declarations; it fails the build on a reference cycle, a primitive declared twice, or a primitive left in its output. `tokens/scripts/tokens.test.mjs` fails when a primitive or a `var()` is left. A new value starts as a primitive aliased by a semantic token, never as a semantic literal.
 
 ## Consequences
 
