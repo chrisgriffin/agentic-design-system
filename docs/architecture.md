@@ -43,6 +43,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 - `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.
 - `specs/` — the Spec Kit spec, plan and tasks behind each build.
+- `types/` — ambient declarations TypeScript cannot infer: `css-modules.d.ts` types a `*.module.css` import, which Vite resolves at build time.
 - `.github/workflows/` — CI, the Storybook check, <!-- init -->the init check, <!-- /init -->the Pages deploy, and the release and review-loop triggers.
 - `.design-delta/` — the engine's output, not tracked today: its reports and state are ignored, and a gathered snapshot of the design side will be committed under `snapshots/` once `design-delta.json` names a design file (`design.files` is empty, so none exists yet).
 
@@ -65,7 +66,7 @@ npm run scaffold -- name  # a new component directory plus a draft contract
 npm run verify            # the gate CI runs as build / ci; Storybook builds in storybook / ci
 ```
 
-The gate CI runs, and the one to run before pushing, is `npm run verify`: `build:tokens`, `prettier:check`, `lint`, `lint:styles`, `drift:verify` and `test`, in that order. `storybook / ci` is the only check that builds this checkout's Storybook (`npm run build:tokens && npm run build-storybook`)<!-- init -->; `init / ci` builds the renamed copy's<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main`.
+The gate CI runs, and the one to run before pushing, is `npm run verify`: `build:tokens`, `typecheck`, `prettier:check`, `lint`, `lint:styles`, `drift:verify` and `test`, in that order. `storybook / ci` is the only check that builds this checkout's Storybook (`npm run build:tokens && npm run build-storybook`)<!-- init -->; `init / ci` builds the renamed copy's<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main`.
 
 ## Where to look next
 

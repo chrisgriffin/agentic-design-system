@@ -8,5 +8,11 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["components", "tokens/scripts", ".storybook"]
+  "include": [
+    "components",
+    "tokens/scripts",
+    ".storybook",
+    "types",
+    "vitest.setup.ts"
+  ]
 }
