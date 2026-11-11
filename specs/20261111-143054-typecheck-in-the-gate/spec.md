@@ -29,7 +29,7 @@
 - [ ] **Runnable:** `npx tsc --noEmit` exits 0 and prints no `error TS` line. Red on `develop` today, where it exits 2 and prints 12 of them.
 - [ ] `npm run verify` fails when a component is given a type error, and the failure names the file and the line.
 - [ ] `npm run typecheck` exists and runs the same check on its own.
-- [ ] No `@ts-ignore` or `@ts-expect-error` is added anywhere, and nothing is removed from `tsconfig.json`'s `include` to clear an error. **Runnable:** `! grep -rn "@ts-ignore\|@ts-expect-error" components tokens/scripts .storybook *.ts` exits 0.
+- [ ] No `@ts-ignore` or `@ts-expect-error` is added anywhere, and nothing is removed from `tsconfig.json`'s `include` to clear an error. Checked with `! grep -rn "@ts-ignore\|@ts-expect-error" components tokens/scripts .storybook *.ts`, which already exits 0 today and must keep doing so. It is a constraint on the change rather than an acceptance test, so it is deliberately not marked as the runnable line.
 - [ ] `docs/testing.md`, `README.md` and `CLAUDE.md` say the gate typechecks.
 
 ## Out of scope
