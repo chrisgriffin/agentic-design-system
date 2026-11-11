@@ -37,4 +37,4 @@
 
 - Turning on any stricter compiler option than `@chrisgriffin/config/tsconfig.json` already sets. The point here is that the configured strictness is actually enforced, not a new level of it.
 - `scripts/`, `.specify/` and the `tokens/scripts/*.test.mjs` files, which are plain ESM and not in the program today; widening `include` to reach them is a separate decision.
-- The 48 `tokens/token-unreferenced` findings `drift:verify` reports at `review` severity. Unrelated surface, and whether the token scale stays complete is Chris's call.
+- The 48 `tokens/token-unreferenced` findings `drift:verify` reports at `review` severity. Unrelated surface, and whether the token scale stays complete is the repo owner's call.

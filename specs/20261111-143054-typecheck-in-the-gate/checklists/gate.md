@@ -61,7 +61,7 @@
 
 ## Ambiguities & Conflicts
 
-- [ ] CHK028 Does the spec's out-of-scope list resolve, rather than leave open, whether the unreferenced-token findings belong to this change? [Ambiguity, Spec § Out of scope] — **left open, deliberately.** The spec puts them out of scope, which settles this change; what it cannot settle is whether the 48 `tokens/token-unreferenced` findings should be trimmed or kept as a complete scale. That is Chris's call, not this ticket's, and the PM pass reports it rather than deciding it. Open here because the question is genuinely unanswered, not because the spec is wrong.
+- [ ] CHK028 Does the spec's out-of-scope list resolve, rather than leave open, whether the unreferenced-token findings belong to this change? [Ambiguity, Spec § Out of scope] — **left open, deliberately.** The spec puts them out of scope, which settles this change; what it cannot settle is whether the 48 `tokens/token-unreferenced` findings should be trimmed or kept as a complete scale. That is the repo owner's call, not this ticket's, and it is reported rather than decided here. Open here because the question is genuinely unanswered, not because the spec is wrong.
 - [x] CHK029 Is there any conflict between FR-007's ban on removing an `include` entry and FR-001/FR-002's requirement to add two? [Conflict] — resolved: no. FR-007 bans removing an entry to drop its errors; FR-001 and FR-002 add entries. Adding is not removing.
 
 ## Notes
