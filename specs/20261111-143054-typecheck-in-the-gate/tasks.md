@@ -13,7 +13,7 @@ Run `npx tsc --noEmit` at the start and after every phase: it is the spec's runn
 - [ ] T002 Add `types/css-modules.d.ts` declaring `declare module "*.module.css"` as `{ readonly [key: string]: string }`, with a one-line comment saying Vite resolves these at build time and this is the type side of that.
 - [ ] T003 Add `"types"` to `tsconfig.json`'s `include`, then run `npx tsc --noEmit`: the 4 × TS2307 are gone and the 8 × TS2339 remain.
 - [ ] T004 Add `"vitest.setup.ts"` to `tsconfig.json`'s `include`, then run `npx tsc --noEmit`: it exits 0 and prints no `error TS` line.
-- [ ] T005 Confirm nothing was silenced: `! grep -rn "@ts-ignore\|@ts-expect-error" components tokens/scripts .storybook types *.ts` exits 0, and `tsconfig.json`'s `include` lost no entry.
+- [ ] T005 Fix any error that T003 or T004 surfaced which is not one of the original twelve, by supplying the declaration or program entry it is missing (FR-006), then confirm nothing was silenced: `! grep -rn "@ts-ignore\|@ts-expect-error" components tokens/scripts .storybook types *.ts` exits 0, and `tsconfig.json`'s `include` lost no entry.
 
 ## Phase 3 — the gate runs it
 

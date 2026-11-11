@@ -21,8 +21,9 @@
 - FR-002: `vitest.setup.ts` is inside `tsconfig.json`'s program, so `@testing-library/jest-dom/vitest`'s matcher augmentation applies to the component test files.
 - FR-003: `package.json` has a `typecheck` script running `tsc --noEmit`.
 - FR-004: `npm run verify` runs `typecheck`. It runs after `build:tokens`, so the generated token CSS exists, and the chain's other steps keep their order.
-- FR-005: `docs/testing.md` and `README.md` name `typecheck` where they list what the gate runs; `CLAUDE.md`'s Commands block lists the script.
-- FR-006: No existing error is silenced to reach zero — no `@ts-ignore`, no `@ts-expect-error`, no `skipLibCheck` widening and no file excluded from `include` to drop its errors. Each of the twelve is cleared by supplying the declaration or the program entry it is missing.
+- FR-005: `docs/testing.md`, `README.md` and `docs/architecture.md` name `typecheck` where they list what the gate runs; `CLAUDE.md`'s Commands block lists the script.
+- FR-006: The zero-error result covers the whole program, not only `components/`. `tokens/scripts` and `.storybook` are already inside `include` and contribute none of today's twelve, and bringing `vitest.setup.ts` and `types` in may surface errors that do not exist today; any that appear are fixed by supplying what is missing, exactly as the twelve are, and none is excluded to avoid it.
+- FR-007: No existing error is silenced to reach zero — no `@ts-ignore`, no `@ts-expect-error`, no `skipLibCheck` widening and no file excluded from `include` to drop its errors. Each of the twelve is cleared by supplying the declaration or the program entry it is missing.
 
 ## Success criteria
 
