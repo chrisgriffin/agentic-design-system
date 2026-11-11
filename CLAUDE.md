@@ -9,7 +9,7 @@ npm run build:tokens      # tokens/json → tokens/css/tokens.css (semantic --ad
 npm run drift:verify      # design-delta: every contract against its code and styles
 npm run scaffold -- name  # a new component directory plus a draft contract
 npm run storybook         # the stories, the Tokens page, the Design Drift page
-npm run verify            # the whole gate, the same chain CI runs
+npm run verify            # the gate CI runs as build / ci; Storybook builds in storybook / ci
 ```
 
 ## Non-negotiable invariants
@@ -44,4 +44,5 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 
 ## CI
 
-Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one. The gate is `npm run verify`; Storybook builds again as its own check and deploys from `main`.
+Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one.
+The gate is `npm run verify`; `storybook / ci` is the only check that builds this checkout's Storybook<!-- init --> (`init / ci` builds the renamed copy's)<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main` to deploy it.

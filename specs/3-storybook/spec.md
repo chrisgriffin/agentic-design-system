@@ -18,7 +18,7 @@ Storybook for the template: the component stories plus two system pages, Tokens 
 - FR-002: `.storybook/preview.ts` loads `tokens/css/tokens.css` and a theme toggle that sets `data-theme` on the root; `preview-head.html` loads the two font families the tokens name.
 - FR-003: A Tokens page lists the semantic colors in both themes, every other semantic token by category, and the primitive palette, all from the manifest.
 - FR-004: A Design Drift page lists the audit's findings grouped by rule with their severity, and the counts.
-- FR-005: `npm run build-storybook` writes `storybook-static/` (ignored), and `npm run verify` ends with it.
+- FR-005: `npm run build-storybook` writes `storybook-static/` (ignored), and `npm run verify` ends with it. Replaced by `specs/21-storybook-built-once/`: `verify` no longer builds the Storybook, and FR-006's `storybook / ci` is the one Storybook gate.
 - FR-006: `storybook-check.yml` calls the fleet's reusable Node CI with `npm run build:tokens && npm run build-storybook` on every PR, reporting as `storybook / ci`; `deploy-pages.yml` builds and deploys `storybook-static/` to GitHub Pages on push to `main`.
 - FR-007: The system pages' own styles are a CSS Module of `--ads-*` tokens, held by the same Stylelint rules as the components.
 
@@ -26,7 +26,7 @@ Storybook for the template: the component stories plus two system pages, Tokens 
 
 - [x] `.storybook/` runs `react-vite` with `addon-docs`, `addon-a11y` and the theme addon, and loads the token CSS and fonts.
 - [x] A Tokens page renders every semantic token from the manifest in both themes, and a Design Drift page renders the audit's findings.
-- [x] `npm run build-storybook` is part of `npm run verify`, and a `storybook-check.yml` stub builds it on every PR.
+- [x] `npm run build-storybook` is part of `npm run verify`, and a `storybook-check.yml` stub builds it on every PR. (Since `specs/21-storybook-built-once/`, only the stub builds it.)
 - [x] A Pages deploy stub publishes `storybook-static/` on push to `main`, at the repo's GitHub Pages URL.
 - [x] **Runnable:** `npm run build-storybook && test -f storybook-static/index.html && echo built` prints `built` (there is no `.storybook/` today).
 

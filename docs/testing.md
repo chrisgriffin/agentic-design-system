@@ -13,7 +13,7 @@ The tests prove that the token build emits what the components may use and nothi
 
 ## Running tests
 
-`build-check.yml` runs `npm run verify`, which is these seven in order:
+`build-check.yml` runs `npm run verify`, which is these six in order:
 
 - `npm run build:tokens` — Terrazzo over `tokens/json`, then the primitive inlining; the later steps read its output.
 - `npm run prettier:check` — Prettier over everything `.prettierignore` does not exclude, in the shared `@chrisgriffin/config/prettier` style.
@@ -21,13 +21,12 @@ The tests prove that the token build emits what the components may use and nothi
 - `npm run lint:styles` — Stylelint over every `.css` file: a color, fill or stroke, font family, size or weight, line height, border radius, margin or padding, gap, or transition or animation duration or timing value that is not a `--ads-*` property fails (other sizes, such as `width`, are not checked), and so does a property name the built CSS does not define.
 - `npm run drift:verify` — `design-delta verify`: every contract validated, then compared with its component and stylesheet; an error-severity finding fails it.
 - `npm test` — `node --test` over `tokens/scripts/*.test.mjs`, then `vitest run` over `components/**/*.test.tsx` in jsdom.
-- `npm run build-storybook` — the Storybook build, which also runs the engine's audit for the Design Drift page.
 
-`storybook-check.yml` runs the token and Storybook builds again as their own check, `storybook / ci`.
+`storybook-check.yml` is the Storybook gate, `storybook / ci`, and the only check that builds this checkout's Storybook: `npm run build:tokens && npm run build-storybook`, the Storybook build also running the engine's audit for the Design Drift page. Run it with `verify` before pushing a change to a component, a story or `.storybook/`.
 
 <!-- init -->
 
-`init-check.yml` runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs the whole chain itself on the renamed checkout, and the check fails when the script survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script or its workflow.
+`init-check.yml` runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs `npm run verify` and then `npm run build-storybook` itself on the renamed checkout, and the check fails when the script survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script or its workflow.
 
 <!-- /init -->
 

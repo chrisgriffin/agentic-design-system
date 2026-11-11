@@ -21,9 +21,9 @@ const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
 
 Rewrites the name, prefix and owner everywhere they appear, installs, docks the
-engine, runs npm run verify, then removes itself, its CI check, this README
-section and every docs passage marked <!-- init -->. Nothing is committed:
-read the diff, then commit.`
+engine, runs npm run verify and builds the Storybook, then removes itself, its
+CI check, this README section and every docs passage marked <!-- init -->.
+Nothing is committed: read the diff, then commit.`
 
 const args = process.argv.slice(2)
 const flag = f => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined)
@@ -136,9 +136,12 @@ if (!existsSync(path.join(root, "node_modules/.bin/design-delta")))
 run("npx design-delta dock")
 run("npx prettier --write . --log-level warn")
 run("npm run verify")
+// verify leaves the Storybook to its own check, so the copy builds it here,
+// before the removals: a failed build leaves the script for a second run.
+run("npm run build-storybook")
 
 for (const rel of removed)
   if (existsSync(path.join(root, rel))) rmSync(path.join(root, rel))
 console.log(
-  `\n${name}: ${changed.length} files rewritten (prefix --${prefix}-, owner ${owner}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify is green. Read the diff, then commit.`,
+  `\n${name}: ${changed.length} files rewritten (prefix --${prefix}-, owner ${owner}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff, then commit.`,
 )

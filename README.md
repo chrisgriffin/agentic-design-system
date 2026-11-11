@@ -20,8 +20,8 @@ node scripts/init.mjs --name my-system --prefix my --owner my-login [--figma-fil
 
 One run rewrites the name, the `--ads-*` prefix and the owner everywhere they
 appear, writes the Figma file key into `design-delta.json` and the Code
-Connect stubs when given one, installs, docks the engine, runs `npm run verify`
-and then removes itself, its CI check and this section. Pass `--fleet` to keep
+Connect stubs when given one, installs, docks the engine, runs `npm run verify`,
+builds the Storybook and then removes itself, its CI check and this section. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the
 diff, then commit.
@@ -84,7 +84,8 @@ what the token CSS keys off. Docs and accessibility checks come from
 
 ```bash
 npm install
-npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test → build-storybook
+npm run verify   # build:tokens → prettier:check → lint → lint:styles → drift:verify → test
+npm run build-storybook   # the Storybook; this checkout's is built by storybook / ci on a PR, deploy-pages.yml on main
 ```
 
 How the repo fits together, in prose: [docs/architecture.md](docs/architecture.md);
