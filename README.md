@@ -77,8 +77,12 @@ push to `main`.
   starts: the same verdict `npm run verify` gates on.
 
 The toolbar's theme toggle sets `data-theme` on the preview's root, which is
-what the token CSS keys off. Docs and accessibility checks come from
-`@storybook/addon-docs` and `@storybook/addon-a11y`.
+what the token CSS keys off. Docs come from `@storybook/addon-docs`.
+`@storybook/addon-a11y` shows an accessibility panel beside each story; it
+reports to whoever is looking and fails nothing. What fails is the gate: every
+component's test runs axe-core over its variants in jsdom, so a violation turns
+`npm run verify` red. Colour contrast needs a real browser, so only the panel
+checks it.
 
 ## Development
 
