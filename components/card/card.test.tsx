@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
+import { expectNoViolations } from "../../test-utils/axe"
+import { Badge } from "../badge"
 import { Card } from "./card"
 
 test("composes a header with a trailing slot inside a padded card", () => {
@@ -25,3 +27,19 @@ test("padding none drops the inset", () => {
   )
   expect(screen.getByTestId("card")).toHaveClass("paddingNone")
 })
+
+test.each(["default", "none"] as const)(
+  "padding %s with a header has no accessibility violations",
+  async padding => {
+    const { container } = render(
+      <Card padding={padding}>
+        <Card.Header
+          title="Title"
+          trailing={<Badge tone="accent">New</Badge>}
+        />
+        Body
+      </Card>,
+    )
+    await expectNoViolations(container)
+  },
+)
