@@ -1,8 +1,9 @@
 // The token source, read once for the CSS build and the manifest: one JSON
 // file per group under tokens/json/{primitives,semantics}/, deep-merged into
-// the single DTCG document Terrazzo parses. Primitives are literal values a
-// component never uses directly; semantics alias them and are the only tier
-// that ships as CSS.
+// the single DTCG document Terrazzo parses. Primitives are the values a
+// component never uses directly (a literal, or an alias of another primitive,
+// resolved at build); semantics alias them and are the only tier that ships
+// as CSS.
 import { readdirSync, readFileSync } from "node:fs"
 
 export const PREFIX = "ads"

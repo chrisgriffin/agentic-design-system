@@ -36,7 +36,7 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 ## What is tested
 
 - `tokens/scripts/tokens.test.mjs` — the built CSS declares no `--ads-primitive-*` property, has no `var()` left and declares more than 40 `--ads-*` properties, both themes are present and differ, and every manifest value is a literal.
-- `tokens/scripts/inline-primitives.test.mjs` — `inlinePrimitives` on its own, without running the build: a primitive reference becomes the primitive's value, primitive declarations are gone from the output, and an undeclared primitive throws.
+- `tokens/scripts/inline-primitives.test.mjs` — `inlinePrimitives` on its own, without running the build: a primitive reference becomes the primitive's value, primitive declarations are gone from the output, an undeclared primitive throws, a primitive aliasing another inlines to its final value, a reference cycle throws naming it (a self-reference and a cycle nothing references too), a reference with whitespace or a fallback is inlined, a semantic name containing `-primitive-` is left alone, a primitive declared in two blocks throws, and a primitive left in the output in any other form throws.
 - `components/<name>/<name>.test.tsx` — each component renders its content and the class its stylesheet keys off, with Testing Library; CSS Module class names are unscoped in tests so an assertion can name them.
 - `design-delta verify` — not a test file but the gate's own check: the contract's props against the component's, its anatomy against the rendered tree, its token bindings against the stylesheet.
 
