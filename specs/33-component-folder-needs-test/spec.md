@@ -22,10 +22,10 @@ The gate fails a component test that never calls `expectNoViolations`, but it on
 
 ## Success criteria
 
-- [ ] A folder under `components/` with a component source file and no `.test.tsx` file makes `npm test` fail, and the failure names that folder.
-- [ ] The existing `badge`, `button` and `card` folders still pass, and so does a folder `npm run scaffold -- <name>` writes. The scaffolded folder is deleted before committing.
-- [ ] `docs/testing.md` says the gate fails a component folder with no test file.
-- [ ] **Runnable:** `mkdir -p components/zz-probe && printf 'export const ZzProbe = () => null\n' > components/zz-probe/zz-probe.tsx && npm test; s=$?; git clean -fdq components/zz-probe; [ $s -ne 0 ]` exits 0. On `develop` today it exits 1, because `npm test` passes with the untested probe folder in place.
+- [x] A folder under `components/` with a component source file and no `.test.tsx` file makes `npm test` fail, and the failure names that folder.
+- [x] The existing `badge`, `button` and `card` folders still pass, and so does a folder `npm run scaffold -- <name>` writes. The scaffolded folder is deleted before committing.
+- [x] `docs/testing.md` says the gate fails a component folder with no test file.
+- [x] **Runnable:** `mkdir -p components/zz-probe && printf 'export const ZzProbe = () => null\n' > components/zz-probe/zz-probe.tsx && npm test; s=$?; git clean -fdq components/zz-probe; [ $s -ne 0 ]` exits 0. On `develop` today it exits 1, because `npm test` passes with the untested probe folder in place.
 
 ## Out of scope
 
