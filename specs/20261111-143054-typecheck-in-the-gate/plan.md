@@ -1,0 +1,29 @@
+# Plan: The template typechecks, and the gate runs it
+
+## Technical context
+
+- `tsconfig.json` extends `@chrisgriffin/config/tsconfig.json` and sets `module: ESNext`, `moduleResolution: Bundler`, `jsx: react-jsx`, `noEmit: true`, `allowImportingTsExtensions: true`, with `include: ["components", "tokens/scripts", ".storybook"]`. Nothing invokes `tsc`: `package.json` has no `typecheck` script and `verify` is six steps, none of them TypeScript.
+- **The 4 × TS2307** are CSS Modules. `.storybook/globals.d.ts` already declares `*.module.css`, but that file never reached the program: `tsc`'s `include` expansion skips a dot-directory named bare, so `".storybook"` added nothing. Keep one declaration: `types/css-modules.d.ts` declares `*.module.css` as `{ readonly [key: string]: string }` (FR-001), `types` is named in `include`, and the declaration is deleted from `globals.d.ts`. A local declaration is preferred over adding `"types": ["vite/client"]`: `vite/client` also pulls in Vite's whole asset-module surface, and the program needs only the CSS shapes.
+- **`.storybook` is brought in** with a `.storybook/**/*` entry in place of `.storybook` (a widening, not a removal, FR-007). It surfaces five errors, each cleared by supplying what is missing (FR-006): `@types/node` as a dev dependency for the three `node:*` imports in `main.ts`; `tokens/scripts/build-manifest.d.mts`, a declaration of the manifest's default export, whose `TokenManifest` type `globals.d.ts` now reuses for `__TOKEN_MANIFEST__` rather than restating the shape; and `declare module "*.css" {}` in `types/css-modules.d.ts` for `preview.ts`'s side-effect import of `tokens/css/tokens.css`. The empty body allows only a side-effect import, and a `*.module.css` import still resolves to its read-only record.
+- **The 8 × TS2339** are jest-dom's matchers. `vitest.setup.ts` already imports `@testing-library/jest-dom/vitest`, whose module augmentation extends vitest's `Assertion`. An augmentation only applies to a program that contains the importing file, and `include` does not reach a root-level `.ts` file. Add `vitest.setup.ts` to `include`. That also brings `vite.config.ts`-adjacent root files into scope only if named, so name the one file, not `"*.ts"`.
+- **Order in the chain.** `typecheck` goes after `build:tokens` and before `prettier:check`. `build-css.mjs` writes `tokens/css/tokens.css`, which `.storybook/preview.ts` imports, but `tsc` types that import from the `*.css` declaration rather than the file, so the dependency is not strictly needed — but keeping generated output ahead of every verifying step is the chain's existing shape, and a type failure is the cheapest signal to get first among the four linters.
+- **`npm run typecheck` is `tsc --noEmit`**, not `tsc`, even though `tsconfig.json` already sets `noEmit`: the flag makes a direct invocation safe regardless of the config, and it is how `token-atlas` spells the same script.
+- **One dev dependency is added: `@types/node`** (`^22`, matching `engines.node`), the type declarations `.storybook/main.ts`'s `node:*` imports need. `typescript` is already a `devDependency` and `tsc` is already resolvable; `package-lock.json` gains `@types/node` and its `undici-types`, nothing else.
+- FR-007 is why this is not a config-widening change: `skipLibCheck`, an `include` removal or a `@ts-expect-error` would each reach zero errors while leaving the twelve real gaps in place. The fix is two files in the program and one declaration.
+
+## Surfaces touched
+
+- `tsconfig.json` — `include` gains `types` and `vitest.setup.ts`, and `.storybook` becomes `.storybook/**/*`.
+- `.storybook/globals.d.ts` — its `*.module.css` declaration moves to `types/`, and `__TOKEN_MANIFEST__` takes its type from `build-manifest.d.mts`.
+- `tokens/scripts/build-manifest.d.mts` — new: the manifest export's type.
+- `types/css-modules.d.ts` — new file, the ambient `*.module.css` declaration and the side-effect `*.css` one. A new top-level directory, so `docs/architecture.md`'s directory list gains it; CI's `Check docs/` step holds that list.
+- `package.json` — a `typecheck` script, `verify` gains it as a seventh step, and `@types/node` joins `devDependencies` (`package-lock.json` with it).
+- `docs/testing.md` — "which is these six in order" becomes seven, with the `typecheck` bullet; the `Adding a test` section says `vitest.setup.ts` is in the program.
+- `README.md` — the Development block's `verify` comment lists `typecheck`.
+- `CLAUDE.md` — the Commands block lists `npm run typecheck`, and its `verify` line says the gate typechecks.
+- `docs/architecture.md` — the directory list gains `types/`, and the gate sentence lists seven steps (FR-005 names this file).
+- `.github/workflows/build-check.yml` — no change: it runs `npm run verify` and names no chain step, so the `build / ci` check name is untouched and the branch ruleset needs no edit.
+- `scripts/init.mjs` — no change needed by this plan; it runs `npm run verify`, so a renamed copy typechecks through the same chain. Confirm its `--ads-` sweep and its removal list do not need `types/` added, and say so in the PR body if they do not.
+- cost — none: no workflow trigger, cron, agent fire or scheduled function is added. `tsc` adds a few seconds inside the existing `build / ci` job, no new job and no new billed minute.
+- `docs/adr/` — none: this enforces strictness the repo already configured rather than deciding anything new. No ADR.
+- none else — no reusable workflow body in [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) is touched, no required check is renamed, nothing published changes (this package is private and ships no `bin` or export), and no rule is newly stated in a second doc: the gate's step list lives in `docs/testing.md`, and `README.md`, `CLAUDE.md` and `docs/architecture.md` each already summarise it, so they are updated rather than newly duplicated.
