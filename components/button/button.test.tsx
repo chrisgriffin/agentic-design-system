@@ -29,6 +29,48 @@ test("defaults to md and default, and forwards onClick", async () => {
   expect(onClick).toHaveBeenCalledOnce()
 })
 
+test("keyboard: Tab reaches it, and Enter and Space each fire onClick once", async () => {
+  const user = userEvent.setup()
+  const onClick = vi.fn()
+  render(<Button onClick={onClick}>Save</Button>)
+  const button = screen.getByRole("button", { name: "Save" })
+
+  await user.tab()
+  expect(button).toHaveFocus()
+
+  await user.keyboard("{Enter}")
+  expect(onClick).toHaveBeenCalledOnce()
+
+  onClick.mockClear()
+  await user.keyboard(" ")
+  expect(onClick).toHaveBeenCalledOnce()
+})
+
+test("keyboard: a disabled Button is skipped by Tab and fires nothing on Enter or Space", async () => {
+  const user = userEvent.setup()
+  const onClick = vi.fn()
+  render(
+    <>
+      <button type="button">Before</button>
+      <Button disabled onClick={onClick}>
+        Save
+      </Button>
+    </>,
+  )
+  const before = screen.getByRole("button", { name: "Before" })
+  const disabled = screen.getByRole("button", { name: "Save" })
+
+  await user.tab()
+  expect(before).toHaveFocus()
+  await user.tab()
+  expect(disabled).not.toHaveFocus()
+  expect(document.body).toHaveFocus()
+
+  await user.keyboard("{Enter}")
+  await user.keyboard(" ")
+  expect(onClick).not.toHaveBeenCalled()
+})
+
 const SIZES = ["sm", "md", "lg"] as const
 const VARIANTS = ["default", "outline"] as const
 

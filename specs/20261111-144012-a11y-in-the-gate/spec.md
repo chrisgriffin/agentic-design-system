@@ -38,6 +38,6 @@ That matters more here than in an ordinary app. This is a public template, and `
 ## Out of scope
 
 - Colour-contrast checking, which axe cannot evaluate in jsdom (it has no layout or computed colour). Say so where the docs name what is covered, rather than implying a check that does not run.
-- Keyboard-interaction tests beyond what axe asserts statically. Worth having, and a separate ticket.
+- Keyboard-interaction tests beyond what axe asserts statically. Worth having, and a separate ticket. Done in [`specs/29-button-keyboard`](../29-button-keyboard/spec.md) (#29).
 - The Storybook a11y addon's own configuration. It stays exactly as it is; this adds a gate beside it and does not replace it.
 - `tsc` not running in the gate, which is its own ticket.

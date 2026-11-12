@@ -23,10 +23,10 @@ The gate's accessibility check runs axe over each component's rendered markup, w
 
 ## Success criteria
 
-- [ ] Button's tests show it is reached with Tab, and that Enter and Space each fire its `onClick` exactly once.
-- [ ] A disabled Button is skipped by Tab and fires nothing on Enter or Space.
-- [ ] `docs/testing.md` says what keyboard behaviour the gate checks, separately from what axe checks.
-- [ ] **Runnable:** `npx vitest run components/button --reporter=verbose 2>&1 | grep -ci keyboard` prints 1 or more and exits 0 (on `develop` today it prints `0` and exits 1).
+- [x] Button's tests show it is reached with Tab, and that Enter and Space each fire its `onClick` exactly once.
+- [x] A disabled Button is skipped by Tab and fires nothing on Enter or Space.
+- [x] `docs/testing.md` says what keyboard behaviour the gate checks, separately from what axe checks.
+- [x] **Runnable:** `npx vitest run components/button --reporter=verbose 2>&1 | grep -ci keyboard` prints 1 or more and exits 0 (on `develop` today it prints `0` and exits 1).
 
 ## Out of scope
 
