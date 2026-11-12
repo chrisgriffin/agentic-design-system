@@ -91,6 +91,38 @@ test("finds the component test files", () => {
   expect(files.length).toBeGreaterThan(0)
 })
 
+/**
+ * Holds the rule that every component folder has a test: a folder under
+ * `components/` holding a component source file but no `.test.tsx` fails
+ * here, by its path. The check is per folder, so a composed part such as
+ * `card/card-header.tsx` is covered by its parent's test. The glob is not
+ * eager: only its keys are read, so no component module is imported.
+ */
+const NOT_A_COMPONENT = /\.(test|stories|figma)\.tsx$/
+
+const folderOf = (path: string) =>
+  path.replace(/^\.\.\//, "").replace(/\/[^/]+$/, "")
+
+const componentFolders = [
+  ...new Set(
+    Object.keys(import.meta.glob("../components/**/*.tsx"))
+      .filter(path => !NOT_A_COMPONENT.test(path))
+      .map(folderOf),
+  ),
+].sort()
+
+const testedFolders = new Set(Object.keys(sources).map(folderOf))
+
+test("finds the component folders", () => {
+  expect(componentFolders.length).toBeGreaterThan(0)
+})
+
+test.each(componentFolders)("%s has a test file", folder => {
+  expect(testedFolders.has(folder), `${folder} has no .test.tsx file`).toBe(
+    true,
+  )
+})
+
 test.each(files)("%s calls expectNoViolations", (file, source) => {
   expect(
     callsExpectNoViolations(source),
