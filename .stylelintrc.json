@@ -1,0 +1,54 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-css-modules"],
+  "plugins": [
+    "stylelint-value-no-unknown-custom-properties",
+    "stylelint-declaration-strict-value"
+  ],
+  "rules": {
+    "color-named": "never",
+    "csstools/value-no-unknown-custom-properties": [
+      true,
+      {
+        "importFrom": ["tokens/css/tokens.css"]
+      }
+    ],
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "/color$/",
+        "fill",
+        "stroke",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "line-height",
+        "/^border(-[a-z]+)*-radius$/",
+        "/^(margin|padding)(-[a-z]+)*$/",
+        "/gap$/",
+        "/^(transition|animation)-(duration|timing-function)$/"
+      ],
+      {
+        "expandShorthand": true,
+        "ignoreValues": {
+          "": [
+            "0",
+            "auto",
+            "inherit",
+            "initial",
+            "unset",
+            "none",
+            "currentcolor",
+            "transparent",
+            "normal",
+            "/^-?[\\d.]+(em|ex|ch|vh|vw|svh|dvh|%)$/"
+          ]
+        }
+      }
+    ],
+    "selector-class-pattern": [
+      "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]+$",
+      {
+        "message": "Expected class selector to be kebab-case or camelCase (CSS Modules read camelCase as a property)"
+      }
+    ]
+  }
+}

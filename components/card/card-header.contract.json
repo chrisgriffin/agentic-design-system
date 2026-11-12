@@ -1,0 +1,68 @@
+{
+  "$schema": "../../node_modules/design-delta/schema/contract.schema.json",
+  "id": "card-header",
+  "title": "CardHeader",
+  "status": "published",
+  "_comment": "Card.Header: the second contract in the card directory. Composition is two contracts, each conforming against its own file.",
+  "sources": {
+    "code": {
+      "path": "components/card/card-header.tsx",
+      "styles": "components/card/card-header.module.css"
+    }
+  },
+  "props": {
+    "title": {
+      "type": "string"
+    },
+    "trailing": {
+      "type": "slot",
+      "required": false
+    }
+  },
+  "anatomy": {
+    "root": {
+      "type": "container",
+      "element": "div",
+      "codeClass": "header",
+      "children": ["title"]
+    },
+    "title": {
+      "type": "text",
+      "element": "h3",
+      "codeClass": "title",
+      "content": {
+        "$prop": "title"
+      }
+    }
+  },
+  "styles": {
+    "title": {
+      "base": {
+        "fontFamily": {
+          "token": "font-family.heading"
+        },
+        "fontSize": {
+          "token": "font-size.lg"
+        },
+        "fontWeight": {
+          "token": "font-weight.semibold"
+        },
+        "lineHeight": {
+          "token": "line-height.snug"
+        }
+      }
+    },
+    "root": {
+      "base": {
+        "gap": {
+          "token": "inline.md"
+        },
+        "margin": {
+          "blockEnd": {
+            "token": "stack.md"
+          }
+        }
+      }
+    }
+  }
+}
