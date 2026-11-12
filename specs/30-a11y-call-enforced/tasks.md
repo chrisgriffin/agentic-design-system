@@ -6,15 +6,15 @@
 
 ## Phase 2: Build
 
-- [ ] T002 `test-utils/a11y-coverage.test.ts`: one case per `components/**/*.test.tsx`, failing and naming the file when it never calls `expectNoViolations`; fails when no files are found.
-- [ ] T003 `vite.config.ts`: `include` gains `test-utils/**/*.test.ts`.
+- [x] T002 `test-utils/a11y-coverage.test.ts`: one case per `components/**/*.test.tsx`, failing and naming the file when it never calls `expectNoViolations`; fails when no files are found.
+- [x] T003 `vite.config.ts`: `include` gains `test-utils/**/*.test.ts`.
 
 ## Phase 3: Surfaces
 
-- [ ] T004 `docs/testing.md`: § Running tests, § What is tested and § Adding a test say the gate enforces the call.
-- [ ] T005 `docs/architecture.md`: `test-utils/` names the new test.
+- [x] T004 `docs/testing.md`: § Running tests, § What is tested and § Adding a test say the gate enforces the call.
+- [x] T005 `docs/architecture.md`: `test-utils/` names the new test.
 
 ## Phase 4: Green
 
-- [ ] T006 The badge, button and card tests pass; a file from `npm run scaffold -- zz-scaffold` passes, then the directory is deleted.
-- [ ] T007 The runnable line exits 0; `npm run verify` green.
+- [x] T006 The badge, button and card tests pass; a file from `npm run scaffold -- zz-scaffold` passes, then the directory is deleted.
+- [x] T007 The runnable line exits 0; `npm run verify` green.

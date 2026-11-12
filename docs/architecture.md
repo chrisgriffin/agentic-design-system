@@ -43,7 +43,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 - `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.
 - `specs/` — the Spec Kit spec, plan and tasks behind each build.
-- `test-utils/` — helpers the component tests import: `axe.ts` holds `expectNoViolations`, the accessibility assertion every component's test calls.
+- `test-utils/` — helpers the component tests import: `axe.ts` holds `expectNoViolations`, the accessibility assertion every component's test calls, and `a11y-coverage.test.ts` fails the gate on a component test that never calls it.
 - `.github/workflows/` — CI, the Storybook check, <!-- init -->the init check, <!-- /init -->the Pages deploy, and the release and review-loop triggers.
 - `.design-delta/` — the engine's output, not tracked today: its reports and state are ignored, and a gathered snapshot of the design side will be committed under `snapshots/` once `design-delta.json` names a design file (`design.files` is empty, so none exists yet).
 

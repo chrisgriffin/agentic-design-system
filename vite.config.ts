@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
-    include: ["components/**/*.test.tsx"],
+    include: ["components/**/*.test.tsx", "test-utils/**/*.test.ts"],
     setupFiles: ["./vitest.setup.ts"],
     css: { modules: { classNameStrategy: "non-scoped" } },
   },
