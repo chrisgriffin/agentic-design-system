@@ -63,11 +63,17 @@ export const Default: Story = {}
   [`${name}.test.tsx`]: `import { render, screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
+import { expectNoViolations } from "../../test-utils/axe"
 import { ${pascal} } from "./${name}"
 
 test("renders its content", () => {
   render(<${pascal}>Hello</${pascal}>)
   expect(screen.getByText("Hello")).toHaveClass("${camel}")
+})
+
+test("has no accessibility violations", async () => {
+  const { container } = render(<${pascal}>Hello</${pascal}>)
+  await expectNoViolations(container)
 })
 `,
   [`${name}.figma.tsx`]: `import figma from "@figma/code-connect"
