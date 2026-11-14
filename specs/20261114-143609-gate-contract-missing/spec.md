@@ -32,9 +32,9 @@ A component folder holding only `probe.tsx`, `probe.module.css` and a
   `1 warn, 48 review — reported, not gating`.
 - `design-delta audit --json` carries the finding in full:
   `{"ruleId": "coverage/uncontracted-component", "severity": "warn", "surface":
-  "coverage", "side": "code", "entity": "components/probe/probe.tsx",
-  "message": "component at \"components/probe/probe.tsx\" has no contract
-  referencing it"}`
+"coverage", "side": "code", "entity": "components/probe/probe.tsx",
+"message": "component at \"components/probe/probe.tsx\" has no contract
+referencing it"}`
 - With `"rules": {"coverage/uncontracted-component": "error"}` added to
   `design-delta.json` and the same folder present: `drift:verify` →
   **exit 1**, `FAIL 1 finding(s) at "error" severity or above`, and the 48

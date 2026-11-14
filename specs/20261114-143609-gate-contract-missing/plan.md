@@ -76,12 +76,12 @@ would break `card-header` and widen a small ticket into a shape audit.
 
 ## File structure
 
-| File | Change |
-| --- | --- |
-| `design-delta.json` | add the `rules` object with the one entry and its `_doc` |
-| `test-utils/contract-coverage.test.ts` | **new** — the pinning test from D2 |
-| `README.md` | the gate paragraph says a component with no contract fails it |
-| `CLAUDE.md` | invariant 2 says the gate enforces it, not just the convention |
+| File                                   | Change                                                         |
+| -------------------------------------- | -------------------------------------------------------------- |
+| `design-delta.json`                    | add the `rules` object with the one entry and its `_doc`       |
+| `test-utils/contract-coverage.test.ts` | **new** — the pinning test from D2                             |
+| `README.md`                            | the gate paragraph says a component with no contract fails it  |
+| `CLAUDE.md`                            | invariant 2 says the gate enforces it, not just the convention |
 
 ## Surfaces touched
 
