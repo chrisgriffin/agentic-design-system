@@ -20,5 +20,9 @@
     "codeConnectSuffix": ".figma.tsx",
     "contractSuffix": ".contract.json",
     "nonComponentFileSuffixes": [".stories.tsx", ".test.tsx", ".figma.tsx"]
+  },
+  "rules": {
+    "_doc": "Severities that differ from the engine defaults. coverage/uncontracted-component is error here because CLAUDE.md invariant 2 makes the contract the source of truth: a component with no contract is never audited again, which is the drift this template exists to prevent. Pinned by test-utils/contract-coverage.test.ts.",
+    "coverage/uncontracted-component": "error"
   }
 }

@@ -5,7 +5,8 @@ in the [DTCG](https://www.designtokens.org/tr/2025.10/format/) format, built
 into CSS custom properties by [Terrazzo](https://terrazzo.app); React
 components with CSS Modules, each with a contract, a story and a test;
 Storybook; and the [design-delta](https://github.com/chrisgriffin/design-delta)
-gate, which fails CI when code and contracts disagree.
+gate, which fails CI when code and contracts disagree, or when a component
+has no contract at all.
 
 > This repo is built in layers, each a merged build: the tokens, the
 > components with contracts, the Storybook, the agent layer, and the release
@@ -61,8 +62,10 @@ A **contract** (`*.contract.json`) is the source of truth for a component: its
 props, its element structure and the tokens its styles bind. `npm run
 drift:verify` runs [design-delta](https://github.com/chrisgriffin/design-delta)
 over `design-delta.json` and fails when the code or a stylesheet disagrees with
-a contract. Styles use only `--ads-*` custom properties; Stylelint refuses a
-literal where a token belongs.
+a contract, or when a component has no contract: `design-delta.json` raises
+`coverage/uncontracted-component` to `error`, and
+`test-utils/contract-coverage.test.ts` holds it there. Styles use only
+`--ads-*` custom properties; Stylelint refuses a literal where a token belongs.
 
 ## Storybook
 
