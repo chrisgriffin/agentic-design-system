@@ -36,7 +36,7 @@ One task per `## Surfaces touched` line in `plan.md`, in that order.
 
 - [x] T013 `README.md` — the gate paragraph says a component with no contract fails CI, not only that code and contracts disagreeing does.
 - [x] T014 `CLAUDE.md` — invariant 2 names the gate that now enforces it; § CI's gate line stays accurate.
-- [x] T015 `docs/architecture.md` — confirm no directory is added, removed or renamed, so CI's `Check docs/` step needs nothing; say so in the PR body rather than editing the file.
+- [x] T015 `docs/architecture.md` — confirm no directory is added, removed or renamed, so CI's `Check docs/` step needs nothing; its `test-utils/` line names the new test, and the PR body says so.
 - [x] T016 `CHANGELOG.md` — confirm nothing is hand-written; the release flow generates it from conventional-commit history.
 - [x] T017 `docs/adr/` — confirm no record is owed: this applies an invariant `CLAUDE.md` already states.
 - [x] T018 Required check names — confirm none changes, so the branch ruleset is untouched (`build / ci` still runs `npm run verify`).

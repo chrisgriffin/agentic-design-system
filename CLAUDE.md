@@ -15,7 +15,7 @@ npm run verify            # the gate CI runs as build / ci; Storybook builds in 
 ## Non-negotiable invariants
 
 1. **Token-first styling.** Every color, space, font, radius and motion value in a stylesheet is a `--ads-*` custom property from `tokens/css/tokens.css`. Stylelint refuses a literal where a token belongs; do not widen its ignore list, add a token.
-2. **The contract is the source of truth.** `name.contract.json` declares a component's props, anatomy and token bindings; the code and the stylesheet conform to it, never the other way around. A component with no contract fails the gate: `drift:verify` reports it as `coverage/uncontracted-component` at `error` (`test-utils/contract-coverage.test.ts` pins it). An axis the contract marks `code: none` is design-only and never becomes a prop.
+2. **The contract is the source of truth.** `name.contract.json` declares a component's props, anatomy and token bindings; the code and the stylesheet conform to it, never the other way around. A component with no contract fails the gate ([`docs/testing.md`](docs/testing.md)). An axis the contract marks `code: none` is design-only and never becomes a prop.
 3. **Semantic tokens only ship.** Primitives alias into semantics and are inlined at build; code never references a primitive, and a new value starts as a primitive aliased by a semantic token.
 4. **Generated files are not edited.** `tokens/css/`, `storybook-static/`, `.design-delta/reports/` and the dock-generated hook and skills are overwritten by their generators.
 
