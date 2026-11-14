@@ -13,9 +13,10 @@ The tests prove that the token build emits what the components may use and nothi
 
 ## Running tests
 
-`build-check.yml` runs `npm run verify`, which is these six in order:
+`build-check.yml` runs `npm run verify`, which is these seven in order:
 
 - `npm run build:tokens` — Terrazzo over `tokens/json`, then the primitive inlining; the later steps read its output.
+- `npm run typecheck` — `tsc --noEmit` over the program `tsconfig.json` includes: `components`, `.storybook` (named by its `.storybook/**/*` glob, since `tsc` skips a dot-directory a bare name reaches), `types`, `vitest.setup.ts`, and from `tokens/scripts` only `build-manifest.d.mts`, its `.mjs` scripts being plain ESM outside the program; a type error fails it, naming the file and the line.
 - `npm run prettier:check` — Prettier over everything `.prettierignore` does not exclude, in the shared `@chrisgriffin/config/prettier` style.
 - `npm run lint` — ESLint from `eslint.config.mjs`, which spreads `@chrisgriffin/config/eslint` first.
 - `npm run lint:styles` — Stylelint over every `.css` file: a color, fill or stroke, font family, size or weight, line height, border radius, margin or padding, gap, or transition or animation duration or timing value that is not a `--ads-*` property fails (other sizes, such as `width`, are not checked), and so does a property name the built CSS does not define.
@@ -47,4 +48,4 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 - A component's test is `components/<name>/<name>.test.tsx`; `vite.config.ts` collects `components/**/*.test.tsx` and `test-utils/**/*.test.ts` only.
 - A component's test also calls `expectNoViolations` from `../../test-utils/axe` on each variant its contract gives code; `npm run scaffold` writes the first call for you, and `test-utils/a11y-coverage.test.ts` fails `npm test` on a test file without one, and on a component folder with no test file at all. A violation is fixed in the component, never by switching a rule off.
 - A token test is a `.test.mjs` beside the scripts under `tokens/scripts/`, on `node:test`.
-- `vitest.setup.ts` loads jest-dom's matchers and cleans the DOM after each test.
+- `vitest.setup.ts` loads jest-dom's matchers and cleans the DOM after each test. It is in the TypeScript program, so `typecheck` sees those matchers on every test file.
