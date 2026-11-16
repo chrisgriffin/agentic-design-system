@@ -1,7 +1,14 @@
 // @vitest-environment node
 
 import { spawnSync } from "node:child_process"
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -62,3 +69,13 @@ test("a component with no contract fails the gate", () => {
   expect(verify.status, verify.stdout + verify.stderr).not.toBe(0)
   expect(verify.stdout).toContain(`${RULE}  ${FIXTURE}`)
 }, 60_000)
+
+// The two gate tests in this folder enforce the template's invariants, so
+// they are type-checked like the code they guard: dropping `test-utils` from
+// the program would let a type error in either one pass `npm run verify`.
+test("the typecheck covers test-utils", () => {
+  const { include } = JSON.parse(
+    readFileSync(join(ROOT, "tsconfig.json"), "utf8"),
+  ) as { include: string[] }
+  expect(include).toContain("test-utils")
+})
