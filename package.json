@@ -5,6 +5,9 @@
   "description": "A design system template an agent can build in and keep honest: DTCG tokens, component contracts, Storybook, and the design-delta gate.",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "agentic-design-system": "cli/create.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chrisgriffin/agentic-design-system.git"
@@ -20,7 +23,7 @@
     "lint:styles": "stylelint \"**/*.css\" --allow-empty-input",
     "typecheck": "tsc --noEmit",
     "scaffold": "node scripts/scaffold-component.mjs",
-    "test": "node --test tokens/scripts/*.test.mjs && vitest run",
+    "test": "node --test tokens/scripts/*.test.mjs cli/*.test.mjs && vitest run",
     "verify": "npm run build:tokens && npm run typecheck && npm run prettier:check && npm run lint && npm run lint:styles && npm run drift:verify && npm test",
     "drift:audit": "design-delta audit",
     "drift:contracts": "design-delta contracts",
