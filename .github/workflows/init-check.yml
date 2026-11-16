@@ -1,7 +1,8 @@
 name: Init Check
 
 # Thin stub: proves cli/create.mjs makes a system that passes its gate with
-# no credentials, and that scripts/init.mjs turns a fresh copy of the template into a
+# no credentials, run under npm 11, whose lock file is the template's renamed
+# and passes npm ci on Node 22's npm 10 (#44), and that scripts/init.mjs turns a fresh copy of the template into a
 # named system that still passes the gate. The script runs the verify chain
 # and the Storybook build itself and removes itself, this file, the docs
 # passages marked <!-- init --> and the two fleet-only stubs.
@@ -25,7 +26,9 @@ jobs:
     with:
       node_version: "22"
       run: |
-        env -u NODE_AUTH_TOKEN GIT_SSH_COMMAND=false node cli/create.mjs created-system --prefix cds --owner sample-owner --dir "$RUNNER_TEMP" --from "$PWD"
+        env -u NODE_AUTH_TOKEN GIT_SSH_COMMAND=false npx -y -p npm@11 -- node cli/create.mjs created-system --prefix cds --owner sample-owner --dir "$RUNNER_TEMP" --from "$PWD"
+        node -e 'const fs = require("fs"), bare = f => { const l = JSON.parse(fs.readFileSync(f)); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(process.argv[1]) !== bare(process.argv[2])) { console.error("the created lock file differs from the template'"'"'s past its name and bin"); process.exit(1) }' package-lock.json "$RUNNER_TEMP/created-system/package-lock.json"
+        (cd "$RUNNER_TEMP/created-system" && npx -y npm@10 ci --dry-run)
         test ! -e "$RUNNER_TEMP/created-system/cli"
         test ! -e "$RUNNER_TEMP/created-system/scripts/init.mjs"
         node scripts/init.mjs --name sample-system --prefix sds --owner sample-owner --figma-file SAMPLEKEY

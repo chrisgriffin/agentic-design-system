@@ -134,6 +134,14 @@ const pkg = JSON.parse(readFileSync(manifest, "utf8"))
 delete pkg.bin
 pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
 writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
+// The lock file is renamed here, not by an install, so it stays the template's:
+// npm install lets the local npm re-resolve it, and npm 11 drops an entry the
+// npm 10 on CI's Node 22 needs (#44). npm ci below installs it and writes nothing.
+const lockfile = path.join(root, "package-lock.json")
+const lock = JSON.parse(readFileSync(lockfile, "utf8"))
+lock.name = lock.packages[""].name = name
+delete lock.packages[""].bin
+writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
 
 const removed = [self, ".github/workflows/init-check.yml", "cli"]
 if (!fleet)
@@ -144,7 +152,7 @@ if (!fleet)
 
 const run = cmd => execSync(cmd, { cwd: root, stdio: "inherit" })
 if (!existsSync(path.join(root, "node_modules/.bin/design-delta")))
-  run("npm install --no-audit --no-fund")
+  run("npm ci --no-audit --no-fund")
 run("npx design-delta dock")
 run("npx prettier --write . --log-level warn")
 run("npm run verify")
