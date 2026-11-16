@@ -22,4 +22,4 @@
 - [x] T012 `node cli/create.mjs sample-system --prefix sds --owner sample-owner --dir <temp> --from <this checkout>` creates a system whose `npm run verify` exits 0, with no token and no SSH key.
 - [x] T013 The runnable line prints the usage line; `npm run verify` exits 0 on the branch.
 - [ ] T014 (after merge) `npx github:chrisgriffin/agentic-design-system sample-system --prefix sds --owner sample-owner` from an empty folder creates a system that verifies.
-- [ ] T015 (after merge) The vault's System Map entry for this repo names the create command.
+- [ ] T015 (after merge) The owner's record of what this template offers names the create command.
