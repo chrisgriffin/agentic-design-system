@@ -12,6 +12,7 @@
     "components",
     "tokens/scripts",
     ".storybook/**/*",
+    "test-utils",
     "types",
     "vitest.setup.ts"
   ]
