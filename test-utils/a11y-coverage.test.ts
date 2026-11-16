@@ -1,4 +1,3 @@
-/// <reference types="vite/types/importMeta.d.ts" />
 import ts from "typescript"
 import { describe, expect, test } from "vitest"
 

@@ -4,7 +4,7 @@
 
 ## Overview
 
-`npm run typecheck` checked the components, the token scripts, Storybook and `types/`, but not the two gate tests under `test-utils/`. Those tests enforce the template's accessibility and contract invariants, so a type mistake in either one passed the gate. This puts `test-utils/` in the type-checked program and fixes the type errors that surfaces.
+`npm run typecheck` checked the components, the token scripts' declaration file (`tokens/scripts/build-manifest.d.mts`), Storybook and `types/`, but not the two gate tests under `test-utils/`. Those tests enforce the template's accessibility and contract invariants, so a type mistake in either one passed the gate. This puts `test-utils/` in the type-checked program and fixes the type errors that surfaces.
 
 ## User scenarios
 
