@@ -51,6 +51,26 @@ if (args.includes("--check")) process.exit(0)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const self = path.relative(root, fileURLToPath(import.meta.url))
+// A node_modules means an install already ran in this copy and may have
+// re-resolved the lock (#44), so the committed one is restored before anything
+// is written; a copy with no committed lock to restore stops here, unchanged.
+const lockfile = path.join(root, "package-lock.json")
+if (existsSync(path.join(root, "node_modules"))) {
+  let committed
+  try {
+    committed = execSync("git show HEAD:./package-lock.json", {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+  } catch {
+    console.error(
+      "#44: node_modules exists, so an install may have re-resolved package-lock.json, and there is no committed lock to restore. Put back the template's package-lock.json, delete node_modules, then run this script again.",
+    )
+    process.exit(1)
+  }
+  writeFileSync(lockfile, committed)
+}
 const SKIP = new Set([
   "node_modules",
   ".git",
@@ -137,7 +157,6 @@ writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
 // The lock file is renamed here, not by an install, so it stays the template's:
 // npm install lets the local npm re-resolve it, and npm 11 drops an entry the
 // npm 10 on CI's Node 22 needs (#44). npm ci below installs it and writes nothing.
-const lockfile = path.join(root, "package-lock.json")
 const lock = JSON.parse(readFileSync(lockfile, "utf8"))
 lock.name = lock.packages[""].name = name
 delete lock.packages[""].bin
@@ -151,8 +170,7 @@ if (!fleet)
   )
 
 const run = cmd => execSync(cmd, { cwd: root, stdio: "inherit" })
-if (!existsSync(path.join(root, "node_modules/.bin/design-delta")))
-  run("npm ci --no-audit --no-fund")
+run("npm ci --no-audit --no-fund")
 run("npx design-delta dock")
 run("npx prettier --write . --log-level warn")
 run("npm run verify")
