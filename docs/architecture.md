@@ -35,7 +35,9 @@ The contract declares the props, the element structure and the tokens the styles
 
 <!-- init -->
 
-`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, installs, docks the engine and runs the gate, then removes itself, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
+`cli/create.mjs` is the template's `bin`, so `npx github:chrisgriffin/agentic-design-system <name>` runs it with no clone: it asks for any value it was not given, asks `scripts/init.mjs --check` whether the values are valid, clones the template into a new folder, starts a fresh git history there and runs that copy's `scripts/init.mjs`. It holds no rewrite logic of its own.
+
+`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, installs, docks the engine and runs the gate, then removes itself, `cli/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
 
 <!-- /init -->
 

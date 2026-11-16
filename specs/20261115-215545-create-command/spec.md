@@ -1,5 +1,7 @@
 # Spec: One command creates a named design system from the template
 
+**Issue**: [#41](https://github.com/chrisgriffin/agentic-design-system/issues/41)
+
 ## Overview
 
 Starting a design system from this template takes four manual steps today: copy the repo, clone it, run `scripts/init.mjs` with three flags, then commit. This adds a `create` command, run with `npx` straight from GitHub, that does all of it: it asks for a name, a prefix and an owner, writes a new folder holding the template under those values, and leaves a system whose `npm run verify` passes. It is the first command of a CLI for building out an agent-operated design system; the commands that grow a system (`add component`, `add token`, `check`, `doctor`) are later specs.
@@ -14,7 +16,7 @@ Starting a design system from this template takes four manual steps today: copy 
 ## Functional requirements
 
 - FR-001: `package.json` declares a `bin`, so `npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <login>] [--figma-file <key>] [--fleet] [--dir <path>]` runs it with no clone and no registry. `--help` prints usage and exits 0.
-- FR-002: It writes the template into `<dir>/<name>` (the current folder by default), leaving out `node_modules`, `.git`, `specs`, build output and the CLI's own files, then runs `git init` there.
+- FR-002: It clones the template into `<dir>/<name>` (the current folder by default) and starts a fresh git history there. The copy's init script removes the create command itself, so a created system and a copy made by hand end up the same.
 - FR-003: It hands the name, prefix, owner and Figma key to the existing `scripts/init.mjs` in the new folder, which rewrites the values, installs, docks the engine, runs the gate and removes itself. The create command holds no second copy of that logic.
 - FR-004: In a terminal, a missing name, prefix or owner is asked for, each with a default (the prefix from the name's initials, the owner from `git config user.name` when it is a valid login). With no terminal, a missing value exits 1 and names the flag.
 - FR-005: A target folder that exists and is not empty exits 1 before anything is written.
@@ -24,11 +26,11 @@ Starting a design system from this template takes four manual steps today: copy 
 
 ## Success criteria
 
-- [ ] `npx github:chrisgriffin/agentic-design-system my-system --prefix my --owner my-login`, run in an empty folder, creates `my-system/` as a git repository holding the template under that name, prefix and owner, with no clone step, and the README leads with that command.
-- [ ] `npm run verify` exits 0 inside the created system, installed with no GitHub token and no SSH key, and a CI check proves it on every PR.
-- [ ] Run in a terminal with no flags, it asks for the name, prefix and owner; run with no terminal and a value missing, it exits 1 and names the missing flag.
-- [ ] Pointed at a folder that exists and is not empty, it exits 1 and writes nothing.
-- [ ] **Runnable:** `node cli/create.mjs --help | head -1` prints the usage line (on `develop` today there is no `cli/create.mjs`).
+- [x] `npx github:chrisgriffin/agentic-design-system my-system --prefix my --owner my-login`, run in an empty folder, creates `my-system/` as a git repository holding the template under that name, prefix and owner, with no clone step, and the README leads with that command.
+- [x] `npm run verify` exits 0 inside the created system, installed with no GitHub token and no SSH key, and a CI check proves it on every PR.
+- [x] Run in a terminal with no flags, it asks for the name, prefix and owner; run with no terminal and a value missing, it exits 1 and names the missing flag.
+- [x] Pointed at a folder that exists and is not empty, it exits 1 and writes nothing.
+- [x] **Runnable:** `node cli/create.mjs --help | head -1` prints the usage line (on `develop` today there is no `cli/create.mjs`).
 
 ## Out of scope
 

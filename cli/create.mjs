@@ -101,10 +101,8 @@ if (existsSync(target) && readdirSync(target).length)
 
 const git = (...gitArgs) => execFileSync("git", gitArgs, { stdio: "inherit" })
 git("clone", "--quiet", "--depth", "1", from, target)
-// A new system starts its own history, and the template's specs are the
-// template's.
-for (const rel of [".git", "specs"])
-  rmSync(path.join(target, rel), { recursive: true, force: true })
+// A new system starts its own history.
+rmSync(path.join(target, ".git"), { recursive: true, force: true })
 git("-C", target, "init", "--quiet")
 
 if (init) {

@@ -62,13 +62,12 @@ test("a folder that exists and is not empty is refused, untouched", () => {
   assert.deepEqual(readdirSync(path.join(dir, "sample-system")), ["keep.txt"])
 })
 
-test("it writes the template as a new git repository, without the template's specs", () => {
+test("it writes the template as a new git repository", () => {
   const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const made = path.join(dir, "sample-system")
   for (const file of ["package.json", ".gitignore", "scripts/init.mjs", ".git"])
     assert.ok(existsSync(path.join(made, file)), `${file} is missing`)
-  assert.ok(!existsSync(path.join(made, "specs")), "specs/ was copied")
   const log = spawnSync("git", ["-C", made, "log", "--oneline"], {
     encoding: "utf8",
   })

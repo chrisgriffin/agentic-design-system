@@ -10,10 +10,22 @@ has no contract at all.
 
 > This repo is built in layers, each a merged build: the tokens, the
 > components with contracts, the Storybook, the agent layer, and the release
-> flow.<!-- init --> `scripts/init.mjs` turns a copy into a named system: see
+> flow.<!-- init --> One command turns it into a named system of your own: see
 > [Starting your own](#starting-your-own).<!-- /init -->
 
 ## Starting your own
+
+```bash
+npx github:chrisgriffin/agentic-design-system my-system
+```
+
+Run it in an empty folder. It asks for a custom property prefix and the GitHub
+login the repo will live under (or takes them as `--prefix` and `--owner`, with
+`--figma-file <key>` and `--dir <path>` when you want them), clones the
+template into `my-system/` as a new git repository, and runs the init script
+there. It needs Node 22, git and no account or token.
+
+In a copy you made by hand, run the init script yourself:
 
 ```bash
 node scripts/init.mjs --name my-system --prefix my --owner my-login [--figma-file <key>]
@@ -22,7 +34,7 @@ node scripts/init.mjs --name my-system --prefix my --owner my-login [--figma-fil
 One run rewrites the name, the `--ads-*` prefix and the owner everywhere they
 appear, writes the Figma file key into `design-delta.json` and the Code
 Connect stubs when given one, installs, docks the engine, runs `npm run verify`,
-builds the Storybook and then removes itself, its CI check and this section. Pass `--fleet` to keep
+builds the Storybook and then removes itself, its CI check, the create command and this section. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the
 diff, then commit.
