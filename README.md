@@ -19,11 +19,13 @@ has no contract at all.
 npx github:chrisgriffin/agentic-design-system my-system
 ```
 
-Run it in an empty folder. It asks for a custom property prefix and the GitHub
-login the repo will live under (or takes them as `--prefix` and `--owner`, with
-`--figma-file <key>` and `--dir <path>` when you want them), clones the
-template into `my-system/` as a new git repository, and runs the init script
-there. It needs Node 22, git and no account or token.
+Run it where you want the new folder: it refuses when `my-system` already
+exists there and is not an empty folder. It asks for a custom property prefix
+and the GitHub login the repo will live under (or takes them as `--prefix` and
+`--owner`, with `--figma-file <key>` and `--dir <path>` when you want them),
+clones the template's default branch into `my-system/` as a new git
+repository, and runs the init script there. It needs Node 22, git and no
+account or token.
 
 In a copy you made by hand, run the init script yourself:
 

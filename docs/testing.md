@@ -27,7 +27,7 @@ The tests prove that the token build emits what the components may use and nothi
 
 <!-- init -->
 
-`init-check.yml` first runs `cli/create.mjs` with sample values into a temp folder, with no token and SSH disabled, so the check fails when a created system does not install without credentials or does not pass its own gate. It then runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs `npm run verify` and then `npm run build-storybook` itself on the renamed checkout, and the check fails when the script survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script or its workflow.
+`init-check.yml` first runs `cli/create.mjs` with sample values into a temp folder, with no token and SSH disabled, so the check fails when a created system does not install without credentials, does not pass its own gate, or still holds `cli/` or `scripts/init.mjs`. It then runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs `npm run verify` and then `npm run build-storybook` itself on the renamed checkout, and the check fails when the script or `cli/` survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script, `cli/create.mjs` or its workflow.
 
 <!-- /init -->
 
@@ -40,7 +40,7 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 
 <!-- init -->
 
-- `cli/create.test.mjs` — the create command up to its hand-off to `scripts/init.mjs`, under `node --test`: `--help` prints the usage line, a missing value with no terminal exits 1 and names the flag, a value the init script refuses and a target folder that is not empty both exit 1 and write nothing, and a run writes the template as a new git repository with no history.
+- `cli/create.test.mjs` — the create command up to its hand-off to `scripts/init.mjs`, under `node --test`: `--help` prints the usage line, a missing value with no terminal exits 1 and names the flag, an unknown option, a value flag with no value and a second name are refused with the usage; a value the init script refuses (this copy's or the cloned template's), a target that is a file, a target folder that is not empty, a failed clone and a missing git all exit 1 with one message and leave nothing behind; an empty target folder is used; the closing line names the folder it made; a run writes the template as a new git repository with no history; and the prefix and owner defaults it offers in a terminal.
 
 <!-- /init -->
 
