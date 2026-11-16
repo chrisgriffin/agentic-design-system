@@ -63,17 +63,23 @@ if (missing.length) {
     (
       await rl.question(`${question}${fallback ? ` (${fallback})` : ""}: `)
     ).trim() || fallback
-  name ||= await ask("Name, kebab-case")
-  // The initials of the name: my-system → ms.
-  prefix ||= await ask(
-    "Custom property prefix",
-    (name ?? "")
-      .split("-")
-      .map(part => part[0])
-      .join(""),
-  )
-  owner ||= await ask("GitHub login the repo will live under")
-  rl.close()
+  // Input that closes mid-question (Ctrl-D) rejects the pending answer.
+  try {
+    name ||= await ask("Name, kebab-case")
+    // The initials of the name: my-system → ms.
+    prefix ||= await ask(
+      "Custom property prefix",
+      (name ?? "")
+        .split("-")
+        .map(part => part[0])
+        .join(""),
+    )
+    owner ||= await ask("GitHub login the repo will live under")
+  } catch {
+    fail("\ncanceled; nothing was written.")
+  } finally {
+    rl.close()
+  }
 }
 
 // The template's own init script owns what a valid value is.
