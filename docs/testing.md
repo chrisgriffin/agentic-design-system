@@ -27,7 +27,7 @@ The tests prove that the token build emits what the components may use and nothi
 
 <!-- init -->
 
-`init-check.yml` runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs `npm run verify` and then `npm run build-storybook` itself on the renamed checkout, and the check fails when the script survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script or its workflow.
+`init-check.yml` first runs `cli/create.mjs` with sample values into a temp folder, with no token and SSH disabled, so the check fails when a created system does not install without credentials, does not pass its own gate, or still holds `cli/` or `scripts/init.mjs`. It then runs `scripts/init.mjs` with sample values on the PR's checkout, renaming it in place, as `init / ci`: the script runs `npm run verify` and then `npm run build-storybook` itself on the renamed checkout, and the check fails when the script or `cli/` survives, when an `--ads-` reference is left outside `specs/`, `node_modules` and `storybook-static`, or when a Markdown file outside those still holds an `<!-- init -->` marker or names the script, `cli/create.mjs` or its workflow.
 
 <!-- /init -->
 
@@ -37,6 +37,13 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 
 - `tokens/scripts/tokens.test.mjs` — the built CSS declares no `--ads-primitive-*` property, has no `var()` left and declares more than 40 `--ads-*` properties, both themes are present and differ, and every manifest value is a literal.
 - `tokens/scripts/inline-primitives.test.mjs` — `inlinePrimitives` on its own, without running the build: a primitive reference becomes the primitive's value, primitive declarations are gone from the output, an undeclared primitive throws, a primitive aliasing another inlines to its final value, a reference cycle throws naming it (a self-reference and a cycle nothing references too), a reference with whitespace or a fallback is inlined, a semantic name containing `-primitive-` is left alone, a primitive declared in two blocks throws, and a primitive left in the output in any other form throws.
+
+<!-- init -->
+
+- `cli/create.test.mjs` — the create command up to its hand-off to `scripts/init.mjs`, under `node --test`: `--help` prints the usage line, a missing value with no terminal exits 1 and names the flag, an unknown option, a value flag with no value and a second name are refused with the usage; a value the init script refuses (this copy's or the cloned template's), a target that is a file, a target folder that is not empty, a failed clone and a missing git all exit 1 with one message and leave nothing behind; an empty target folder is used; the closing line names the folder it made; a run writes the template as a new git repository with no history; and the prefix and owner defaults it offers in a terminal.
+
+<!-- /init -->
+
 - `components/<name>/<name>.test.tsx` — each component renders its content and the class its stylesheet keys off, with Testing Library; CSS Module class names are unscoped in tests so an assertion can name them.
 - The same files' accessibility tests — `expectNoViolations` from `test-utils/axe.ts` runs axe-core over the rendered DOM and fails on any violation, naming the rule, how many elements broke it and the first one. It covers each component's default and every variant its contract gives code: `badge`'s four tones, `button`'s three sizes by two variants plus the `iconBefore` slot, and `card`'s two paddings, each with a `Card.Header`, which is also `card-header`'s coverage. `color-contrast` is switched off: jsdom has no layout and no computed colour, so axe cannot measure it, and rules that need layout report incomplete rather than failing. Contrast is checked only by the Storybook accessibility panel (`@storybook/addon-a11y`), which shows findings in the browser and fails nothing.
 - `test-utils/a11y-coverage.test.ts` — the gate enforces the rule that every component test calls `expectNoViolations`: it reads each `components/**/*.test.tsx` and fails, naming the file, when one never calls it (comments do not count, and importing it is not calling it). It also fails, naming the folder, when a folder under `components/` holds a component source file but no `.test.tsx`; the check is per folder, so `card-header.tsx` is covered by `card.test.tsx`.

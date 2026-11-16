@@ -45,6 +45,9 @@ if (!ok) {
   console.error(USAGE)
   process.exit(1)
 }
+// cli/create.mjs asks this script whether its values are valid before it
+// writes anything, so the patterns above have one home.
+if (args.includes("--check")) process.exit(0)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const self = path.relative(root, fileURLToPath(import.meta.url))
@@ -123,7 +126,16 @@ for (const rel of walk("").filter(f => f.endsWith(".md"))) {
   if (after !== before) writeFileSync(file, after)
 }
 
-const removed = [self, ".github/workflows/init-check.yml"]
+// The create command belongs to the template, not to a system made from it:
+// its folder, its bin and its tests leave the copy.
+const CLI_TESTS = " cli/*.test.mjs"
+const manifest = path.join(root, "package.json")
+const pkg = JSON.parse(readFileSync(manifest, "utf8"))
+delete pkg.bin
+pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
+writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
+
+const removed = [self, ".github/workflows/init-check.yml", "cli"]
 if (!fleet)
   removed.push(
     ".github/workflows/evaluator-gate.yml",
@@ -141,7 +153,8 @@ run("npm run verify")
 run("npm run build-storybook")
 
 for (const rel of removed)
-  if (existsSync(path.join(root, rel))) rmSync(path.join(root, rel))
+  if (existsSync(path.join(root, rel)))
+    rmSync(path.join(root, rel), { recursive: true })
 console.log(
   `\n${name}: ${changed.length} files rewritten (prefix --${prefix}-, owner ${owner}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff, then commit.`,
 )
