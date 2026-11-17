@@ -114,7 +114,7 @@ checks it.
 ## Development
 
 ```bash
-npm install
+npm ci
 npm run verify   # build:tokens → typecheck → prettier:check → lint → lint:styles → drift:verify → test
 npm run build-storybook   # the Storybook; this checkout's is built by storybook / ci on a PR, deploy-pages.yml on main
 ```

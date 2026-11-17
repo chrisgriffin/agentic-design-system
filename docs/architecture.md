@@ -61,7 +61,7 @@ The contract declares the props, the element structure and the tokens the styles
 ## Running it
 
 ```bash
-npm install
+npm ci
 npm run build:tokens      # tokens/json → tokens/css/tokens.css
 npm run storybook         # the stories and the two system pages
 npm run drift:verify      # every contract against its code and styles
