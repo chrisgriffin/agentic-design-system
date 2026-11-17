@@ -50,6 +50,10 @@ test("--help prints the usage line and exits 0", () => {
   assert.match(run.stdout.split("\n")[0], /^usage: npx github:/)
 })
 
+test("--help calls --owner your GitHub username", () => {
+  assert.match(create("--help").stdout, /--owner {7}your GitHub username\n/)
+})
+
 test("with no terminal, a missing value exits 1 and names the flag", () => {
   const run = create("sample-system", "--owner", "sample-owner")
   assert.equal(run.status, 1)
