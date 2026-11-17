@@ -335,6 +335,65 @@ test("the init script refuses --author or --description with no value (#49)", ()
   assert.deepEqual(readdirSync(dir), [])
 })
 
+test("#52 the init script refuses an argument it does not recognize, naming it", () => {
+  for (const args of [
+    ["--auther", "Jane"],
+    ["--bogus"],
+    ["-x"],
+    ["--figma-file=abc"],
+    ["stray"],
+  ]) {
+    const run = check(...args)
+    refusesCleanly(run)
+    assert.match(
+      run.stderr,
+      new RegExp(`^unknown argument ${args[0]}\n\nusage: `),
+      args.join(" "),
+    )
+    assert.equal(run.stdout, "", `${args.join(" ")} printed to stdout`)
+  }
+  // Without --check it stops before it writes anything. The first write is the
+  // lock restore a copy with a node_modules gets (#44), so the refusal must
+  // come before that step's own stop. The copy is cloned from the committed
+  // template, so it is handed this checkout's script.
+  const made = path.join(dir, "sample-system")
+  const copy = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  assert.equal(copy.status, 0, copy.stderr)
+  writeFileSync(path.join(made, "scripts/init.mjs"), readFileSync(INIT))
+  mkdirSync(path.join(made, "node_modules"))
+  const manifest = readFileSync(path.join(made, "package.json"), "utf8")
+  const init = spawnSync(
+    process.execPath,
+    [
+      "scripts/init.mjs",
+      "--name",
+      "sample-system",
+      ...VALUES,
+      "--auther",
+      "Jane",
+    ],
+    { cwd: made, encoding: "utf8" },
+  )
+  refusesCleanly(init)
+  assert.match(init.stderr, /^unknown argument --auther\n/)
+  assert.equal(readFileSync(path.join(made, "package.json"), "utf8"), manifest)
+  assert.ok(existsSync(path.join(made, "scripts/init.mjs")))
+})
+
+test("#52 the init script still takes every switch its usage lists", () => {
+  for (const f of ["--help", "-h"]) {
+    const run = spawnSync(process.execPath, [INIT, f, "--bogus"], {
+      encoding: "utf8",
+    })
+    assert.equal(run.status, 0, `${f}: ${run.stderr}`)
+    assert.match(run.stdout, /^usage: node scripts\/init\.mjs /)
+  }
+  for (const args of [[], ["--fleet"], ["--figma-file", "abc123"]]) {
+    const run = check(...args)
+    assert.equal(run.status, 0, `${args.join(" ")}: ${run.stderr}`)
+  }
+})
+
 test("an author or description with a line break is refused (#49)", () => {
   for (const f of ["--author", "--description"]) {
     const run = create("sample-system", ...VALUES, f, "two\nlines")
