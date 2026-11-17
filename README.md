@@ -35,7 +35,10 @@ node scripts/init.mjs --name my-system --prefix my --owner my-login [--figma-fil
 
 One run rewrites the name, the `--ads-*` prefix and the owner everywhere they
 appear, writes the Figma file key into `design-delta.json` and the Code
-Connect stubs when given one, installs, docks the engine, runs `npm run verify`,
+Connect stubs when given one, installs with `npm ci` from the template's lock
+file (renamed, never re-resolved, so whichever npm you run it with, CI's
+`npm ci` accepts it; if you already installed in the copy, it first restores
+the committed lock, and stops when there is none), docks the engine, runs `npm run verify`,
 builds the Storybook and then removes itself, its CI check, the create command and this section. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the

@@ -5,6 +5,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -81,6 +82,23 @@ test("it writes the template as a new git repository", () => {
     encoding: "utf8",
   })
   assert.notEqual(log.status, 0, "the copy kept the template's history")
+})
+
+test("init in a copy with node_modules and no committed lock stops unchanged (#44)", () => {
+  const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  assert.equal(run.status, 0, run.stderr)
+  const made = path.join(dir, "sample-system")
+  mkdirSync(path.join(made, "node_modules"))
+  const manifest = readFileSync(path.join(made, "package.json"), "utf8")
+  const init = spawnSync(
+    process.execPath,
+    ["scripts/init.mjs", "--name", "sample-system", ...VALUES],
+    { cwd: made, encoding: "utf8" },
+  )
+  refusesCleanly(init)
+  assert.match(init.stderr, /^#44: node_modules exists/)
+  assert.equal(readFileSync(path.join(made, "package.json"), "utf8"), manifest)
+  assert.ok(existsSync(path.join(made, "scripts/init.mjs")))
 })
 
 test("an unknown option is refused with the usage, before any write", () => {
