@@ -1,17 +1,22 @@
 # agentic-design-system
 
-A design system template an agent can build in and keep honest: design tokens
-in the [DTCG](https://www.designtokens.org/tr/2025.10/format/) format, built
+A design system template an agent can build in and keep honest.
+
+It holds design tokens in the [DTCG](https://www.designtokens.org/tr/2025.10/format/) format, built
 into CSS custom properties by [Terrazzo](https://terrazzo.app); React
 components with CSS Modules, each with a contract, a story and a test;
 Storybook; and the [design-delta](https://github.com/chrisgriffin/design-delta)
 gate, which fails CI when code and contracts disagree, or when a component
 has no contract at all.
 
+<!-- init -->
+
 > This repo is built in layers, each a merged build: the tokens, the
 > components with contracts, the Storybook, the agent layer, and the release
-> flow.<!-- init --> One command turns it into a named system of your own: see
-> [Starting your own](#starting-your-own).<!-- /init -->
+> flow. One command turns it into a named system of your own: see
+> [Starting your own](#starting-your-own).
+
+<!-- /init -->
 
 ## Starting your own
 
@@ -22,7 +27,8 @@ npx github:chrisgriffin/agentic-design-system my-system
 Run it where you want the new folder: it refuses when `my-system` already
 exists there and is not an empty folder. It asks for a custom property prefix
 and your GitHub username (or takes them as `--prefix` and
-`--owner`, with `--figma-file <key>` and `--dir <path>` when you want them),
+`--owner`, with `--author <name>`, `--description <text>`, `--figma-file <key>`
+and `--dir <path>` when you want them),
 clones the template's default branch into `my-system/` as a new git
 repository, and runs the init script there. It needs Node 22, git and no
 account or token.
@@ -30,16 +36,17 @@ account or token.
 In a copy you made by hand, run the init script yourself:
 
 ```bash
-node scripts/init.mjs --name my-system --prefix my --owner my-username [--figma-file <key>]
+node scripts/init.mjs --name my-system --prefix my --owner my-username [--author <name>] [--description <text>] [--figma-file <key>]
 ```
 
 One run rewrites the name, the `--ads-*` prefix and the owner everywhere they
-appear, writes the Figma file key into `design-delta.json` and the Code
+appear, writes `--author` into `LICENSE` and `--description` into
+`package.json` and the intro above, writes the Figma file key into `design-delta.json` and the Code
 Connect stubs when given one, installs with `npm ci` from the template's lock
 file (renamed, never re-resolved, so whichever npm you run it with, CI's
 `npm ci` accepts it; if you already installed in the copy, it first restores
 the committed lock, and stops when there is none), docks the engine, runs `npm run verify`,
-builds the Storybook and then removes itself, its CI check, the create command and this section. Pass `--fleet` to keep
+builds the Storybook and then removes itself, its CI check, the create command, the template's `specs/` and this section. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the
 diff, then commit.

@@ -20,11 +20,13 @@ import { fileURLToPath } from "node:url"
 
 import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
-const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--figma-file <key>] [--fleet] [--dir <path>]
+const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet] [--dir <path>]
 
   <name>        the package and repo name, kebab-case; the new folder is named after it
   --prefix      the custom property prefix, letters and digits (as in --ads-*)
   --owner       your GitHub username
+  --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
+  --description one line for package.json and the README intro (default: "The <name> design system.")
   --figma-file  a Figma file key, written to design-delta.json and every Code Connect stub
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
   --dir         where to create the folder (default: the current folder)
@@ -52,6 +54,8 @@ const fail = message => {
 const VALUE_FLAGS = new Set([
   "--prefix",
   "--owner",
+  "--author",
+  "--description",
   "--figma-file",
   "--dir",
   "--from",
@@ -79,6 +83,8 @@ let name = positional[0]
 let prefix = values["--prefix"]
 let owner = values["--owner"]
 const figma = values["--figma-file"]
+const author = values["--author"]
+const description = values["--description"]
 const fleet = switches.has("--fleet")
 const init = !switches.has("--no-init")
 const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"))
@@ -117,10 +123,16 @@ const initArgs = [
   prefix ?? "",
   "--owner",
   owner ?? "",
+  ...(author === undefined ? [] : ["--author", author]),
+  ...(description === undefined ? [] : ["--description", description]),
   ...(figma === undefined ? [] : ["--figma-file", figma]),
   ...(fleet ? ["--fleet"] : []),
 ]
-const refused = `a value is missing or not valid: ${initArgs.join(" ")}`
+// Quoted for a shell, since an author or description can hold spaces.
+const quoted = initArgs
+  .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
+  .join(" ")
+const refused = `a value is missing or not valid: ${quoted}`
 const accepts = dir =>
   spawnSync(
     process.execPath,
@@ -199,7 +211,7 @@ if (init) {
   })
   if (run.status !== 0)
     fail(
-      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${initArgs.join(" ")}`,
+      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted}`,
     )
 }
 const relative = path.relative(process.cwd(), target)

@@ -37,7 +37,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 `cli/create.mjs` is the template's `bin`, so `npx github:chrisgriffin/agentic-design-system <name>` runs it with no clone: it asks for any value it was not given, asks `scripts/init.mjs --check` whether the values are valid, clones the template's default branch into a staging folder, asks that clone's `scripts/init.mjs --check` again, starts a fresh git history there, moves it into place and runs that copy's `scripts/init.mjs`. Any failure before the move leaves nothing behind. It holds no rewrite logic of its own.
 
-`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, installs, docks the engine and runs the gate, then removes itself, `cli/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
+`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, writes the author into `LICENSE` and the description into `package.json` and the README intro, installs, docks the engine and runs the gate, then removes itself, `cli/`, the template's `specs/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
 
 <!-- /init -->
 

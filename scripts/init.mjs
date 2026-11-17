@@ -12,17 +12,20 @@ import {
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--figma-file <key>] [--fleet]
+const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
   --name        the package and repo name, kebab-case (today: agentic-design-system)
   --prefix      the custom property prefix, letters and digits (today: ads, as in --ads-*)
   --owner       your GitHub username (today: chrisgriffin)
+  --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
+  --description one line for package.json and the README intro (default: "The <name> design system.")
   --figma-file  a Figma file key, written to design-delta.json and every Code Connect stub
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
 
-Rewrites the name, prefix and owner everywhere they appear, installs, docks the
-engine, runs npm run verify and builds the Storybook, then removes itself, its
-CI check, this README section and every docs passage marked <!-- init -->.
+Rewrites the name, prefix and owner everywhere they appear, writes the author
+and description, installs, docks the engine, runs npm run verify and builds the
+Storybook, then removes itself, its CI check, the template's specs/, this README
+section and every docs passage marked <!-- init -->.
 Nothing is committed: read the diff, then commit.`
 
 const args = process.argv.slice(2)
@@ -36,11 +39,15 @@ const prefix = flag("--prefix")
 const owner = flag("--owner")
 const figma = flag("--figma-file")
 const fleet = args.includes("--fleet")
+// Free text, one line: it lands in LICENSE, package.json and the README.
+const line = v => v === undefined || /^[^\n\r]*\S[^\n\r]*$/.test(v)
 const ok =
   /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(name ?? "") &&
   /^[a-z][a-z0-9]*$/.test(prefix ?? "") &&
   /^[A-Za-z0-9-]+$/.test(owner ?? "") &&
-  (figma === undefined || /^[A-Za-z0-9]+$/.test(figma))
+  (figma === undefined || /^[A-Za-z0-9]+$/.test(figma)) &&
+  line(flag("--author")) &&
+  line(flag("--description"))
 if (!ok) {
   console.error(USAGE)
   process.exit(1)
@@ -50,6 +57,19 @@ if (!ok) {
 if (args.includes("--check")) process.exit(0)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const gitName = () => {
+  try {
+    return execSync("git config user.name", {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim()
+  } catch {
+    return ""
+  }
+}
+const author = flag("--author") ?? (gitName() || owner)
+const description = flag("--description") ?? `The ${name} design system.`
 const self = path.relative(root, fileURLToPath(import.meta.url))
 // A node_modules means an install already ran in this copy and may have
 // re-resolved the lock (#44), so the committed one is restored before anything
@@ -93,6 +113,8 @@ const TEMPLATE = {
   name: "agentic-design-system",
   prefix: "ads",
   owner: "chrisgriffin",
+  description:
+    "A design system template an agent can build in and keep honest.",
 }
 const swaps = [
   [
@@ -110,28 +132,44 @@ const swaps = [
 ]
 if (figma) swaps.push(["FIGMA_FILE_KEY", figma])
 
-const changed = []
+const changed = new Set()
 for (const rel of walk("")) {
   if (rel === self) continue
   const file = path.join(root, rel)
   const before = readFileSync(file, "utf8")
   let after = before
   for (const [from, to] of swaps) after = after.replaceAll(from, to)
-  if (after !== before) (writeFileSync(file, after), changed.push(rel))
+  if (after !== before) (writeFileSync(file, after), changed.add(rel))
 }
+
+// The README's intro sentence is the template's description; package.json's
+// and LICENSE's lines are set whole, so any text is safe in them.
+const readme = path.join(root, "README.md")
+const license = path.join(root, "LICENSE")
+writeFileSync(
+  readme,
+  readFileSync(readme, "utf8").replace(TEMPLATE.description, () => description),
+)
+writeFileSync(
+  license,
+  readFileSync(license, "utf8").replace(
+    /^Copyright \(c\) .*$/m,
+    () => `Copyright (c) ${new Date().getFullYear()} ${author}`,
+  ),
+)
+changed.add("README.md").add("LICENSE")
 
 if (figma) {
   const file = path.join(root, "design-delta.json")
   const config = JSON.parse(readFileSync(file, "utf8"))
   config.design = { ...config.design, files: [figma] }
   writeFileSync(file, JSON.stringify(config, null, 2) + "\n")
-  changed.push("design-delta.json")
+  changed.add("design-delta.json")
 }
 
 // The README section that describes this script goes with it, and so does every
 // passage marked <!-- init --> ... <!-- /init -->: the docs that name this script
 // or its check would otherwise describe files a copy no longer has.
-const readme = path.join(root, "README.md")
 writeFileSync(
   readme,
   readFileSync(readme, "utf8").replace(
@@ -152,6 +190,7 @@ const CLI_TESTS = " cli/*.test.mjs"
 const manifest = path.join(root, "package.json")
 const pkg = JSON.parse(readFileSync(manifest, "utf8"))
 delete pkg.bin
+pkg.description = description
 pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
 writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
 // The lock file is renamed here, not by an install, so it stays the template's:
@@ -162,7 +201,8 @@ lock.name = lock.packages[""].name = name
 delete lock.packages[""].bin
 writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
 
-const removed = [self, ".github/workflows/init-check.yml", "cli"]
+// specs/ is the template's build history; a system starts its own.
+const removed = [self, ".github/workflows/init-check.yml", "cli", "specs"]
 if (!fleet)
   removed.push(
     ".github/workflows/evaluator-gate.yml",
@@ -182,5 +222,5 @@ for (const rel of removed)
   if (existsSync(path.join(root, rel)))
     rmSync(path.join(root, rel), { recursive: true })
 console.log(
-  `\n${name}: ${changed.length} files rewritten (prefix --${prefix}-, owner ${owner}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff, then commit.`,
+  `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff, then commit.`,
 )
