@@ -23,5 +23,5 @@
 
 ## Out of scope
 
-- `npm install design-delta@^<version>`, the deliberate engine move: it names a package, so it is not a bare install.
+- ~~`npm install design-delta@^<version>`, the deliberate engine move: it names a package, so it is not a bare install.~~ Withdrawn on PR #54's Evaluator round 0: naming a package does not stop npm 11 re-resolving the lock (`scripts/init.mjs`, #44), so the engine-move step in `README.md` § Development and `docs/architecture.md` § How it connects now runs it with npm 10 (`npx npm@10 install design-delta@^<version>`). No success criterion changes.
 - The init script, already on `npm ci` (#44).

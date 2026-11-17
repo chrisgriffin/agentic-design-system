@@ -8,6 +8,7 @@
 
 - [x] T002 `README.md` § Development: `npm install` → `npm ci`.
 - [x] T003 `docs/architecture.md` § Running it: `npm install` → `npm ci`.
+- [x] T003a The engine-move step in `README.md` § Development and `docs/architecture.md` § How it connects: `npm install design-delta@^<version>` → `npx npm@10 install design-delta@^<version>`.
 
 ## Phase 3: Green
 
@@ -15,5 +16,5 @@
 
 ## Phase 4: Surfaces
 
-- [x] T005 ADR-003 and `scripts/init.mjs` read: no bare contributor `npm install` left to change.
+- [x] T005 ADR-003 and `scripts/init.mjs` read: ADR-003 records the decision and stays; init already runs `npm ci`.
 - [x] T006 No `CLAUDE.md` § Architecture coupling, Routine, ruleset, workflow or vault note touched.
