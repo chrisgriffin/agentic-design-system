@@ -41,15 +41,24 @@ const VALUE_FLAGS = new Set([
   "--description",
   "--figma-file",
 ])
+// Anything else is refused, never dropped: a misspelled --auther would
+// otherwise leave the default author in silence (#52).
+const SWITCHES = new Set(["--help", "-h", "--fleet", "--check"])
 const values = {}
 const switches = new Set()
+let unknown
 const argv = process.argv.slice(2)
 for (let i = 0; i < argv.length; i++)
   if (VALUE_FLAGS.has(argv[i])) values[argv[i]] = argv[++i] ?? null
-  else switches.add(argv[i])
+  else if (SWITCHES.has(argv[i])) switches.add(argv[i])
+  else unknown ??= argv[i]
 if (switches.has("--help") || switches.has("-h")) {
   console.log(USAGE)
   process.exit(0)
+}
+if (unknown !== undefined) {
+  console.error(`unknown argument ${unknown}\n\n${USAGE}`)
+  process.exit(1)
 }
 const name = values["--name"]
 const prefix = values["--prefix"]
