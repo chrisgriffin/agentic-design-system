@@ -15,7 +15,7 @@ import path from "node:path"
 import { afterEach, beforeEach, test } from "node:test"
 import { fileURLToPath } from "node:url"
 
-import { ownerFrom, prefixFrom } from "./defaults.mjs"
+import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
 // The create command up to the hand-off: its arguments, its refusals and the
 // folder it writes. The install and the gate it then runs are proved end to
@@ -258,6 +258,83 @@ if (!process.argv.includes("--check"))
   )
 })
 
+test("an author or description that starts with - reaches the init script as text (#49)", () => {
+  withTemplate(
+    `import { writeFileSync } from "node:fs"
+if (!process.argv.includes("--check"))
+  writeFileSync("argv.json", JSON.stringify(process.argv.slice(2)))
+`,
+    template => {
+      for (const [f, text] of [
+        ["--description", "- tokens for the web"],
+        ["--description", "--fleet"],
+        ["--description", "-h"],
+        ["--author", "-x"],
+        ["--author", "--help"],
+      ]) {
+        const made = path.join(dir, "sample-system")
+        const run = create(
+          "sample-system",
+          ...VALUES,
+          f,
+          text,
+          "--from",
+          template,
+        )
+        assert.equal(run.status, 0, `${f} ${text}: ${run.stderr}`)
+        const argv = JSON.parse(
+          readFileSync(path.join(made, "argv.json"), "utf8"),
+        )
+        assert.equal(argv[argv.indexOf(f) + 1], text)
+        assert.equal(argv.filter(a => a === text).length, 1, argv.join(" "))
+        rmSync(made, { recursive: true, force: true })
+      }
+    },
+  )
+})
+
+// The init script's own parser, asked through --check as the create command asks it.
+const INIT = path.join(ROOT, "scripts/init.mjs")
+const check = (...args) =>
+  spawnSync(
+    process.execPath,
+    [INIT, "--name", "sample-system", ...VALUES, ...args, "--check"],
+    { encoding: "utf8" },
+  )
+
+test("the init script reads a value after --author or --description as text (#49)", () => {
+  for (const [f, text] of [
+    ["--description", "- tokens for the web"],
+    ["--description", "--fleet"],
+    ["--description", "--help"],
+    ["--author", "-h"],
+  ]) {
+    const run = check(f, text)
+    assert.equal(run.status, 0, `${f} ${text}: ${run.stderr}`)
+    assert.equal(run.stdout, "", `${f} ${text} printed the usage`)
+  }
+})
+
+test("the init script refuses --author or --description with no value (#49)", () => {
+  for (const f of ["--author", "--description"]) {
+    const run = spawnSync(
+      process.execPath,
+      [INIT, "--check", "--name", "sample-system", ...VALUES, f],
+      { encoding: "utf8" },
+    )
+    refusesCleanly(run)
+    assert.match(run.stderr, /^usage: /)
+    const missing = spawnSync(
+      process.execPath,
+      [CREATE, "sample-system", ...VALUES, f],
+      { encoding: "utf8", cwd: dir },
+    )
+    refusesCleanly(missing)
+    assert.match(missing.stderr, new RegExp(`^${f} needs a value`))
+  }
+  assert.deepEqual(readdirSync(dir), [])
+})
+
 test("an author or description with a line break is refused (#49)", () => {
   for (const f of ["--author", "--description"]) {
     const run = create("sample-system", ...VALUES, f, "two\nlines")
@@ -277,4 +354,13 @@ test("the owner defaults to git's user.name only when it is a valid login", () =
   assert.equal(ownerFrom("Sample Owner"), undefined)
   assert.equal(ownerFrom(""), undefined)
   assert.equal(ownerFrom(undefined), undefined)
+})
+
+test("git's user.name is read in the folder given, trimmed, or undefined", () => {
+  const git = (...args) => spawnSync("git", ["-C", dir, ...args])
+  git("init", "--quiet")
+  git("config", "user.name", "  Sample Author  ")
+  assert.equal(gitUserName(dir), "Sample Author")
+  git("config", "user.name", "")
+  assert.equal(gitUserName(dir), undefined)
 })

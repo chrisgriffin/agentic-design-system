@@ -12,6 +12,8 @@ import {
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { gitUserName } from "../cli/defaults.mjs"
+
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
   --name        the package and repo name, kebab-case (today: agentic-design-system)
@@ -28,48 +30,52 @@ Storybook, then removes itself, its CI check, the template's specs/, this README
 section and every docs passage marked <!-- init -->.
 Nothing is committed: read the diff, then commit.`
 
-const args = process.argv.slice(2)
-const flag = f => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined)
-if (args.includes("--help") || args.includes("-h")) {
+// A value flag takes the next argument whatever it is, so free text that
+// starts with "-" (an author, a description) is text, never a flag, and a
+// value flag given last has no value and is refused below (#49).
+const VALUE_FLAGS = new Set([
+  "--name",
+  "--prefix",
+  "--owner",
+  "--author",
+  "--description",
+  "--figma-file",
+])
+const values = {}
+const switches = new Set()
+const argv = process.argv.slice(2)
+for (let i = 0; i < argv.length; i++)
+  if (VALUE_FLAGS.has(argv[i])) values[argv[i]] = argv[++i] ?? null
+  else switches.add(argv[i])
+if (switches.has("--help") || switches.has("-h")) {
   console.log(USAGE)
   process.exit(0)
 }
-const name = flag("--name")
-const prefix = flag("--prefix")
-const owner = flag("--owner")
-const figma = flag("--figma-file")
-const fleet = args.includes("--fleet")
+const name = values["--name"]
+const prefix = values["--prefix"]
+const owner = values["--owner"]
+const figma = values["--figma-file"]
+const fleet = switches.has("--fleet")
 // Free text, one line: it lands in LICENSE, package.json and the README.
-const line = v => v === undefined || /^[^\n\r]*\S[^\n\r]*$/.test(v)
+const line = v => v === undefined || /^[^\n\r]*\S[^\n\r]*$/.test(v ?? "")
 const ok =
   /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(name ?? "") &&
   /^[a-z][a-z0-9]*$/.test(prefix ?? "") &&
   /^[A-Za-z0-9-]+$/.test(owner ?? "") &&
-  (figma === undefined || /^[A-Za-z0-9]+$/.test(figma)) &&
-  line(flag("--author")) &&
-  line(flag("--description"))
+  (figma === undefined || /^[A-Za-z0-9]+$/.test(figma ?? "")) &&
+  line(values["--author"]) &&
+  line(values["--description"])
 if (!ok) {
   console.error(USAGE)
   process.exit(1)
 }
 // cli/create.mjs asks this script whether its values are valid before it
 // writes anything, so the patterns above have one home.
-if (args.includes("--check")) process.exit(0)
+if (switches.has("--check")) process.exit(0)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const gitName = () => {
-  try {
-    return execSync("git config user.name", {
-      cwd: root,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim()
-  } catch {
-    return ""
-  }
-}
-const author = flag("--author") ?? (gitName() || owner)
-const description = flag("--description") ?? `The ${name} design system.`
+const author = values["--author"] ?? gitUserName(root) ?? owner
+const description = values["--description"] ?? `The ${name} design system.`
 const self = path.relative(root, fileURLToPath(import.meta.url))
 // A node_modules means an install already ran in this copy and may have
 // re-resolved the lock (#44), so the committed one is restored before anything

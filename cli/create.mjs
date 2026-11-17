@@ -39,10 +39,6 @@ then commit.`
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
-if (args.includes("--help") || args.includes("-h")) {
-  console.log(USAGE)
-  process.exit(0)
-}
 
 const fail = message => {
   console.error(message)
@@ -60,22 +56,32 @@ const VALUE_FLAGS = new Set([
   "--dir",
   "--from",
 ])
-const SWITCHES = new Set(["--fleet", "--no-init"])
+// Free text, so a value starting with "-" is the value, not a flag (#49).
+const TEXT_FLAGS = new Set(["--author", "--description"])
+const SWITCHES = new Set(["--fleet", "--no-init", "--help", "-h"])
 const values = {}
 const switches = new Set()
 const positional = []
+let refusal
 for (let i = 0; i < args.length; i++) {
   const arg = args[i]
   if (VALUE_FLAGS.has(arg)) {
     const value = args[i + 1]
-    if (value === undefined || value.startsWith("-"))
-      fail(`${arg} needs a value\n\n${USAGE}`)
-    values[arg] = value
-    i++
+    if (value === undefined || (value.startsWith("-") && !TEXT_FLAGS.has(arg)))
+      refusal ??= `${arg} needs a value`
+    else {
+      values[arg] = value
+      i++
+    }
   } else if (SWITCHES.has(arg)) switches.add(arg)
-  else if (arg.startsWith("-")) fail(`unknown option ${arg}\n\n${USAGE}`)
+  else if (arg.startsWith("-")) refusal ??= `unknown option ${arg}`
   else positional.push(arg)
 }
+if (switches.has("--help") || switches.has("-h")) {
+  console.log(USAGE)
+  process.exit(0)
+}
+if (refusal) fail(`${refusal}\n\n${USAGE}`)
 if (positional.length > 1)
   fail(`one name only, got: ${positional.join(" ")}\n\n${USAGE}`)
 
