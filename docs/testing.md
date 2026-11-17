@@ -41,6 +41,7 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 <!-- init -->
 
 - `cli/create.test.mjs` — the create command up to its hand-off to `scripts/init.mjs`, under `node --test`: `--help` prints the usage line and calls `--owner` your GitHub username, a missing value with no terminal exits 1 and names the flag, an unknown option, a value flag with no value and a second name are refused with the usage; `--author` and `--description` reach the init script as given, and one holding a line break is refused (#49); a value the init script refuses (this copy's or the cloned template's), a target that is a file, a target folder that is not empty, a failed clone and a missing git all exit 1 with one message and leave nothing behind; the init script in a copy with a `node_modules` and no committed lock exits 1 naming #44 and changes nothing; an empty target folder is used; the closing line names the folder it made; a run writes the template as a new git repository with no history; and the prefix and owner defaults it offers in a terminal.
+- `cli/lockfile.test.mjs` — no `minimatch` in `package-lock.json` resolves inside GHSA-g3hv-75wg-m249's range (`>= 7.0.0, < 11.0.1`), the advisory `package.json`'s `minimatch` override fixes, and the range check counts its bounds and a pre-release of 11.0.1 as the advisory does (#43).
 
 <!-- /init -->
 
