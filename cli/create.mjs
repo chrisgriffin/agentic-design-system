@@ -20,11 +20,11 @@ import { fileURLToPath } from "node:url"
 
 import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
-const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-login>] [--figma-file <key>] [--fleet] [--dir <path>]
+const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--figma-file <key>] [--fleet] [--dir <path>]
 
   <name>        the package and repo name, kebab-case; the new folder is named after it
   --prefix      the custom property prefix, letters and digits (as in --ads-*)
-  --owner       the GitHub login the repo will live under
+  --owner       your GitHub username
   --figma-file  a Figma file key, written to design-delta.json and every Code Connect stub
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
   --dir         where to create the folder (default: the current folder)
@@ -101,10 +101,7 @@ if (missing.length) {
   try {
     name ||= await ask("Name, kebab-case")
     prefix ||= await ask("Custom property prefix", prefixFrom(name))
-    owner ||= await ask(
-      "GitHub login the repo will live under",
-      ownerFrom(gitUserName()),
-    )
+    owner ||= await ask("Your GitHub username", ownerFrom(gitUserName()))
   } catch {
     fail("\ncanceled; nothing was written.")
   } finally {

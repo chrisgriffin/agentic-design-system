@@ -12,11 +12,11 @@ import {
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-login> [--figma-file <key>] [--fleet]
+const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--figma-file <key>] [--fleet]
 
   --name        the package and repo name, kebab-case (today: agentic-design-system)
   --prefix      the custom property prefix, letters and digits (today: ads, as in --ads-*)
-  --owner       the GitHub login the repo lives under (today: chrisgriffin, where it names this repo)
+  --owner       your GitHub username (today: chrisgriffin)
   --figma-file  a Figma file key, written to design-delta.json and every Code Connect stub
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
 
