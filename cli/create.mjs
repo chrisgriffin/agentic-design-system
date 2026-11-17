@@ -20,11 +20,13 @@ import { fileURLToPath } from "node:url"
 
 import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
-const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--figma-file <key>] [--fleet] [--dir <path>]
+const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet] [--dir <path>]
 
   <name>        the package and repo name, kebab-case; the new folder is named after it
   --prefix      the custom property prefix, letters and digits (as in --ads-*)
   --owner       your GitHub username
+  --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
+  --description one line for package.json and the README intro (default: "The <name> design system.")
   --figma-file  a Figma file key, written to design-delta.json and every Code Connect stub
   --fleet       keep evaluator-gate.yml and claude-mention.yml, which need a private operator
   --dir         where to create the folder (default: the current folder)
@@ -37,10 +39,6 @@ then commit.`
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
-if (args.includes("--help") || args.includes("-h")) {
-  console.log(USAGE)
-  process.exit(0)
-}
 
 const fail = message => {
   console.error(message)
@@ -52,26 +50,38 @@ const fail = message => {
 const VALUE_FLAGS = new Set([
   "--prefix",
   "--owner",
+  "--author",
+  "--description",
   "--figma-file",
   "--dir",
   "--from",
 ])
-const SWITCHES = new Set(["--fleet", "--no-init"])
+// Free text, so a value starting with "-" is the value, not a flag (#49).
+const TEXT_FLAGS = new Set(["--author", "--description"])
+const SWITCHES = new Set(["--fleet", "--no-init", "--help", "-h"])
 const values = {}
 const switches = new Set()
 const positional = []
+let refusal
 for (let i = 0; i < args.length; i++) {
   const arg = args[i]
   if (VALUE_FLAGS.has(arg)) {
     const value = args[i + 1]
-    if (value === undefined || value.startsWith("-"))
-      fail(`${arg} needs a value\n\n${USAGE}`)
-    values[arg] = value
-    i++
+    if (value === undefined || (value.startsWith("-") && !TEXT_FLAGS.has(arg)))
+      refusal ??= `${arg} needs a value`
+    else {
+      values[arg] = value
+      i++
+    }
   } else if (SWITCHES.has(arg)) switches.add(arg)
-  else if (arg.startsWith("-")) fail(`unknown option ${arg}\n\n${USAGE}`)
+  else if (arg.startsWith("-")) refusal ??= `unknown option ${arg}`
   else positional.push(arg)
 }
+if (switches.has("--help") || switches.has("-h")) {
+  console.log(USAGE)
+  process.exit(0)
+}
+if (refusal) fail(`${refusal}\n\n${USAGE}`)
 if (positional.length > 1)
   fail(`one name only, got: ${positional.join(" ")}\n\n${USAGE}`)
 
@@ -79,6 +89,8 @@ let name = positional[0]
 let prefix = values["--prefix"]
 let owner = values["--owner"]
 const figma = values["--figma-file"]
+const author = values["--author"]
+const description = values["--description"]
 const fleet = switches.has("--fleet")
 const init = !switches.has("--no-init")
 const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"))
@@ -117,10 +129,16 @@ const initArgs = [
   prefix ?? "",
   "--owner",
   owner ?? "",
+  ...(author === undefined ? [] : ["--author", author]),
+  ...(description === undefined ? [] : ["--description", description]),
   ...(figma === undefined ? [] : ["--figma-file", figma]),
   ...(fleet ? ["--fleet"] : []),
 ]
-const refused = `a value is missing or not valid: ${initArgs.join(" ")}`
+// Quoted for a shell, since an author or description can hold spaces.
+const quoted = initArgs
+  .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
+  .join(" ")
+const refused = `a value is missing or not valid: ${quoted}`
 const accepts = dir =>
   spawnSync(
     process.execPath,
@@ -199,7 +217,7 @@ if (init) {
   })
   if (run.status !== 0)
     fail(
-      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${initArgs.join(" ")}`,
+      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted}`,
     )
 }
 const relative = path.relative(process.cwd(), target)

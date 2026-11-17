@@ -15,7 +15,7 @@ import path from "node:path"
 import { afterEach, beforeEach, test } from "node:test"
 import { fileURLToPath } from "node:url"
 
-import { ownerFrom, prefixFrom } from "./defaults.mjs"
+import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
 // The create command up to the hand-off: its arguments, its refusals and the
 // folder it writes. The install and the gate it then runs are proved end to
@@ -194,16 +194,12 @@ test("with no git on PATH it exits 1 saying so and leaves nothing behind", () =>
   }
 })
 
-test("the cloned template's own init script decides before the copy is kept", () => {
-  // A template whose init script refuses every value, as another version of
-  // the template might refuse values this copy accepts.
+// A one-commit template repository whose scripts/init.mjs is `source`.
+const withTemplate = (source, use) => {
   const template = mkdtempSync(path.join(tmpdir(), "create-template-"))
   try {
     mkdirSync(path.join(template, "scripts"))
-    writeFileSync(
-      path.join(template, "scripts/init.mjs"),
-      "process.exit(process.argv.includes('--check') ? 1 : 0)\n",
-    )
+    writeFileSync(path.join(template, "scripts/init.mjs"), source)
     const git = (...args) =>
       spawnSync(
         "git",
@@ -213,12 +209,137 @@ test("the cloned template's own init script decides before the copy is kept", ()
     git("init", "--quiet")
     git("add", "-A")
     assert.equal(git("commit", "--quiet", "-m", "template").status, 0)
-    const run = create("sample-system", ...VALUES, "--from", template)
-    refusesCleanly(run)
-    assert.match(run.stderr, /cloned template's init script refuses them/)
-    assert.deepEqual(readdirSync(dir), [])
+    use(template)
   } finally {
     rmSync(template, { recursive: true, force: true })
+  }
+}
+
+test("the cloned template's own init script decides before the copy is kept", () => {
+  // A template whose init script refuses every value, as another version of
+  // the template might refuse values this copy accepts.
+  withTemplate(
+    "process.exit(process.argv.includes('--check') ? 1 : 0)\n",
+    template => {
+      const run = create("sample-system", ...VALUES, "--from", template)
+      refusesCleanly(run)
+      assert.match(run.stderr, /cloned template's init script refuses them/)
+      assert.deepEqual(readdirSync(dir), [])
+    },
+  )
+})
+
+test("--author and --description reach the init script as given (#49)", () => {
+  // A template whose init script records the arguments of its real run.
+  withTemplate(
+    `import { writeFileSync } from "node:fs"
+if (!process.argv.includes("--check"))
+  writeFileSync("argv.json", JSON.stringify(process.argv.slice(2)))
+`,
+    template => {
+      const run = create(
+        "sample-system",
+        ...VALUES,
+        "--author",
+        "Sample Author",
+        "--description",
+        "Sample tokens.",
+        "--from",
+        template,
+      )
+      assert.equal(run.status, 0, run.stderr)
+      const argv = JSON.parse(
+        readFileSync(path.join(dir, "sample-system/argv.json"), "utf8"),
+      )
+      const value = f => argv[argv.indexOf(f) + 1]
+      assert.equal(value("--author"), "Sample Author")
+      assert.equal(value("--description"), "Sample tokens.")
+    },
+  )
+})
+
+test("an author or description that starts with - reaches the init script as text (#49)", () => {
+  withTemplate(
+    `import { writeFileSync } from "node:fs"
+if (!process.argv.includes("--check"))
+  writeFileSync("argv.json", JSON.stringify(process.argv.slice(2)))
+`,
+    template => {
+      for (const [f, text] of [
+        ["--description", "- tokens for the web"],
+        ["--description", "--fleet"],
+        ["--description", "-h"],
+        ["--author", "-x"],
+        ["--author", "--help"],
+      ]) {
+        const made = path.join(dir, "sample-system")
+        const run = create(
+          "sample-system",
+          ...VALUES,
+          f,
+          text,
+          "--from",
+          template,
+        )
+        assert.equal(run.status, 0, `${f} ${text}: ${run.stderr}`)
+        const argv = JSON.parse(
+          readFileSync(path.join(made, "argv.json"), "utf8"),
+        )
+        assert.equal(argv[argv.indexOf(f) + 1], text)
+        assert.equal(argv.filter(a => a === text).length, 1, argv.join(" "))
+        rmSync(made, { recursive: true, force: true })
+      }
+    },
+  )
+})
+
+// The init script's own parser, asked through --check as the create command asks it.
+const INIT = path.join(ROOT, "scripts/init.mjs")
+const check = (...args) =>
+  spawnSync(
+    process.execPath,
+    [INIT, "--name", "sample-system", ...VALUES, ...args, "--check"],
+    { encoding: "utf8" },
+  )
+
+test("the init script reads a value after --author or --description as text (#49)", () => {
+  for (const [f, text] of [
+    ["--description", "- tokens for the web"],
+    ["--description", "--fleet"],
+    ["--description", "--help"],
+    ["--author", "-h"],
+  ]) {
+    const run = check(f, text)
+    assert.equal(run.status, 0, `${f} ${text}: ${run.stderr}`)
+    assert.equal(run.stdout, "", `${f} ${text} printed the usage`)
+  }
+})
+
+test("the init script refuses --author or --description with no value (#49)", () => {
+  for (const f of ["--author", "--description"]) {
+    const run = spawnSync(
+      process.execPath,
+      [INIT, "--check", "--name", "sample-system", ...VALUES, f],
+      { encoding: "utf8" },
+    )
+    refusesCleanly(run)
+    assert.match(run.stderr, /^usage: /)
+    const missing = spawnSync(
+      process.execPath,
+      [CREATE, "sample-system", ...VALUES, f],
+      { encoding: "utf8", cwd: dir },
+    )
+    refusesCleanly(missing)
+    assert.match(missing.stderr, new RegExp(`^${f} needs a value`))
+  }
+  assert.deepEqual(readdirSync(dir), [])
+})
+
+test("an author or description with a line break is refused (#49)", () => {
+  for (const f of ["--author", "--description"]) {
+    const run = create("sample-system", ...VALUES, f, "two\nlines")
+    refusesCleanly(run)
+    assert.deepEqual(readdirSync(dir), [])
   }
 })
 
@@ -233,4 +354,13 @@ test("the owner defaults to git's user.name only when it is a valid login", () =
   assert.equal(ownerFrom("Sample Owner"), undefined)
   assert.equal(ownerFrom(""), undefined)
   assert.equal(ownerFrom(undefined), undefined)
+})
+
+test("git's user.name is read in the folder given, trimmed, or undefined", () => {
+  const git = (...args) => spawnSync("git", ["-C", dir, ...args])
+  git("init", "--quiet")
+  git("config", "user.name", "  Sample Author  ")
+  assert.equal(gitUserName(dir), "Sample Author")
+  git("config", "user.name", "")
+  assert.equal(gitUserName(dir), undefined)
 })

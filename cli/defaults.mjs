@@ -18,12 +18,17 @@ export const ownerFrom = gitName => {
   return LOGIN.test(value) ? value : undefined
 }
 
-export const gitUserName = () => {
+// git's user.name as seen from `cwd`, trimmed; undefined when none is set.
+// scripts/init.mjs imports it too, while cli/ is still in the copy.
+export const gitUserName = cwd => {
   try {
-    return execFileSync("git", ["config", "user.name"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    })
+    return (
+      execFileSync("git", ["config", "user.name"], {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() || undefined
+    )
   } catch {
     return undefined
   }

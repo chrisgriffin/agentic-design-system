@@ -37,14 +37,14 @@ The contract declares the props, the element structure and the tokens the styles
 
 `cli/create.mjs` is the template's `bin`, so `npx github:chrisgriffin/agentic-design-system <name>` runs it with no clone: it asks for any value it was not given, asks `scripts/init.mjs --check` whether the values are valid, clones the template's default branch into a staging folder, asks that clone's `scripts/init.mjs --check` again, starts a fresh git history there, moves it into place and runs that copy's `scripts/init.mjs`. Any failure before the move leaves nothing behind. It holds no rewrite logic of its own.
 
-`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, installs, docks the engine and runs the gate, then removes itself, `cli/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
+`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, writes the author into `LICENSE` and the description into `package.json` and the README intro, installs, docks the engine and runs the gate, then removes itself, `cli/`, the template's `specs/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
 
 <!-- /init -->
 
 ### Everything else in the repo
 
-- `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.
-- `specs/` — the Spec Kit spec, plan and tasks behind each build.
+- `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.<!-- init -->
+- `specs/` — the Spec Kit spec, plan and tasks behind each build.<!-- /init -->
 - `test-utils/` — helpers the component tests import: `axe.ts` holds `expectNoViolations`, the accessibility assertion every component's test calls, and `a11y-coverage.test.ts` fails the gate on a component test that never calls it, and on a component folder with no test file; `contract-coverage.test.ts` fails it unless a component with no contract fails `drift:verify`.
 - `types/` — ambient declarations TypeScript cannot infer: `css-modules.d.ts` types a `*.module.css` import and a plain stylesheet's side-effect import, both of which Vite resolves at build time. It is the one declaration of either.
 - `.github/workflows/` — CI, the Storybook check, <!-- init -->the init check, <!-- /init -->the Pages deploy, and the release and review-loop triggers.
