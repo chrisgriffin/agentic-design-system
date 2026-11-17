@@ -114,7 +114,7 @@ checks it.
 ## Development
 
 ```bash
-npm install
+npm ci
 npm run verify   # build:tokens → typecheck → prettier:check → lint → lint:styles → drift:verify → test
 npm run build-storybook   # the Storybook; this checkout's is built by storybook / ci on a PR, deploy-pages.yml on main
 ```
@@ -124,10 +124,13 @@ how a change becomes a release: [docs/releasing.md](docs/releasing.md).
 
 The design-delta engine comes from the public npm registry on a caret range
 (`^0.27.0`), so installing the engine needs no git access or credentials and `npm ci`
-gets exactly the engine the lockfile records. Move to a new minor on purpose:
-`npm install design-delta@^<version>`, then `npm run verify`, and read any
-change in its findings before committing
-([ADR-003](docs/adr/ADR-003-engine-from-the-registry.md)).
+gets exactly the engine the lockfile records. Move to a new minor on purpose,
+with the npm 10 that CI's Node 22 runs:
+`npx npm@10 install design-delta@^<version>`, then `npm run verify`, and read
+any change in its findings before committing
+([ADR-003](docs/adr/ADR-003-engine-from-the-registry.md)). Any install on npm 11
+re-resolves `package-lock.json` and drops an entry npm 10 needs, so CI's
+`npm ci` would refuse the lock (#44).
 
 Prettier, ESLint and TypeScript come from the shared
 [`@chrisgriffin/config`](https://github.com/chrisgriffin/config); Stylelint

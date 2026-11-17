@@ -37,7 +37,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 `cli/create.mjs` is the template's `bin`, so `npx github:chrisgriffin/agentic-design-system <name>` runs it with no clone: it asks for any value it was not given, asks `scripts/init.mjs --check` whether the values are valid, clones the template's default branch into a staging folder, asks that clone's `scripts/init.mjs --check` again, starts a fresh git history there, moves it into place and runs that copy's `scripts/init.mjs`. Any failure before the move leaves nothing behind. It holds no rewrite logic of its own.
 
-`scripts/init.mjs` turns a fresh copy of the template into a named system: it rewrites the name, prefix and owner, writes the author into `LICENSE` and the description into `package.json` and the README intro, installs, docks the engine and runs the gate, then removes itself, `cli/`, the template's `specs/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
+`scripts/init.mjs` turns a fresh copy of the template into a named system: it refuses an argument it does not recognize, naming it, before it writes anything (#52), rewrites the name, prefix and owner, writes the author into `LICENSE` and the description into `package.json` and the README intro, installs, docks the engine and runs the gate, then removes itself, `cli/`, the template's `specs/`, the `bin` entry, `init-check.yml`, the README's "Starting your own" section and every passage marked `<!-- init -->` (this one included), and, unless `--fleet` is passed, the two stubs that need a private operator.
 
 <!-- /init -->
 
@@ -52,7 +52,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 ## How it connects
 
-- **design-delta** is the engine, a dev dependency from the public npm registry on a caret range (`^0.27.0`: patch releases within the minor), so installing it needs no git access and `npm ci` gets exactly the engine the lockfile records. A copy's owner moves to a new minor deliberately, with `npm install design-delta@^<version>` and a green `npm run verify` read against the previous `drift:verify` report ([ADR-003](./adr/ADR-003-engine-from-the-registry.md)). It reads `design-delta.json` and the contracts; nothing in this repo reimplements a check.
+- **design-delta** is the engine, a dev dependency from the public npm registry on a caret range (`^0.27.0`: patch releases within the minor), so installing it needs no git access and `npm ci` gets exactly the engine the lockfile records. A copy's owner moves to a new minor deliberately, with Node 22's npm 10 (`npx npm@10 install design-delta@^<version>`; an npm 11 install re-resolves the lock and drops an entry CI's `npm ci` needs, #44) and a green `npm run verify` read against the previous `drift:verify` report ([ADR-003](./adr/ADR-003-engine-from-the-registry.md)). It reads `design-delta.json` and the contracts; nothing in this repo reimplements a check.
 - **Terrazzo** builds the tokens; **Vite**, **Vitest**, **Testing Library** and **Storybook** build and test the components; **Code Connect** maps each component to its Figma node once a file key is set.
 - **The shared configs** `@chrisgriffin/config` supply Prettier, ESLint and the TypeScript base.
 - **CI.** Every workflow in `.github/workflows/` but the Pages deploy is a thin trigger stub calling one of the `_reusable-*.yml` workflows in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, passing this repo's own facts as inputs. The Pages deploy is GitHub's standard upload-then-deploy workflow.
@@ -61,7 +61,7 @@ The contract declares the props, the element structure and the tokens the styles
 ## Running it
 
 ```bash
-npm install
+npm ci
 npm run build:tokens      # tokens/json → tokens/css/tokens.css
 npm run storybook         # the stories and the two system pages
 npm run drift:verify      # every contract against its code and styles
