@@ -237,5 +237,5 @@ for (const rel of removed)
   if (existsSync(path.join(root, rel)))
     rmSync(path.join(root, rel), { recursive: true })
 console.log(
-  `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Next: run /setup-system in Claude Code here to write your own docs and brand, then read the diff and commit.`,
+  `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff and commit it, then run /setup-system in Claude Code here to write your own docs and brand.`,
 )

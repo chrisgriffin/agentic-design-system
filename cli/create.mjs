@@ -226,5 +226,5 @@ const shown =
     ? relative
     : target
 console.log(
-  `\nCreated ${target}. Next: cd ${shown}, run /setup-system in Claude Code, then read the diff and commit.`,
+  `\nCreated ${target}. Next: cd ${shown}, read it and commit, then run /setup-system in Claude Code.`,
 )

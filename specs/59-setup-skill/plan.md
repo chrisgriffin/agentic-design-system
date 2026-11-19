@@ -2,9 +2,9 @@
 
 ## Technical context
 
-- `.claude/skills/setup-system/SKILL.md`: frontmatter `name` and `description`, then the steps: stop check, read, interview (one question at a time, each with "keep the template's" as an answer), rewrite the docs, ADRs, brand, examples, `npm run verify`, delete itself. It names no template value init would rewrite (the name, the prefix) and no init-only file, so the rewrite leaves it whole and `init-check.yml`'s grep for init's files stays clean.
+- `.claude/skills/setup-system/SKILL.md`: frontmatter `name` and `description`, then the steps: stop check and commit-init-first, read, interview (one question at a time, each with "keep what's there" as an answer), rewrite the docs, ADRs, brand (with a contrast check of each pair the stylesheets set), examples, `prettier --write`, `npm run verify`, `build-storybook`, delete itself. It names no template value init would rewrite (the name, the prefix) and no init-only file, so the rewrite leaves it whole and `init-check.yml`'s grep for init's files stays clean.
 - `cli/setup-skill.test.mjs` (`node --test`, picked up by `package.json`'s `cli/*.test.mjs`): the skill's frontmatter names it; every backticked repo path in it exists in this checkout and is none init removes; it holds no `<!-- init -->` marker; it names no template name or prefix init would rewrite.
-- `scripts/init.mjs` and `cli/create.mjs`: each closing line names `/setup-system`.
+- `scripts/init.mjs` and `cli/create.mjs`: each closing line says to commit, then run `/setup-system`.
 - `init-check.yml`: the create run and the init run each fail when the copy lacks the skill; the init run's output is kept in a file and fails when its closing line does not name `/setup-system`.
 - `README.md` "Starting your own" (removed by init) and `docs/architecture.md`'s agent layer (inside `<!-- init -->`) describe the skill; a copy's docs never name a skill that deletes itself.
 

@@ -15,11 +15,11 @@ The init script swaps names, but the prose and the brand a copy inherits still d
 
 - FR-001: `.claude/skills/setup-system/SKILL.md` ships in the template and survives init.
 - FR-002: The init script's closing line and the create command's both name `/setup-system`.
-- FR-003: The skill stops, changing nothing, where `package.json` still has a `bin` entry (init removes it).
-- FR-004: The skill interviews the owner and rewrites `CLAUDE.md`'s opening line, the README's purpose and component sections, `docs/architecture.md`'s "What it is" and its "It is a template" line, and `docs/releasing.md`'s package line; it asks whether to keep each ADR, and a dropped one leaves `docs/adr/` with its index row and every link to it.
-- FR-005: The skill sets the font families and accent ramp the owner gives in `tokens/json/primitives/`, with the matching font links in `.storybook/preview-head.html`.
+- FR-003: The skill stops, changing nothing, where `package.json` still has a `bin` entry (init removes it), and asks the owner to commit init's changes first so its own diff reads alone.
+- FR-004: The skill interviews the owner and rewrites `CLAUDE.md`'s opening line, the README's purpose and component sections, `docs/architecture.md`'s "What it is" and its "It is a template" line, and `docs/releasing.md`'s package line, offers to replace init's description, and rewrites any other sentence or issue reference that is the template's; it asks whether to keep each ADR, and a dropped one leaves `docs/adr/` with its index row and every link to it.
+- FR-005: The skill sets the font families and accent ramp the owner gives in `tokens/json/primitives/`, with the matching font links in `.storybook/preview-head.html`, renaming the ramp after its hue and holding every text pair the component stylesheets set to 4.5:1 in both themes by re-aliasing, never by lowering the bar.
 - FR-006: The skill asks whether to keep `button` and `card`; a removed one leaves `components/` and every doc that names it. `badge` stays: the scaffold copies it.
-- FR-007: The skill ends with `npm run verify` green, commits nothing and deletes its own folder.
+- FR-007: The skill formats, ends with `npm run verify` green and the Storybook built, commits nothing and deletes its own folder.
 - FR-008: A test fails when the skill names a repo path a copy does not have.
 
 ## Success criteria
@@ -31,6 +31,8 @@ The init script swaps names, but the prose and the brand a copy inherits still d
 - [ ] **Runnable:** `node --test cli/setup-skill.test.mjs` (a test this work adds, failing when the skill names a path a copy does not have) exits 0 with `# fail 0`.
 
 ## Notes
+
+- A dry run of the first draft in an initialized copy (answers given in advance) passed the gate and found 15 gaps in the instructions; the second draft closes them. One was the template's own: white on the dark `accent.default` is 3.18:1, filed as [#60](https://github.com/chrisgriffin/agentic-design-system/issues/60).
 
 - The stop test reads `package.json`'s `bin`, not the presence of `scripts/init.mjs`: `init-check.yml` fails a copy whose Markdown names the init script, and the skill is Markdown in the copy. Init removes both together, so the two tests agree.
 
