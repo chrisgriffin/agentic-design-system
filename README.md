@@ -48,8 +48,13 @@ file (renamed, never re-resolved, so whichever npm you run it with, CI's
 the committed lock, and stops when there is none), docks the engine, runs `npm run verify`,
 builds the Storybook and then removes itself, its CI check, the create command, the template's `specs/` and this section. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
-behind them; without it they are removed. Nothing is committed: read the
-diff, then commit.
+behind them; without it they are removed. Nothing is committed.
+
+Then open Claude Code in the new folder and run `/setup-system`. It asks what
+the system is for, its fonts and accent color, and which of the template's
+examples and decision records to keep; then it rewrites the docs that still
+describe the template, sets the brand tokens, runs `npm run verify` and deletes
+itself. Read the diff, then commit.
 
 ## Tokens
 

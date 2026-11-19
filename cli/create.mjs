@@ -225,4 +225,6 @@ const shown =
   relative && !relative.startsWith("..") && !path.isAbsolute(relative)
     ? relative
     : target
-console.log(`\nCreated ${target}. Next: cd ${shown}, read it, then commit.`)
+console.log(
+  `\nCreated ${target}. Next: cd ${shown}, run /setup-system in Claude Code, then read the diff and commit.`,
+)
