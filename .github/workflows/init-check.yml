@@ -9,6 +9,8 @@ name: Init Check
 # passages marked <!-- init --> and the two fleet-only stubs.
 # Both runs fail when the copy keeps the template's specs/, copyright holder
 # or description (#49).
+# Both fail when the copy has no setup skill, and the init run when its
+# closing line does not name it (#59).
 # scripts/init.mjs removes this file from a copy, so a copy never runs it.
 
 on:
@@ -37,8 +39,12 @@ jobs:
         test ! -e "$RUNNER_TEMP/created-system/specs" || { echo "#49: the template's specs/ survived create"; exit 1; }
         grep -qx 'The created-system design system.' "$RUNNER_TEMP/created-system/README.md" || { echo "#49: create left the template's README description"; exit 1; }
         ! grep -q 'Chris Griffin' "$RUNNER_TEMP/created-system/LICENSE" || { echo "#49: create left the template's copyright holder"; exit 1; }
+        test -f "$RUNNER_TEMP/created-system/.claude/skills/setup-system/SKILL.md" || { echo "#59: create left no setup skill"; exit 1; }
         node -e 'const fs = require("fs"), l = JSON.parse(fs.readFileSync("package-lock.json")); delete l.packages["node_modules/design-delta/node_modules/yaml-to-momoa"]; fs.writeFileSync("package-lock.json", JSON.stringify(l, null, 2))'
-        node scripts/init.mjs --name sample-system --prefix sds --owner sample-owner --author "Sample Author" --description "Sample tokens." --figma-file SAMPLEKEY
+        node scripts/init.mjs --name sample-system --prefix sds --owner sample-owner --author "Sample Author" --description "Sample tokens." --figma-file SAMPLEKEY > "$RUNNER_TEMP/init.log" 2>&1 || { cat "$RUNNER_TEMP/init.log"; exit 1; }
+        cat "$RUNNER_TEMP/init.log"
+        tail -1 "$RUNNER_TEMP/init.log" | grep -q '/setup-system' || { echo "#59: init's closing line does not name /setup-system"; exit 1; }
+        test -f .claude/skills/setup-system/SKILL.md || { echo "#59: init left no setup skill"; exit 1; }
         node -e 'const fs = require("fs"), { execSync } = require("child_process"), bare = t => { const l = JSON.parse(t); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(fs.readFileSync("package-lock.json", "utf8")) !== bare(execSync("git show HEAD:./package-lock.json", { encoding: "utf8" }))) { console.error("#44: init kept a re-resolved lock file instead of the committed one"); process.exit(1) }'
         test ! -f scripts/init.mjs
         test ! -e cli
