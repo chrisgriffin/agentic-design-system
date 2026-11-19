@@ -58,16 +58,26 @@ Say only what the owner told you, in plain words: no claims of your own.
 - `docs/architecture.md`: "What it is" (both paragraphs), and the "Nothing
   depends on this repo as code" line, rewritten to say how other projects get
   it; the README line under "Where to look next".
-- `docs/releasing.md`: the opening paragraph's package line.
-- Then grep every Markdown file and code comment, outside `node_modules` and
-  `storybook-static`, for `template`, `Chris` and issue references such as
-  `(#44)`. Rewrite each sentence that describes the template rather than this
-  system, and drop each issue reference: those issues are the template's and
-  do not exist in this repo. Leave a `<!-- fleet:... -->` block alone.
+- `docs/releasing.md`: the opening paragraph's package line. Write only what
+  is true today: the release flow publishes to no registry, so if the owner
+  wants the package published, say it is not yet, and tell them what is
+  missing (a scope, `publishConfig`, a publish step).
+- Then search every tracked text file (`git grep`), Markdown, comments, test
+  titles, JSON `_doc` keys and workflow YAML alike, for `template`, `Chris`,
+  `--figma-file` and issue references such as `(#44)` or `"#23 `. Rewrite each
+  sentence that describes the template's origin or its owner rather than this
+  system, and each that tells the reader to run init, which this copy no
+  longer has (a Figma key is now set by replacing the placeholder key in each
+  `*.figma.tsx` and adding it to `design.files` in `design-delta.json`). Drop each issue reference:
+  those issues are the template's. Read past the word, too: "A copy's owner"
+  is the template talking. Leave alone: other senses of the word (a template
+  literal, the scaffold's templates), the `chrisgriffin/*` packages and repos
+  this copy depends on, generated files, and any `<!-- fleet:... -->` block.
 
 ## 4. Drop the ADRs the owner does not keep
 
-For each one: delete its file from `docs/adr/`, remove its row from
+For each one: delete its file from `docs/adr/` (a plain delete, not `git rm`,
+which stages it), remove its row from
 `docs/adr/README.md`, then grep the repo for its number (`ADR-003`, say) and
 rewrite each sentence that links it, so none points at a missing file. Leave
 the text of a kept record as written: it records a decision as it was made.
@@ -80,25 +90,34 @@ Fonts:
   keeping each array's generic fallbacks.
 - Replace the font link in `.storybook/preview-head.html` so it loads the new
   families. A weight range (`wght@400..700`) works only for a variable font;
-  for one that is not, list the weights (`wght@400;500;600;700`). For
+  for one that is not, list the weights (`wght@400;500;600;700`). To tell
+  which, fetch the link's URL: a 400 means the range is refused. For
   self-hosted fonts, remove the link and tell the owner where the files go.
 
 Accent:
 
+A semantic color sets its light value twice, in `$value` (which the CSS's
+`:root` is built from) and in `$extensions.mode.light` (which the Storybook
+Tokens page reads); change the two together, always.
+
 1. Rename the accent ramp (the template's is `color.blue`) after the new hue,
    in `tokens/json/primitives/color.json`, and update every alias to it in
    `tokens/json/semantics/color.json`. Keep its step names.
-2. From a single hex, put it at the step the light theme's
-   `color.accent.default` aliases, then build the lighter and darker steps
+2. From a single hex, put it at the step `color.accent.default`'s `$value`
+   aliases, then build the lighter and darker steps
    around it. A ramp the owner gives replaces the steps as given.
 3. Find the pairs to check in the component stylesheets: each rule that sets
    a `color` token over a `background` token, and each accent token used as
    text on the canvas. Text must reach 4.5:1 against what it sits on, in both
-   themes.
+   themes. Check every pair, not only the accent's: the template's own
+   success and danger badges fall short in both themes.
 4. Where a pair falls short, change which step its semantic token aliases in
-   that theme (its `$extensions.mode`), or adjust the step's value. Never
-   lower the bar or switch a check off. If no step can satisfy every pair a
-   token is in, tell the owner which pairs conflict and let them choose.
+   that theme, adjust a step's value, or add a step to a short ramp. Never
+   lower the bar or switch a check off. In the dark theme, expect a conflict:
+   no accent step carries white `fg.on-accent` text at 4.5:1 and also reads
+   as `accent.default` text on the near-black canvas. The usual way out is to
+   alias dark `fg.on-accent` to a dark neutral step. Tell the owner which pairs
+   conflicted and what you chose, and let them change it.
 5. Run `npm run build:tokens`. Never edit the built CSS by hand.
 
 ## 6. Remove the examples the owner does not keep
@@ -107,7 +126,8 @@ For each one: delete `components/<name>/`, then grep the repo for the name
 (outside `node_modules` and `storybook-static`) and update every doc, story,
 test and table that names it, `docs/testing.md` included. Where a doc uses it
 as the example of a rule that still holds (`card-header` is the composed-part
-example), keep the rule and give another example, or a generic one.
+example), keep the rule and give another example, or a generic one; but leave a kept
+ADR's text as written (step 4).
 
 ## 7. Run the gate
 

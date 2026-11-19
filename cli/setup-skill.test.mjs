@@ -41,6 +41,7 @@ test("#59 init leaves the skill whole", () => {
   for (const s of [
     "agentic-design-system",
     "--ads-",
+    "FIGMA_FILE_KEY",
     "<!-- init -->",
     "init.mjs",
     "create.mjs",
