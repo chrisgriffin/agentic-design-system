@@ -12,12 +12,16 @@ building. It runs once: the last step deletes it.
 ## 0. Check where you are
 
 1. Read `package.json`. If it still has a `bin` entry, this is the template
-   itself or a copy init has not run in. Say so in one line, tell the owner to
+   itself or a copy init has not finished in (init removes the `bin` last,
+   only after its gate passes). Say so in one line, tell the owner to
    run the init step from the README's "Starting your own" first, and stop
    without changing anything.
-2. Run `git status --short`. If it lists changes, they are init's: ask the
-   owner to commit them first, so this skill's diff can be read on its own.
-   If they decline, go on, and say in the final summary which changes are yours.
+2. Run `git status --short`, and `git rev-parse --verify HEAD`, which fails
+   in a copy with no commit yet (the create command starts a new history and
+   commits nothing). If either shows uncommitted work, it is init's: ask the
+   owner to commit it first, so this skill's diff can be read on its own. If
+   they decline, go on; with no commit, `git status` lists every file, so
+   keep your own list of what you change and give it in the final summary.
 
 ## 1. Read before asking
 
@@ -62,7 +66,8 @@ Say only what the owner told you, in plain words: no claims of your own.
   is true today: the release flow publishes to no registry, so if the owner
   wants the package published, say it is not yet, and tell them what is
   missing (a scope, `publishConfig`, a publish step).
-- Then search every tracked text file (`git grep`), Markdown, comments, test
+- Then search every text file in the working tree, committed or not
+  (`git grep --untracked`, which still skips what `.gitignore` lists), Markdown, comments, test
   titles, JSON `_doc` keys and workflow YAML alike, for `template`, `Chris`,
   `--figma-file` and issue references such as `(#44)` or `"#23 `. Rewrite each
   sentence that describes the template's origin or its owner rather than this
@@ -78,7 +83,7 @@ Say only what the owner told you, in plain words: no claims of your own.
 
 For each one: delete its file from `docs/adr/` (a plain delete, not `git rm`,
 which stages it), remove its row from
-`docs/adr/README.md`, then grep the repo for its number (`ADR-003`, say) and
+`docs/adr/README.md`, then search for its number with `git grep --untracked` (`ADR-003`, say) and
 rewrite each sentence that links it, so none points at a missing file. Leave
 the text of a kept record as written: it records a decision as it was made.
 
@@ -122,8 +127,9 @@ Tokens page reads); change the two together, always.
 
 ## 6. Remove the examples the owner does not keep
 
-For each one: delete `components/<name>/`, then grep the repo for the name
-(outside `node_modules` and `storybook-static`) and update every doc, story,
+For each one: delete `components/<name>/`, then search for the name with
+`git grep --untracked` (it skips `node_modules` and `storybook-static`, which
+`.gitignore` lists) and update every doc, story,
 test and table that names it, `docs/testing.md` included. Where a doc uses it
 as the example of a rule that still holds (`card-header` is the composed-part
 example), keep the rule and give another example, or a generic one; but leave a kept
@@ -141,7 +147,8 @@ ADR's text as written (step 4).
 
 ## 8. Finish
 
-1. Delete this skill's folder, `.claude/skills/setup-system/`.
-2. Show the owner `git status --short` and one line for each change this
-   skill made.
+1. Delete this skill's folder, `.claude/skills/setup-system/`, and the
+   clause naming it in `docs/architecture.md`'s agent-layer passage.
+2. Show the owner `git status --short` (or, with no commit yet, your own
+   list from step 0) and one line for each change this skill made.
 3. Commit nothing: the owner reads the diff and commits it.

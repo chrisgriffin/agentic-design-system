@@ -34,7 +34,7 @@ The init script swaps names, but the prose and the brand a copy inherits still d
 
 - A dry run of the first draft in an initialized copy (answers given in advance) passed the gate and found 15 gaps in the instructions; the second draft closes them. One was the template's own: white on the dark `accent.default` is 3.18:1, filed as [#60](https://github.com/chrisgriffin/agentic-design-system/issues/60).
 
-- The stop test reads `package.json`'s `bin`, not the presence of `scripts/init.mjs`: `init-check.yml` fails a copy whose Markdown names the init script, and the skill is Markdown in the copy. Init removes both together, so the two tests agree.
+- The stop test reads `package.json`'s `bin`, not the presence of `scripts/init.mjs`: `init-check.yml` fails a copy whose Markdown names the init script, and the skill is Markdown in the copy. Init removes the `bin` last, in the same step as the script, after its gate and the Storybook build pass, so a copy whose init failed partway still has both, and the two tests agree.
 
 ## Out of scope
 

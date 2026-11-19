@@ -200,11 +200,12 @@ for (const rel of walk("").filter(f => f.endsWith(".md"))) {
 }
 
 // The create command belongs to the template, not to a system made from it:
-// its folder, its bin and its tests leave the copy.
+// its folder, its bin and its tests leave the copy. The bin goes last, with the
+// folder, so a copy whose gate failed below still reads as one init has not
+// finished: the setup skill stops where it finds a bin.
 const CLI_TESTS = " cli/*.test.mjs"
 const manifest = path.join(root, "package.json")
 const pkg = JSON.parse(readFileSync(manifest, "utf8"))
-delete pkg.bin
 pkg.description = description
 pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
 writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
@@ -213,7 +214,6 @@ writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
 // npm 10 on CI's Node 22 needs (#44). npm ci below installs it and writes nothing.
 const lock = JSON.parse(readFileSync(lockfile, "utf8"))
 lock.name = lock.packages[""].name = name
-delete lock.packages[""].bin
 writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
 
 // specs/ is the template's build history; a system starts its own.
@@ -236,6 +236,10 @@ run("npm run build-storybook")
 for (const rel of removed)
   if (existsSync(path.join(root, rel)))
     rmSync(path.join(root, rel), { recursive: true })
+delete pkg.bin
+writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
+delete lock.packages[""].bin
+writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
 console.log(
   `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff and commit it, then run /setup-system in Claude Code here to write your own docs and brand.`,
 )
