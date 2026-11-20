@@ -205,16 +205,22 @@ for (const rel of walk("").filter(f => f.endsWith(".md"))) {
 // finished: the setup skill stops where it finds a bin.
 const CLI_TESTS = " cli/*.test.mjs"
 const manifest = path.join(root, "package.json")
-const pkg = JSON.parse(readFileSync(manifest, "utf8"))
-pkg.description = description
-pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
-writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
+// Each write reads the file afresh, so no step's change is written over (#62).
+const edit = (file, change) => {
+  const json = JSON.parse(readFileSync(file, "utf8"))
+  change(json)
+  writeFileSync(file, JSON.stringify(json, null, 2) + "\n")
+}
+edit(manifest, pkg => {
+  pkg.description = description
+  pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
+})
 // The lock file is renamed here, not by an install, so it stays the template's:
 // npm install lets the local npm re-resolve it, and npm 11 drops an entry the
 // npm 10 on CI's Node 22 needs (#44). npm ci below installs it and writes nothing.
-const lock = JSON.parse(readFileSync(lockfile, "utf8"))
-lock.name = lock.packages[""].name = name
-writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
+edit(lockfile, lock => {
+  lock.name = lock.packages[""].name = name
+})
 
 // specs/ is the template's build history; a system starts its own.
 const removed = [self, ".github/workflows/init-check.yml", "cli", "specs"]
@@ -236,10 +242,11 @@ run("npm run build-storybook")
 for (const rel of removed)
   if (existsSync(path.join(root, rel)))
     rmSync(path.join(root, rel), { recursive: true })
-delete pkg.bin
-writeFileSync(manifest, JSON.stringify(pkg, null, 2) + "\n")
-delete lock.packages[""].bin
-writeFileSync(lockfile, JSON.stringify(lock, null, 2) + "\n")
+// npm ci writes neither file and Prettier ignores both, but the dock step, or
+// a step added later, may change them, so they are read again and only bin
+// leaves (#62).
+edit(manifest, pkg => delete pkg.bin)
+edit(lockfile, lock => delete lock.packages[""].bin)
 console.log(
   `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff and commit it, then run /setup-system in Claude Code here to write your own docs and brand.`,
 )
