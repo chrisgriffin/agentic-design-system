@@ -242,8 +242,9 @@ run("npm run build-storybook")
 for (const rel of removed)
   if (existsSync(path.join(root, rel)))
     rmSync(path.join(root, rel), { recursive: true })
-// The install, dock and format steps above may have changed both files, so
-// they are read again and only bin leaves (#62).
+// npm ci writes neither file and Prettier ignores both, but the dock step, or
+// a step added later, may change them, so they are read again and only bin
+// leaves (#62).
 edit(manifest, pkg => delete pkg.bin)
 edit(lockfile, lock => delete lock.packages[""].bin)
 console.log(
