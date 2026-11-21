@@ -17,4 +17,4 @@
 ## Phase 4: Surfaces
 
 - [x] T005 ADR-003 and `scripts/init.mjs` read: ADR-003 records the decision and stays; init already runs `npm ci`.
-- [x] T006 No `CLAUDE.md` § Architecture coupling, Routine, ruleset, workflow or vault note touched.
+- [x] T006 No `CLAUDE.md` § Architecture coupling, Routine, ruleset or workflow touched.

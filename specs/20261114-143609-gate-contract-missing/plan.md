@@ -106,8 +106,7 @@ would break `card-header` and widen a small ticket into a shape audit.
   this adds one assertion to a suite that already runs in the existing gate.
 - migration — none. Nothing outside this repo reads this file, and a copier
   running `scripts/init.mjs` gets the stricter gate, which is the point.
-- a vault note — none. `grep -rl "agentic-design-system:design-delta.json" AI/`
-  has no reader; this repo's config is not named in any living doc's `covers:`.
+- outside this repo — none. No document outside this repo names this config.
   Verify in the same session and record the result in the PR body.
 
 ## Verification

@@ -12,4 +12,4 @@
 - `tokens/scripts/build-css.mjs`, `tokens/scripts/source.mjs`: edited; `tokens/scripts/inline-primitives.mjs`, `tokens/scripts/inline-primitives.test.mjs`: new.
 - `docs/architecture.md`: the token paragraph names the new module and its test.
 - `docs/adr/ADR-001-semantic-tokens-ship.md` — unchanged: a decision record, and the post-pass still runs as part of `build-css.mjs`.
-- No directory added, no published surface (the package is private), no workflow, ruleset, Routine, vault note or Mac-installed file.
+- No directory added, no published surface (the package is private), no workflow, ruleset, Routine or Mac-installed file.

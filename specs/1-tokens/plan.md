@@ -15,4 +15,4 @@
 - `package.json`: new, private, no published surface.
 - `.github/workflows/build-check.yml`: new; runs on this PR.
 - Branch rulesets: `Evaluator` removed from the required checks for the bootstrap, restored after #5.
-- No vault note, Routine or cron.
+- No Routine or cron.

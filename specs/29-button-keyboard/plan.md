@@ -15,4 +15,4 @@
 - `CLAUDE.md` § CI's accessibility line — read; it describes axe only and names no keyboard check, so it stays accurate and is left as is.
 - `components/button/button.contract.json`, `button.figma.tsx` — no prop or element changes, so untouched.
 - cost — none: a few milliseconds of tests inside the existing `npm test`; no trigger, cron or agent fire added.
-- none else — no directory added, no published surface, workflow, ruleset, Routine, vault note or Mac-installed file.
+- none else — no directory added, no published surface, workflow, ruleset, Routine or Mac-installed file.

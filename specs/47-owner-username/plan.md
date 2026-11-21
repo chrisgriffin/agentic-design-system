@@ -12,4 +12,4 @@
 - `cli/create.test.mjs` — one new test.
 - `docs/testing.md` — lists what `cli/create.test.mjs` covers; gains the help-text check.
 - `.github/workflows/init-check.yml` — read; it passes flags and greps for init references, never the help text, so unchanged.
-- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron, ruleset, workflow or vault note.
+- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron, ruleset or workflow.

@@ -17,4 +17,4 @@
 
 ## Phase 4: Surfaces
 
-- [x] T007 No workflow, `CLAUDE.md` § Architecture coupling, Routine, cron or vault note touched.
+- [x] T007 No workflow, `CLAUDE.md` § Architecture coupling, Routine or cron touched.

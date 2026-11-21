@@ -12,4 +12,4 @@
 - `scripts/init.mjs` — one swap entry removed; no flag, output or published surface changes.
 - `.github/workflows/evaluator-gate.yml`, `.github/workflows/claude-mention.yml` — header comments only; no job name, trigger or input changes, so no ruleset coupling.
 - `docs/testing.md`, `docs/architecture.md` — read; neither names the removed swap, so unchanged.
-- none of `CLAUDE.md` § Architecture's couplings (no prefix, font, mode, component, job name or badge change); no Routine, cron, ruleset or vault note, and no workflow change beyond the two comments above.
+- none of `CLAUDE.md` § Architecture's couplings (no prefix, font, mode, component, job name or badge change); no Routine, cron or ruleset, and no workflow change beyond the two comments above.

@@ -16,4 +16,4 @@
 - `README.md` — read; its accessibility claim now holds for a hand-written folder, so it stays as is.
 - `scripts/scaffold-component.mjs` — read; it already writes a test file, so untouched; proven by scaffolding a probe, running `npm test`, deleting it.
 - cost — none: a few milliseconds inside the existing `npm test`; no trigger, cron or agent fire added.
-- none else — no directory added, no published surface, workflow, ruleset, Routine, vault note or Mac-installed file.
+- none else — no directory added, no published surface, workflow, ruleset, Routine or Mac-installed file.
