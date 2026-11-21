@@ -3,7 +3,9 @@ import userEvent from "@testing-library/user-event"
 import { expect, test, vi } from "vitest"
 
 import { expectNoViolations } from "../../test-utils/axe"
-import { Button } from "./button"
+import { variantCases } from "../../test-utils/variants"
+import { Button, type ButtonProps } from "./button"
+import contract from "./button.contract.json"
 
 test("renders the label, the size and variant classes, and the icon slot", () => {
   render(
@@ -71,17 +73,10 @@ test("keyboard: a disabled Button is skipped by Tab and fires nothing on Enter o
   expect(onClick).not.toHaveBeenCalled()
 })
 
-const SIZES = ["sm", "md", "lg"] as const
-const VARIANTS = ["default", "outline"] as const
-
-test.each(SIZES.flatMap(size => VARIANTS.map(variant => ({ size, variant }))))(
-  "size $size, variant $variant has no accessibility violations",
-  async ({ size, variant }) => {
-    const { container } = render(
-      <Button size={size} variant={variant}>
-        Save
-      </Button>,
-    )
+test.each(variantCases<ButtonProps>(contract))(
+  "%s has no accessibility violations",
+  async (_, props) => {
+    const { container } = render(<Button {...props}>Save</Button>)
     await expectNoViolations(container)
   },
 )

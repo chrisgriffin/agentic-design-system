@@ -64,17 +64,24 @@ export const Default: Story = {}
 import { expect, test } from "vitest"
 
 import { expectNoViolations } from "../../test-utils/axe"
-import { ${pascal} } from "./${name}"
+import { variantCases } from "../../test-utils/variants"
+import { ${pascal}, type ${pascal}Props } from "./${name}"
+import contract from "./${name}.contract.json"
 
 test("renders its content", () => {
   render(<${pascal}>Hello</${pascal}>)
   expect(screen.getByText("Hello")).toHaveClass("${camel}")
 })
 
-test("has no accessibility violations", async () => {
-  const { container } = render(<${pascal}>Hello</${pascal}>)
-  await expectNoViolations(container)
-})
+// One case per combination of the contract's code-side enum values, so a
+// value added to the contract is checked with no edit here.
+test.each(variantCases<${pascal}Props>(contract))(
+  "%s has no accessibility violations",
+  async (_, props) => {
+    const { container } = render(<${pascal} {...props}>Hello</${pascal}>)
+    await expectNoViolations(container)
+  },
+)
 `,
   [`${name}.figma.tsx`]: `import figma from "@figma/code-connect"
 
