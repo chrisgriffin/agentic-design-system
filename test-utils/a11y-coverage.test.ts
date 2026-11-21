@@ -1,7 +1,7 @@
 import ts from "typescript"
 import { describe, expect, test } from "vitest"
 
-import { type ContractProps, variantCases } from "./variants"
+import { codeEnums, type ContractProps, variantCases } from "./variants"
 
 /**
  * Holds the rule that every component test calls `expectNoViolations`: a test
@@ -17,13 +17,7 @@ const files = Object.entries(sources)
   .map(([path, source]) => [path.replace(/^\.\.\//, ""), source] as const)
   .sort(([a], [b]) => a.localeCompare(b))
 
-/**
- * Parses the source as TSX and looks for a call whose callee is the
- * identifier `expectNoViolations`. The parser, not a regex, decides what is a
- * comment, a string, a template or JSX, so `"image/*"` or `"https://…"` in a
- * test never hides a real call, and a call inside a comment or a string never
- * counts as one.
- */
+/** Parses a test file's source as TSX. */
 const parse = (source: string) =>
   ts.createSourceFile(
     "test.tsx",
@@ -33,14 +27,23 @@ const parse = (source: string) =>
     ts.ScriptKind.TSX,
   )
 
-const calls = (source: string, name: string) => {
+/**
+ * Looks under `root` for a call whose callee is the identifier `name`. The
+ * parser, not a regex, decides what is a comment, a string, a template or
+ * JSX, so `"image/*"` or `"https://…"` in a test never hides a real call, and
+ * a call inside a comment or a string never counts as one.
+ */
+const callsIn = (root: ts.Node, name: string) => {
   const visit = (node: ts.Node): boolean =>
     (ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
       node.expression.text === name) ||
     (ts.forEachChild(node, visit) ?? false)
-  return visit(parse(source))
+  return visit(root)
 }
+
+/** `callsIn` over a whole test file's source. */
+const calls = (source: string, name: string) => callsIn(parse(source), name)
 
 const callsExpectNoViolations = (source: string) =>
   calls(source, "expectNoViolations")
@@ -140,9 +143,11 @@ test.each(files)("%s calls expectNoViolations", (file, source) => {
 /**
  * Holds the rule that every variant a contract gives code gets an
  * accessibility case (#57): `variantCases` turns a contract's code-side enums
- * into cases, and a contract with one fails here, by its path, when its
- * folder's test does not import it and call `variantCases`, so no variant
- * list is typed into a test by hand.
+ * into cases, and a contract with one fails here, naming the contract and
+ * its folder's test files, unless one of them imports it and passes that
+ * import to `test.each(variantCases(…))` with a case that calls
+ * `expectNoViolations`, so no variant list is typed into a test by hand and
+ * every case reaches axe.
  */
 describe("variantCases", () => {
   const contract = (props: ContractProps["props"]) => ({ props })
@@ -180,6 +185,34 @@ describe("variantCases", () => {
       ["defaults", {}],
     ])
   })
+
+  test("gives one defaults case for a contract with no props", () => {
+    expect(variantCases({ id: "empty", title: "Empty" })).toEqual([
+      ["defaults", {}],
+    ])
+  })
+
+  test("takes numeric enum values, as the schema allows", () => {
+    const numeric = { props: { columns: { type: "enum", values: [2, 3] } } }
+    expect(variantCases<{ columns: number }>(numeric)).toEqual([
+      ["columns 2", { columns: 2 }],
+      ["columns 3", { columns: 3 }],
+    ])
+  })
+
+  test("skips a _-prefixed key and a prop that is not an object", () => {
+    const annotated = {
+      props: {
+        _comment: "a note the schema allows",
+        _note: null,
+        _list: ["enum"],
+        broken: null,
+        size: { type: "enum", values: ["sm"] },
+      },
+    }
+    expect(codeEnums(annotated)).toEqual([["size", ["sm"]]])
+    expect(variantCases(annotated)).toEqual([["size sm", { size: "sm" }]])
+  })
 })
 
 const contracts = Object.entries(
@@ -191,23 +224,154 @@ const contracts = Object.entries(
   .map(([path, json]) => [path.replace(/^\.\.\//, ""), json] as const)
   .sort(([a], [b]) => a.localeCompare(b))
 
-const importsFrom = (source: string, specifier: string) =>
-  parse(source).statements.some(
-    node =>
-      ts.isImportDeclaration(node) &&
-      ts.isStringLiteral(node.moduleSpecifier) &&
-      node.moduleSpecifier.text === specifier,
-  )
+/** Strips parentheses, `as`, `satisfies` and `!` around an expression. */
+const unwrap = (node: ts.Expression): ts.Expression =>
+  ts.isParenthesizedExpression(node) ||
+  ts.isAsExpression(node) ||
+  ts.isSatisfiesExpression(node) ||
+  ts.isNonNullExpression(node) ||
+  ts.isTypeAssertionExpression(node)
+    ? unwrap(node.expression)
+    : node
+
+/** The local names an import of `specifier` binds to its default export. */
+const bindingsOf = (file: ts.SourceFile, specifier: string) =>
+  file.statements.flatMap(node => {
+    if (
+      !ts.isImportDeclaration(node) ||
+      !ts.isStringLiteral(node.moduleSpecifier) ||
+      node.moduleSpecifier.text !== specifier ||
+      !node.importClause
+    )
+      return []
+    const { name, namedBindings } = node.importClause
+    return [
+      ...(name ? [name.text] : []),
+      ...(namedBindings && ts.isNamedImports(namedBindings)
+        ? namedBindings.elements
+            .filter(
+              element =>
+                (element.propertyName ?? element.name).text === "default",
+            )
+            .map(element => element.name.text)
+        : []),
+    ]
+  })
+
+/** True for `test.each`, `it.each`, `test.concurrent.each` and the like. */
+const isTestEach = (node: ts.Expression): boolean => {
+  if (!ts.isPropertyAccessExpression(node) || node.name.text !== "each")
+    return false
+  let root: ts.Expression = node.expression
+  while (ts.isPropertyAccessExpression(root)) root = root.expression
+  return ts.isIdentifier(root) && ["test", "it"].includes(root.text)
+}
+
+/**
+ * True when the source imports `specifier` and passes that import straight
+ * to `variantCases` as the cases of a `test.each(…)(title, fn)` whose `fn`
+ * calls `expectNoViolations`, so every case the contract gives reaches axe.
+ */
+const readsContract = (source: string, specifier: string) => {
+  const file = parse(source)
+  const names = bindingsOf(file, specifier)
+  if (names.length === 0) return false
+  const isCasesCall = (node: ts.Expression | undefined) => {
+    const call = node && unwrap(node)
+    if (
+      !call ||
+      !ts.isCallExpression(call) ||
+      !ts.isIdentifier(call.expression) ||
+      call.expression.text !== "variantCases"
+    )
+      return false
+    const argument = call.arguments[0] && unwrap(call.arguments[0])
+    return (
+      argument !== undefined &&
+      ts.isIdentifier(argument) &&
+      names.includes(argument.text)
+    )
+  }
+  const visit = (node: ts.Node): boolean =>
+    (ts.isCallExpression(node) &&
+      ts.isCallExpression(node.expression) &&
+      isTestEach(node.expression.expression) &&
+      isCasesCall(node.expression.arguments[0]) &&
+      node.arguments.some(
+        fn =>
+          (ts.isArrowFunction(fn) || ts.isFunctionExpression(fn)) &&
+          callsIn(fn.body, "expectNoViolations"),
+      )) ||
+    (ts.forEachChild(node, visit) ?? false)
+  return visit(file)
+}
+
+describe("readsContract", () => {
+  const header = [
+    'import { expectNoViolations } from "../../test-utils/axe"',
+    'import { variantCases } from "../../test-utils/variants"',
+    'import contract from "./x.contract.json"',
+  ].join("\n")
+  const each = (cases: string, body = "await expectNoViolations(container)") =>
+    `test.each(${cases})("%s", async (_, props) => { ${body} })`
+
+  test.each([
+    ["the scaffold's form", `${header}\n${each("variantCases<P>(contract)")}`],
+    [
+      "it.each",
+      `${header}\n${each("variantCases(contract)").replace("test.each", "it.each")}`,
+    ],
+    [
+      "test.concurrent.each",
+      `${header}\n${each("variantCases(contract)").replace("test.each", "test.concurrent.each")}`,
+    ],
+    ["a cast contract", `${header}\n${each("variantCases((contract as C))")}`],
+    [
+      "a renamed default import",
+      `import { default as spec } from "./x.contract.json"\n${each("variantCases(spec)")}`,
+    ],
+    [
+      "a function expression",
+      `${header}\ntest.each(variantCases(contract))("%s", async function () { await expectNoViolations(c) })`,
+    ],
+  ])("counts %s", (_, source) => {
+    expect(readsContract(source, "./x.contract.json")).toBe(true)
+  })
+
+  test.each([
+    ["no import of the contract", each("variantCases(contract)")],
+    [
+      "an import whose binding never reaches variantCases",
+      `${header}\nimport other from "./y.contract.json"\n${each("variantCases(other)")}`,
+    ],
+    [
+      "variantCases outside test.each",
+      `${header}\nconst cases = variantCases(contract)\ntest("x", async () => { await expectNoViolations(c) })`,
+    ],
+    [
+      "a test.each case that never calls expectNoViolations",
+      `${header}\n${each("variantCases(contract)", "render(props)")}`,
+    ],
+    [
+      "a call inside a comment",
+      `${header}\n// ${each("variantCases(contract)")}`,
+    ],
+  ])("does not count %s", (_, source) => {
+    expect(readsContract(source, "./x.contract.json")).toBe(false)
+  })
+
+  test("does not count a second contract imported beside the first", () => {
+    const source = `${header}\nimport headerContract from "./card-header.contract.json"\n${each("variantCases(contract)")}`
+    expect(readsContract(source, "./card-header.contract.json")).toBe(false)
+    expect(readsContract(source, "./x.contract.json")).toBe(true)
+  })
+})
 
 test("finds the contracts", () => {
   expect(contracts.length).toBeGreaterThan(0)
 })
 
-const withCodeEnums = contracts.filter(([, json]) =>
-  Object.values(json.props).some(
-    prop => prop.type === "enum" && prop.code !== "none",
-  ),
-)
+const withCodeEnums = contracts.filter(([, json]) => codeEnums(json).length > 0)
 
 test.each(withCodeEnums)(
   "%s has its variants checked through variantCases",
@@ -216,11 +380,12 @@ test.each(withCodeEnums)(
     const tests = files.filter(([file]) => folderOf(file) === folder)
     const specifier = `./${path.slice(folder.length + 1)}`
     expect(
-      tests.some(
-        ([, source]) =>
-          importsFrom(source, specifier) && calls(source, "variantCases"),
-      ),
-      `no test in ${folder} imports ${specifier} and calls variantCases`,
+      tests.some(([, source]) => readsContract(source, specifier)),
+      tests.length === 0
+        ? `${path}: ${folder} has no test file to read it`
+        : `${path}: ${tests.map(([file]) => file).join(", ")} ` +
+            `never passes its import of ${specifier} to ` +
+            "test.each(variantCases(…)) with a case calling expectNoViolations",
     ).toBe(true)
   },
 )

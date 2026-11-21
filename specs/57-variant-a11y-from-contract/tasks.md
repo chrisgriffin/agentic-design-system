@@ -7,7 +7,7 @@
 ## Phase 2: Build
 
 - [x] T002 `test-utils/variants.ts`: `variantCases(contract)` over code-side enums, skipping `code: none`.
-- [x] T003 `test-utils/a11y-coverage.test.ts`: cases for the helper (product, `code: none` skipped, no enum → defaults); a check per contract with a code-side enum that its folder's test imports it and calls `variantCases`.
+- [x] T003 `test-utils/a11y-coverage.test.ts`: cases for the helper (product, `code: none` skipped, no enum → defaults); a check per contract with a code-side enum that its folder's test imports it and passes that import to `test.each(variantCases(…))` with a case calling `expectNoViolations`, the failure naming the contract and the test files.
 - [x] T004 `badge`, `button`, `card` tests: replace the hand-typed lists with `variantCases` on their contract.
 - [x] T005 `scripts/scaffold-component.mjs`: the first test uses `variantCases` on the new contract.
 

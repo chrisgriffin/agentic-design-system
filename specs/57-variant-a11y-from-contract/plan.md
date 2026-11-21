@@ -4,7 +4,7 @@
 
 - The base tsconfig sets `resolveJsonModule`, so a test can `import contract from "./<name>.contract.json"`; Vite imports JSON natively.
 - `test-utils/variants.ts` exports `variantCases(contract)`: the cartesian product of the code-side enum props' values, as `[title, props]` pairs for `test.each`, titled like `size sm, variant outline` (`defaults` when there is none). The props are cast to the component's prop type: a contract value the type does not know yet is exactly the case to run, and `drift:verify` already reports a contract and a prop type that disagree.
-- `a11y-coverage.test.ts` already parses each test file with the TypeScript parser to find `expectNoViolations` calls; the same walk finds a `variantCases` call and an import of the contract file. Contracts are globbed eagerly as JSON (`import.meta.glob`), so the check reads their props.
+- `a11y-coverage.test.ts` already parses each test file with the TypeScript parser to find `expectNoViolations` calls; the same parse finds the contract file's import binding and a `test.each(variantCases(<that binding>))` whose case calls `expectNoViolations`. Contracts are globbed eagerly as JSON (`import.meta.glob`), so the check reads their props.
 - No third `test-utils/*.test.ts` file: `contract-coverage.test.ts` pins exactly two gate tests, and the helper's own cases sit in `a11y-coverage.test.ts`, the rule they serve.
 
 ## Surfaces touched
