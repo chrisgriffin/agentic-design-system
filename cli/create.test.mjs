@@ -84,6 +84,29 @@ test("#56 a refused value is named, with the init script's reason", () => {
   assert.deepEqual(readdirSync(dir), [])
 })
 
+test("#56 a refused name is shown as <name>, the argument create takes", () => {
+  const run = create("Bad_Name", "--prefix", "ads", "--owner", "o")
+  refusesCleanly(run)
+  assert.match(
+    run.stderr,
+    /^<name> "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npx /,
+  )
+  assert.doesNotMatch(run.stderr, /--name/)
+  assert.deepEqual(readdirSync(dir), [])
+})
+
+test("#56 each usage states the prefix rule its refusal states", () => {
+  const rule = "a lowercase letter, then lowercase letters and digits"
+  for (const script of [CREATE, path.join(ROOT, "scripts/init.mjs")]) {
+    const run = spawnSync(process.execPath, [script, "--help"], {
+      encoding: "utf8",
+    })
+    assert.equal(run.status, 0)
+    const line = run.stdout.split("\n").find(l => l.startsWith("  --prefix"))
+    assert.ok(line.includes(rule), `${script}: ${line}`)
+  }
+})
+
 test("a folder that exists and is not empty is refused, untouched", () => {
   mkdirSync(path.join(dir, "sample-system"))
   writeFileSync(path.join(dir, "sample-system/keep.txt"), "mine\n")
@@ -248,6 +271,77 @@ test("#56 the cloned template's refusal carries its init script's reason", () =>
       )
       assert.doesNotMatch(run.stderr, /usage: x/)
       assert.deepEqual(readdirSync(dir), [])
+    },
+  )
+})
+
+test("#56 the cloned template's refusal shows its init's --name as <name>", () => {
+  withTemplate(
+    `if (process.argv.includes("--check")) {
+  console.error('--name "sample-system" is not valid: a reason\\n\\nusage: x')
+  process.exit(1)
+}
+`,
+    template => {
+      const run = create("sample-system", ...VALUES, "--from", template)
+      refusesCleanly(run)
+      assert.match(
+        run.stderr,
+        /refuses them: <name> "sample-system" is not valid: a reason$/m,
+      )
+      assert.deepEqual(readdirSync(dir), [])
+    },
+  )
+})
+
+test("#56 a cloned init that crashes or warns is never shown as its reason", () => {
+  for (const [form, source] of [
+    ["a throw", `throw new Error("boom")\n`],
+    ["a syntax error", `const = 1\n`],
+    ["a missing export", `import { nope } from "node:fs"\n`],
+    [
+      "a warning ahead of usage only",
+      `if (process.argv.includes("--check")) {
+  process.emitWarning("old")
+  setTimeout(() => {
+    console.error("usage: node scripts/init.mjs --name <n>\\n\\n  --prefix  x")
+    process.exit(1)
+  })
+}
+`,
+    ],
+  ])
+    withTemplate(source, template => {
+      const run = create("sample-system", ...VALUES, "--from", template)
+      refusesCleanly(run)
+      assert.match(
+        run.stderr,
+        /refuses them: a value is missing or not valid: --name sample-system /,
+        form,
+      )
+      assert.doesNotMatch(run.stderr, /boom|Error|Warning|usage: node/, form)
+      assert.deepEqual(readdirSync(dir), [], form)
+    })
+})
+
+test("#56 a warning ahead of a cloned init's refusal is dropped, the refusal kept", () => {
+  withTemplate(
+    `if (process.argv.includes("--check")) {
+  process.emitWarning("old")
+  setTimeout(() => {
+    console.error('--owner "sample-owner" is not valid: a reason\\n\\nusage: x')
+    process.exit(1)
+  })
+}
+`,
+    template => {
+      const run = create("sample-system", ...VALUES, "--from", template)
+      refusesCleanly(run)
+      assert.match(
+        run.stderr,
+        /refuses them: --owner "sample-owner" is not valid: a reason\n/,
+      )
+      assert.doesNotMatch(run.stderr, /Warning/)
     },
   )
 })
@@ -429,7 +523,15 @@ test("#56 the init script names each refused value, quoted, and what it accepts"
     ],
     [
       ["--author", "two\nlines"],
-      '--author "two\\nlines" is not valid: one line of text',
+      '--author "two\\nlines" is not valid: one line of text, not blank',
+    ],
+    [
+      ["--author", "  "],
+      '--author "  " is not valid: one line of text, not blank',
+    ],
+    [
+      ["--description", ""],
+      '--description "" is not valid: one line of text, not blank',
     ],
   ]) {
     const run = check(...args)

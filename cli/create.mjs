@@ -23,7 +23,7 @@ import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet] [--dir <path>]
 
   <name>        the package and repo name, kebab-case; the new folder is named after it
-  --prefix      the custom property prefix, letters and digits (as in --ads-*)
+  --prefix      the custom property prefix: a lowercase letter, then lowercase letters and digits (as in --ads-*)
   --owner       your GitHub username
   --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
   --description one line for package.json and the README intro (default: "The <name> design system.")
@@ -138,8 +138,12 @@ const initArgs = [
 const quoted = initArgs
   .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
   .join(" ")
-// The reason init gives, which names each value it refused, without its usage
-// (#56); a template whose init gives none gets the values it was handed.
+// The reason init gives, which names each value it refused (#56): only lines
+// shaped like init's refusals, so a crash's stack trace or a Node warning is
+// never shown as one; a template whose init gives none gets the values it was
+// handed. Init's --name is this command's <name>.
+const REFUSAL_LINE =
+  /^(--[a-z][a-z-]* (is missing|needs a value|".*" is not valid: .+)|unknown argument .+)$/
 const initRefusal = dir => {
   const run = spawnSync(
     process.execPath,
@@ -147,11 +151,14 @@ const initRefusal = dir => {
     { encoding: "utf8", stdio: ["ignore", "ignore", "pipe"] },
   )
   if (run.status === 0) return undefined
-  const reason = String(run.stderr ?? "")
-    .split(/\n\nusage: /)[0]
-    .trim()
-  return reason && !reason.startsWith("usage: ")
-    ? reason
+  const lines = String(run.stderr ?? "").split("\n")
+  const usage = lines.findIndex(line => line.startsWith("usage: "))
+  const reasons = lines
+    .slice(0, usage === -1 ? undefined : usage)
+    .filter(line => REFUSAL_LINE.test(line))
+    .map(line => line.replace(/^--name /, "<name> "))
+  return reasons.length
+    ? reasons.join("\n")
     : `a value is missing or not valid: ${quoted}`
 }
 // Asked of this copy first, so a bad value fails before the network.

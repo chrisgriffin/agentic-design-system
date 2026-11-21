@@ -17,7 +17,7 @@ import { gitUserName } from "../cli/defaults.mjs"
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
   --name        the package and repo name, kebab-case (today: agentic-design-system)
-  --prefix      the custom property prefix, letters and digits (today: ads, as in --ads-*)
+  --prefix      the custom property prefix: a lowercase letter, then lowercase letters and digits (today: ads, as in --ads-*)
   --owner       your GitHub username (today: chrisgriffin)
   --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
   --description one line for package.json and the README intro (default: "The <name> design system.")
@@ -70,7 +70,7 @@ const fleet = switches.has("--fleet")
 // Each flag's pattern and, for the refusal, what it accepts (#56). The author
 // and description are free text, one line: they land in LICENSE, package.json
 // and the README.
-const ONE_LINE = [/^[^\n\r]*\S[^\n\r]*$/, "one line of text"]
+const ONE_LINE = [/^[^\n\r]*\S[^\n\r]*$/, "one line of text, not blank"]
 const RULES = {
   "--name": [
     /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/,
