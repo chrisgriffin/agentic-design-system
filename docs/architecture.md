@@ -47,6 +47,7 @@ The contract declares the props, the element structure and the tokens the styles
 
 - `docs/` — this file and the rest of the written record; `docs/adr/` holds the decision records.<!-- init -->
 - `specs/` — the Spec Kit spec, plan and tasks behind each build.<!-- /init -->
+- `specs/` — the spec, plan and tasks behind each change, one folder per change; a new system starts with none.<!-- init --> Init removes the template's, so the folder appears with its first spec.<!-- /init -->
 - `test-utils/` — helpers the component tests import: `axe.ts` holds `expectNoViolations`, the accessibility assertion every component's test calls, and `a11y-coverage.test.ts` fails the gate on a component test that never calls it, and on a component folder with no test file; `contract-coverage.test.ts` fails it unless a component with no contract fails `drift:verify`.
 - `types/` — ambient declarations TypeScript cannot infer: `css-modules.d.ts` types a `*.module.css` import and a plain stylesheet's side-effect import, both of which Vite resolves at build time. It is the one declaration of either.
 - `.github/workflows/` — CI, the Storybook check, <!-- init -->the init check, <!-- /init -->the Pages deploy, and the release and review-loop triggers.
