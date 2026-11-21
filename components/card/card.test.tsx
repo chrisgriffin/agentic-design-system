@@ -2,8 +2,10 @@ import { render, screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { expectNoViolations } from "../../test-utils/axe"
+import { variantCases } from "../../test-utils/variants"
 import { Badge } from "../badge"
-import { Card } from "./card"
+import { Card, type CardProps } from "./card"
+import contract from "./card.contract.json"
 
 test("composes a header with a trailing slot inside a padded card", () => {
   render(
@@ -28,11 +30,11 @@ test("padding none drops the inset", () => {
   expect(screen.getByTestId("card")).toHaveClass("paddingNone")
 })
 
-test.each(["default", "none"] as const)(
-  "padding %s with a header has no accessibility violations",
-  async padding => {
+test.each(variantCases<CardProps>(contract))(
+  "%s with a header has no accessibility violations",
+  async (_, props) => {
     const { container } = render(
-      <Card padding={padding}>
+      <Card {...props}>
         <Card.Header
           title="Title"
           trailing={<Badge tone="accent">New</Badge>}
