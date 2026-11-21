@@ -11,4 +11,4 @@
 - `scripts/init.mjs` — read; its marker strip and its removal of `specs` are what the new bullet describes, unchanged.
 - `README.md` — read; its one `specs/` mention is in the "Starting your own" section init removes, correct for the template, unchanged.
 - `.claude/skills/setup-system/SKILL.md` — read; it rewrites the docs that still describe the template and names no spec path, unchanged.
-- none of `CLAUDE.md` § Architecture's couplings; no directory added or removed, no Routine, cron, ruleset, workflow or vault note.
+- none of `CLAUDE.md` § Architecture's couplings; no directory added or removed, no Routine, cron, ruleset or workflow.

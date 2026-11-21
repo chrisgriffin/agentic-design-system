@@ -12,4 +12,4 @@
 - `cli/create.test.mjs` — new and updated tests.
 - `docs/architecture.md` — both paragraphs describing the checks.
 - README: unchanged, it does not describe refusal text.
-- none of `CLAUDE.md` § Architecture's couplings; no workflow, Routine, cron, ruleset or vault note; no CHANGELOG entry by hand (release tooling writes it).
+- none of `CLAUDE.md` § Architecture's couplings; no workflow, Routine, cron or ruleset; no CHANGELOG entry by hand (release tooling writes it).

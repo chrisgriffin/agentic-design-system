@@ -43,4 +43,4 @@ One task per `## Surfaces touched` line in `plan.md`, in that order.
 - [x] T019 Published surface — confirm `scripts/init.mjs` rewrites `design-delta.json` by name, prefix and Figma file key only, so a new `rules` key survives an `init` run untouched; if it does not, fix `init.mjs` in this PR.
 - [x] T020 Cost — confirm no workflow trigger, cron, per-push job or Routine fire changes, and say so in the PR body.
 - [x] T021 Migration — confirm none is owed: nothing outside this repo reads `design-delta.json`, and a copier gets the stricter gate by design.
-- [x] T022 Vault notes — run `grep -rl "agentic-design-system:design-delta.json" AI/` against the vault, confirm no living doc's `covers:` names this path, and record the result in the PR body.
+- [x] T022 Outside this repo — confirm no document outside this repo names this path, and record the result in the PR body.

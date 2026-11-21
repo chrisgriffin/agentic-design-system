@@ -18,4 +18,4 @@
 ## Phase 4: Surfaces
 
 - [x] T007 `init-check.yml` read: it passes flags and greps for init references, never the help text.
-- [x] T008 No `CLAUDE.md` § Architecture coupling, Routine, ruleset, workflow or vault note touched.
+- [x] T008 No `CLAUDE.md` § Architecture coupling, Routine, ruleset or workflow touched.

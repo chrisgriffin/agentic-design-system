@@ -19,4 +19,4 @@
 - `docs/architecture.md` — the gate sentence lists six steps plus the Storybook check.
 - `specs/3-storybook/spec.md`, `specs/6-init-script/spec.md` — the passages that put `build-storybook` in `verify` say what replaced it (this spec).
 - cost — saves one Storybook build per pull request push (about a minute of a billed runner each); no trigger, cron or agent fire added.
-- none else — no directory added, no published surface (the package is private), no reusable workflow body, Routine, vault note or Mac-installed file.
+- none else — no directory added, no published surface (the package is private), no reusable workflow body, Routine or Mac-installed file.

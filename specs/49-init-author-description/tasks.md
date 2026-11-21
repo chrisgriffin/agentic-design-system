@@ -20,4 +20,4 @@
 ## Phase 4: Surfaces
 
 - [x] T009 `init-check.yml` job name and triggers unchanged: no ruleset change.
-- [x] T010 No `CLAUDE.md` § Architecture coupling, Routine, cron or vault note touched.
+- [x] T010 No `CLAUDE.md` § Architecture coupling, Routine or cron touched.

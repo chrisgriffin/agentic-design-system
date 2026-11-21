@@ -16,4 +16,4 @@
 - `CLAUDE.md` § CI accessibility line — read; it states the rule, which now holds, so it stays as is.
 - `scripts/scaffold-component.mjs` — read; its test template already calls `expectNoViolations`, so untouched; proven by scaffolding a probe, running `npm test`, deleting it.
 - cost — none: a few milliseconds inside the existing `npm test`; no trigger, cron or agent fire added.
-- none else — no directory added, no published surface, workflow, ruleset, Routine, vault note or Mac-installed file.
+- none else — no directory added, no published surface, workflow, ruleset, Routine or Mac-installed file.

@@ -19,4 +19,4 @@
 - [x] T005 `README.md` — the intro's init passage rewritten inside its markers.
 - [x] T006 `scripts/init.mjs` — the swap entry removed.
 - [x] T007 `docs/testing.md`, `docs/architecture.md` — checked, nothing names the swap.
-- [x] T008 No `CLAUDE.md` § Architecture coupling, Routine, ruleset or vault note touched; the two workflow changes are comments only.
+- [x] T008 No `CLAUDE.md` § Architecture coupling, Routine or ruleset touched; the two workflow changes are comments only.

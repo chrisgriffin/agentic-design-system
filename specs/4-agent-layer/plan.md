@@ -13,4 +13,4 @@
 - `.claude/`: new (settings, three hooks, two skill stubs). `CLAUDE.md`, `scripts/scaffold-component.mjs`: new.
 - `package.json`: the `scaffold` script.
 - `README.md`: the Agent layer section.
-- No workflow, ruleset, vault note, Routine or cron.
+- No workflow, ruleset, Routine or cron.

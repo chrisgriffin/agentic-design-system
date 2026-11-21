@@ -15,4 +15,4 @@
 - `.storybook/`: new. `.gitignore`: `storybook-static/`. `tsconfig.json` and `eslint.config.mjs`: `.storybook` included, the two constants as globals.
 - `.github/workflows/storybook-check.yml` and `deploy-pages.yml`: new stubs. No ruleset change in this PR.
 - `README.md`: the Storybook section.
-- No vault note, Routine or cron.
+- No Routine or cron.

@@ -17,4 +17,4 @@
 - `docs/architecture.md` § `test-utils/` — names `variants.ts` and the new check.
 - `README.md`, `CLAUDE.md` — read; both already say each component's test runs axe over its variants, which now holds by construction, so unchanged.
 - cost — none: a few milliseconds inside the existing `npm test`; no trigger, cron or agent fire added.
-- none else — no directory added, no published surface, workflow, ruleset, Routine, vault note or Mac-installed file.
+- none else — no directory added, no published surface, workflow, ruleset, Routine or Mac-installed file.

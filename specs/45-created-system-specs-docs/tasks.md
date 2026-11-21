@@ -15,4 +15,4 @@
 ## Phase 4: Surfaces
 
 - [x] T004 `scripts/init.mjs`, `README.md` and the setup-system skill read: none names a spec path a copy keeps, so none changes.
-- [x] T005 No `CLAUDE.md` § Architecture coupling, directory, Routine, ruleset, workflow or vault note touched.
+- [x] T005 No `CLAUDE.md` § Architecture coupling, directory, Routine, ruleset or workflow touched.

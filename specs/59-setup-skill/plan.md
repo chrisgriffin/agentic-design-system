@@ -16,4 +16,4 @@
 - `.github/workflows/init-check.yml` — new assertions; job name and triggers unchanged, so no ruleset change. Its shakedown is this PR's own `init / ci` run.
 - `README.md`, `docs/architecture.md`, `docs/testing.md` — the skill, its test and the new checks.
 - `cost` — none: no new workflow, trigger or agent run; `init / ci` gains a few greps.
-- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron, ruleset or vault note.
+- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron or ruleset.

@@ -12,5 +12,5 @@
 - `README.md`: the section; `docs/testing.md` and `docs/architecture.md`: the check and the script.
 - `.github/CODEOWNERS`: the one-line form.
 - the branch ruleset — not required: `init / ci` runs on every PR but the ruleset stays as Build 5 leaves it.
-- the vault's System Map section for this repo — unchanged.
+- nothing outside this repo — unchanged.
 - No Routine, cron or Mac-installed file.

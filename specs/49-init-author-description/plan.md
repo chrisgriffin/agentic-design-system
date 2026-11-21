@@ -13,4 +13,4 @@
 - `cli/create.test.mjs` — pass-through and line-break refusal tests; the template-repo setup becomes a `withTemplate` helper shared with the existing clone test.
 - `.github/workflows/init-check.yml` — new assertions and flags; job name and triggers unchanged, so no ruleset change. Its shakedown is this PR's own `init / ci` run.
 - `README.md`, `docs/testing.md`, `docs/architecture.md` — the flags, the removal and the checks.
-- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron, ruleset or vault note.
+- none of `CLAUDE.md` § Architecture's couplings; no Routine, cron or ruleset.

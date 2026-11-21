@@ -16,4 +16,4 @@
 - `design-delta.json`, `vite.config.ts`, `vitest.setup.ts`: new.
 - `.stylelintrc.json`: the class pattern.
 - `README.md`: the components section.
-- No workflow, vault note, Routine or cron.
+- No workflow, Routine or cron.
