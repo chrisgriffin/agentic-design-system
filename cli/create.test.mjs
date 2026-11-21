@@ -67,6 +67,23 @@ test("a value the init script refuses exits 1 and writes nothing", () => {
   assert.deepEqual(readdirSync(dir), [])
 })
 
+test("#56 a refused value is named, with the init script's reason", () => {
+  const run = create(
+    "sample-system",
+    "--prefix",
+    "Bad",
+    "--owner",
+    "sample-owner",
+  )
+  refusesCleanly(run)
+  assert.match(
+    run.stderr,
+    /^--prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits\n\nusage: npx /,
+  )
+  assert.doesNotMatch(run.stderr, /sample-owner/, "it listed every value")
+  assert.deepEqual(readdirSync(dir), [])
+})
+
 test("a folder that exists and is not empty is refused, untouched", () => {
   mkdirSync(path.join(dir, "sample-system"))
   writeFileSync(path.join(dir, "sample-system/keep.txt"), "mine\n")
@@ -215,6 +232,26 @@ const withTemplate = (source, use) => {
   }
 }
 
+test("#56 the cloned template's refusal carries its init script's reason", () => {
+  withTemplate(
+    `if (process.argv.includes("--check")) {
+  console.error('--owner "sample-owner" is not valid: a reason\\n\\nusage: x')
+  process.exit(1)
+}
+`,
+    template => {
+      const run = create("sample-system", ...VALUES, "--from", template)
+      refusesCleanly(run)
+      assert.match(
+        run.stderr,
+        /cloned template's init script refuses them: --owner "sample-owner" is not valid: a reason$/m,
+      )
+      assert.doesNotMatch(run.stderr, /usage: x/)
+      assert.deepEqual(readdirSync(dir), [])
+    },
+  )
+})
+
 test("the cloned template's own init script decides before the copy is kept", () => {
   // A template whose init script refuses every value, as another version of
   // the template might refuse values this copy accepts.
@@ -323,7 +360,7 @@ test("the init script refuses --author or --description with no value (#49)", ()
       { encoding: "utf8" },
     )
     refusesCleanly(run)
-    assert.match(run.stderr, /^usage: /)
+    assert.match(run.stderr, new RegExp(`^${f} needs a value\n\nusage: `))
     const missing = spawnSync(
       process.execPath,
       [CREATE, "sample-system", ...VALUES, f],
@@ -347,7 +384,7 @@ test("#52 the init script refuses an argument it does not recognize, naming it",
     refusesCleanly(run)
     assert.match(
       run.stderr,
-      new RegExp(`^unknown argument ${args[0]}\n\nusage: `),
+      new RegExp(`^unknown argument "${args[0]}"\n\nusage: `),
       args.join(" "),
     )
     assert.equal(run.stdout, "", `${args.join(" ")} printed to stdout`)
@@ -375,9 +412,69 @@ test("#52 the init script refuses an argument it does not recognize, naming it",
     { cwd: made, encoding: "utf8" },
   )
   refusesCleanly(init)
-  assert.match(init.stderr, /^unknown argument --auther\n/)
+  assert.match(init.stderr, /^unknown argument "--auther"\n/)
   assert.equal(readFileSync(path.join(made, "package.json"), "utf8"), manifest)
   assert.ok(existsSync(path.join(made, "scripts/init.mjs")))
+})
+
+test("#56 the init script names each refused value, quoted, and what it accepts", () => {
+  for (const [args, line] of [
+    [
+      ["--prefix", "Bad"],
+      '--prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits',
+    ],
+    [
+      ["--figma-file", "a-b"],
+      '--figma-file "a-b" is not valid: letters and digits',
+    ],
+    [
+      ["--author", "two\nlines"],
+      '--author "two\\nlines" is not valid: one line of text',
+    ],
+  ]) {
+    const run = check(...args)
+    refusesCleanly(run)
+    assert.ok(run.stderr.startsWith(`${line}\n\nusage: `), run.stderr)
+  }
+  // Every refused value is named, one line each, and a valid one is not.
+  const run = spawnSync(
+    process.execPath,
+    [
+      INIT,
+      "--check",
+      "--name",
+      "Sample_System",
+      "--prefix",
+      "",
+      "--owner",
+      "sample-owner",
+    ],
+    { encoding: "utf8" },
+  )
+  refusesCleanly(run)
+  const [reasons] = run.stderr.split("\n\nusage: ")
+  assert.deepEqual(reasons.split("\n"), [
+    '--name "Sample_System" is not valid: kebab-case, lowercase letters and digits in words joined by single hyphens, starting with a letter',
+    '--prefix "" is not valid: a lowercase letter, then lowercase letters and digits',
+  ])
+  const missing = spawnSync(
+    process.execPath,
+    [INIT, "--check", "--name", "sample-system"],
+    {
+      encoding: "utf8",
+    },
+  )
+  refusesCleanly(missing)
+  assert.match(
+    missing.stderr,
+    /^--prefix is missing\n--owner is missing\n\nusage: /,
+  )
+})
+
+test("#56 an empty argument the init script does not recognize shows quoted", () => {
+  const run = check("")
+  refusesCleanly(run)
+  assert.match(run.stderr, /^unknown argument ""\n\nusage: /)
 })
 
 test("#52 the init script still takes every switch its usage lists", () => {

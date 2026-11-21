@@ -56,8 +56,10 @@ if (switches.has("--help") || switches.has("-h")) {
   console.log(USAGE)
   process.exit(0)
 }
+// Quoted, so an empty value or a line break shows in the refusal (#56).
+const shown = JSON.stringify
 if (unknown !== undefined) {
-  console.error(`unknown argument ${unknown}\n\n${USAGE}`)
+  console.error(`unknown argument ${shown(unknown)}\n\n${USAGE}`)
   process.exit(1)
 }
 const name = values["--name"]
@@ -65,17 +67,38 @@ const prefix = values["--prefix"]
 const owner = values["--owner"]
 const figma = values["--figma-file"]
 const fleet = switches.has("--fleet")
-// Free text, one line: it lands in LICENSE, package.json and the README.
-const line = v => v === undefined || /^[^\n\r]*\S[^\n\r]*$/.test(v ?? "")
-const ok =
-  /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(name ?? "") &&
-  /^[a-z][a-z0-9]*$/.test(prefix ?? "") &&
-  /^[A-Za-z0-9-]+$/.test(owner ?? "") &&
-  (figma === undefined || /^[A-Za-z0-9]+$/.test(figma ?? "")) &&
-  line(values["--author"]) &&
-  line(values["--description"])
-if (!ok) {
-  console.error(USAGE)
+// Each flag's pattern and, for the refusal, what it accepts (#56). The author
+// and description are free text, one line: they land in LICENSE, package.json
+// and the README.
+const ONE_LINE = [/^[^\n\r]*\S[^\n\r]*$/, "one line of text"]
+const RULES = {
+  "--name": [
+    /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/,
+    "kebab-case, lowercase letters and digits in words joined by single hyphens, starting with a letter",
+    true,
+  ],
+  "--prefix": [
+    /^[a-z][a-z0-9]*$/,
+    "a lowercase letter, then lowercase letters and digits",
+    true,
+  ],
+  "--owner": [/^[A-Za-z0-9-]+$/, "letters, digits and hyphens", true],
+  "--figma-file": [/^[A-Za-z0-9]+$/, "letters and digits"],
+  "--author": ONE_LINE,
+  "--description": ONE_LINE,
+}
+const refusals = Object.entries(RULES).flatMap(
+  ([flag, [pattern, rule, required]]) => {
+    const value = values[flag]
+    if (value === undefined) return required ? [`${flag} is missing`] : []
+    if (value === null) return [`${flag} needs a value`]
+    return pattern.test(value)
+      ? []
+      : [`${flag} ${shown(value)} is not valid: ${rule}`]
+  },
+)
+if (refusals.length) {
+  console.error(`${refusals.join("\n")}\n\n${USAGE}`)
   process.exit(1)
 }
 // cli/create.mjs asks this script whether its values are valid before it

@@ -138,15 +138,25 @@ const initArgs = [
 const quoted = initArgs
   .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
   .join(" ")
-const refused = `a value is missing or not valid: ${quoted}`
-const accepts = dir =>
-  spawnSync(
+// The reason init gives, which names each value it refused, without its usage
+// (#56); a template whose init gives none gets the values it was handed.
+const initRefusal = dir => {
+  const run = spawnSync(
     process.execPath,
     [path.join(dir, "scripts/init.mjs"), "--check", ...initArgs],
-    { stdio: "ignore" },
-  ).status === 0
+    { encoding: "utf8", stdio: ["ignore", "ignore", "pipe"] },
+  )
+  if (run.status === 0) return undefined
+  const reason = String(run.stderr ?? "")
+    .split(/\n\nusage: /)[0]
+    .trim()
+  return reason && !reason.startsWith("usage: ")
+    ? reason
+    : `a value is missing or not valid: ${quoted}`
+}
 // Asked of this copy first, so a bad value fails before the network.
-if (!accepts(root)) fail(`${refused}\n\n${USAGE}`)
+const refused = initRefusal(root)
+if (refused) fail(`${refused}\n\n${USAGE}`)
 
 const target = path.resolve(values["--dir"] ?? process.cwd(), name)
 let existing
@@ -189,10 +199,9 @@ step(`cloning ${from}`, () =>
 )
 // The clone's own init script is the one that will run, so it decides.
 step("checking the values", () => {
-  if (!accepts(staging))
-    throw new Error(
-      `the cloned template's init script refuses them: ${refused}`,
-    )
+  const why = initRefusal(staging)
+  if (why)
+    throw new Error(`the cloned template's init script refuses them: ${why}`)
 })
 // A new system starts its own history.
 step("starting a new git history", () => {
