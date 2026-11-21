@@ -1,0 +1,97 @@
+{
+  "$schema": "../../node_modules/design-delta/schema/contract.schema.json",
+  "id": "badge",
+  "title": "Badge",
+  "status": "published",
+  "sources": {
+    "code": {
+      "path": "components/badge/badge.tsx",
+      "styles": "components/badge/badge.module.css"
+    }
+  },
+  "props": {
+    "children": {
+      "type": "string"
+    },
+    "tone": {
+      "type": "enum",
+      "values": ["neutral", "accent", "success", "danger"],
+      "default": "neutral",
+      "required": false
+    }
+  },
+  "anatomy": {
+    "root": {
+      "type": "container",
+      "element": "span",
+      "codeClass": "badge",
+      "content": {
+        "$prop": "children"
+      }
+    }
+  },
+  "styles": {
+    "root": {
+      "base": {
+        "borderRadius": {
+          "token": "radius.pill"
+        },
+        "background": {
+          "token": "color.bg.muted"
+        },
+        "color": {
+          "token": "color.fg.default"
+        },
+        "padding": {
+          "block": {
+            "token": "inset.xs"
+          },
+          "inline": {
+            "token": "inset.sm"
+          }
+        },
+        "fontFamily": {
+          "token": "font-family.body"
+        },
+        "fontSize": {
+          "token": "font-size.xs"
+        },
+        "fontWeight": {
+          "token": "font-weight.medium"
+        },
+        "lineHeight": {
+          "token": "line-height.tight"
+        }
+      },
+      "variants": [
+        {
+          "when": {
+            "tone": "accent"
+          },
+          "background": {
+            "token": "color.accent.subtle"
+          },
+          "color": {
+            "token": "color.accent.default"
+          }
+        },
+        {
+          "when": {
+            "tone": "success"
+          },
+          "color": {
+            "token": "color.success.default"
+          }
+        },
+        {
+          "when": {
+            "tone": "danger"
+          },
+          "color": {
+            "token": "color.danger.default"
+          }
+        }
+      ]
+    }
+  }
+}

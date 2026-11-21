@@ -1,0 +1,27 @@
+name: Claude Mention
+
+# Thin stub: an @claude mention on an issue or PR dispatches the fleet's
+# mention responder. It needs the fleet's private operator, so a copy of the
+# template outside the fleet has no use for this file and deletes it.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, assigned, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  dispatch:
+    uses: chrisgriffin/workflows/.github/workflows/_reusable-claude-mention.yml@v1
+    with:
+      target: agentic-design-system
+    secrets:
+      OPS_GH_TOKEN: ${{ secrets.OPS_GH_TOKEN }}

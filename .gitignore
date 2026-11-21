@@ -1,0 +1,11 @@
+node_modules
+tokens/css/
+storybook-static/
+.DS_Store
+*.log
+.claude/settings.local.json
+.specify/
+
+# design-delta output; the snapshots a gather writes are committed, the rest is not.
+.design-delta/reports/
+.design-delta/state.json

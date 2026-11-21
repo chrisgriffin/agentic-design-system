@@ -1,0 +1,19 @@
+{
+  "extends": "@chrisgriffin/config/tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "components",
+    "tokens/scripts",
+    ".storybook/**/*",
+    "test-utils",
+    "types",
+    "vitest.setup.ts"
+  ]
+}
