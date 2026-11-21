@@ -1,6 +1,8 @@
 import ts from "typescript"
 import { describe, expect, test } from "vitest"
 
+import { type ContractProps, variantCases } from "./variants"
+
 /**
  * Holds the rule that every component test calls `expectNoViolations`: a test
  * file under `components/` that never calls it fails here, by its path.
@@ -22,21 +24,26 @@ const files = Object.entries(sources)
  * test never hides a real call, and a call inside a comment or a string never
  * counts as one.
  */
-const callsExpectNoViolations = (source: string) => {
-  const file = ts.createSourceFile(
+const parse = (source: string) =>
+  ts.createSourceFile(
     "test.tsx",
     source,
     ts.ScriptTarget.Latest,
     false,
     ts.ScriptKind.TSX,
   )
+
+const calls = (source: string, name: string) => {
   const visit = (node: ts.Node): boolean =>
     (ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      node.expression.text === "expectNoViolations") ||
+      node.expression.text === name) ||
     (ts.forEachChild(node, visit) ?? false)
-  return visit(file)
+  return visit(parse(source))
 }
+
+const callsExpectNoViolations = (source: string) =>
+  calls(source, "expectNoViolations")
 
 describe("callsExpectNoViolations", () => {
   test.each([
@@ -129,3 +136,91 @@ test.each(files)("%s calls expectNoViolations", (file, source) => {
     `${file} never calls expectNoViolations`,
   ).toBe(true)
 })
+
+/**
+ * Holds the rule that every variant a contract gives code gets an
+ * accessibility case (#57): `variantCases` turns a contract's code-side enums
+ * into cases, and a contract with one fails here, by its path, when its
+ * folder's test does not import it and call `variantCases`, so no variant
+ * list is typed into a test by hand.
+ */
+describe("variantCases", () => {
+  const contract = (props: ContractProps["props"]) => ({ props })
+
+  test("gives every combination of the code-side enums, titled by value", () => {
+    expect(
+      variantCases(
+        contract({
+          size: { type: "enum", values: ["sm", "lg"] },
+          tone: { type: "enum", values: ["a", "b"] },
+          label: { type: "string" },
+        }),
+      ),
+    ).toEqual([
+      ["size sm, tone a", { size: "sm", tone: "a" }],
+      ["size sm, tone b", { size: "sm", tone: "b" }],
+      ["size lg, tone a", { size: "lg", tone: "a" }],
+      ["size lg, tone b", { size: "lg", tone: "b" }],
+    ])
+  })
+
+  test("gives no case for a design-only enum", () => {
+    expect(
+      variantCases(
+        contract({
+          size: { type: "enum", values: ["sm"] },
+          state: { type: "enum", values: ["resting", "hovered"], code: "none" },
+        }),
+      ),
+    ).toEqual([["size sm", { size: "sm" }]])
+  })
+
+  test("gives one defaults case for a contract with no code-side enum", () => {
+    expect(variantCases(contract({ label: { type: "string" } }))).toEqual([
+      ["defaults", {}],
+    ])
+  })
+})
+
+const contracts = Object.entries(
+  import.meta.glob<ContractProps>("../components/**/*.contract.json", {
+    import: "default",
+    eager: true,
+  }),
+)
+  .map(([path, json]) => [path.replace(/^\.\.\//, ""), json] as const)
+  .sort(([a], [b]) => a.localeCompare(b))
+
+const importsFrom = (source: string, specifier: string) =>
+  parse(source).statements.some(
+    node =>
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      node.moduleSpecifier.text === specifier,
+  )
+
+test("finds the contracts", () => {
+  expect(contracts.length).toBeGreaterThan(0)
+})
+
+const withCodeEnums = contracts.filter(([, json]) =>
+  Object.values(json.props).some(
+    prop => prop.type === "enum" && prop.code !== "none",
+  ),
+)
+
+test.each(withCodeEnums)(
+  "%s has its variants checked through variantCases",
+  path => {
+    const folder = folderOf(path)
+    const tests = files.filter(([file]) => folderOf(file) === folder)
+    const specifier = `./${path.slice(folder.length + 1)}`
+    expect(
+      tests.some(
+        ([, source]) =>
+          importsFrom(source, specifier) && calls(source, "variantCases"),
+      ),
+      `no test in ${folder} imports ${specifier} and calls variantCases`,
+    ).toBe(true)
+  },
+)
