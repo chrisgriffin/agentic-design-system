@@ -18,7 +18,7 @@ import path from "node:path"
 import { createInterface } from "node:readline/promises"
 import { fileURLToPath } from "node:url"
 
-import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
+import { authorFrom, gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
 const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet] [--dir <path>]
 
@@ -210,10 +210,11 @@ step("checking the values", () => {
   if (why)
     throw new Error(`the cloned template's init script refuses them: ${why}`)
 })
-// A new system starts its own history.
+// A new system starts its own history, on main, which its build check and
+// Pages deploy run on, whatever git's own default branch is (#68).
 step("starting a new git history", () => {
   rmSync(path.join(staging, ".git"), { recursive: true, force: true })
-  git("-C", staging, "init", "--quiet")
+  git("-C", staging, "init", "--quiet", "--initial-branch=main")
 })
 step(`moving the copy to ${target}`, () => {
   if (existing) rmdirSync(target)
@@ -227,6 +228,16 @@ step(`moving the copy to ${target}`, () => {
 staging = made = undefined
 
 if (init) {
+  // The author init would default to, resolved in the copy as init resolves
+  // it, said before the install's output and handed to init so the name said
+  // is the name written (#68).
+  if (author === undefined) {
+    const chosen = authorFrom(target, owner)
+    console.log(
+      `LICENSE names ${chosen.author} as the copyright holder, from ${chosen.from}; pass --author to name someone else.`,
+    )
+    initArgs.push("--author", chosen.author)
+  }
   const run = spawnSync(process.execPath, ["scripts/init.mjs", ...initArgs], {
     cwd: target,
     stdio: "inherit",

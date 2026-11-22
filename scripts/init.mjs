@@ -12,7 +12,7 @@ import {
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { gitUserName } from "../cli/defaults.mjs"
+import { authorFrom } from "../cli/defaults.mjs"
 
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
@@ -106,7 +106,7 @@ if (refusals.length) {
 if (switches.has("--check")) process.exit(0)
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const author = values["--author"] ?? gitUserName(root) ?? owner
+const author = values["--author"] ?? authorFrom(root, owner).author
 const description = values["--description"] ?? `The ${name} design system.`
 const self = path.relative(root, fileURLToPath(import.meta.url))
 // A node_modules means an install already ran in this copy and may have

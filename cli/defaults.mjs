@@ -33,3 +33,13 @@ export const gitUserName = cwd => {
     return undefined
   }
 }
+
+// The LICENSE copyright holder when --author is not given: git's user.name in
+// `cwd`, else the owner, with where it came from, for the line that says so.
+// scripts/init.mjs and the create command both take it from here (#68).
+export const authorFrom = (cwd, owner) => {
+  const gitName = gitUserName(cwd)
+  return gitName === undefined
+    ? { author: owner, from: "--owner" }
+    : { author: gitName, from: "git's user.name" }
+}
