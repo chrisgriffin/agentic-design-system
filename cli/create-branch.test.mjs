@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
 import {
+  chmodSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -29,7 +30,9 @@ afterEach(() => {
 
 // The create command under a global git config holding only `config`, so the
 // machine running the test has no say.
-const create = (config, ...args) => {
+// `env` adds to that environment.
+const create = (config, ...args) => createWith({}, config, ...args)
+const createWith = (env, config, ...args) => {
   writeFileSync(gitconfig, config)
   const out = path.join(dir, "out")
   return spawnSync(process.execPath, [CREATE, ...args, "--dir", out], {
@@ -39,6 +42,7 @@ const create = (config, ...args) => {
       ...process.env,
       GIT_CONFIG_GLOBAL: gitconfig,
       GIT_CONFIG_NOSYSTEM: "1",
+      ...env,
     },
   })
 }
@@ -87,15 +91,56 @@ test("#68 the branch a copy starts on is one its build check runs on", () => {
   )
 })
 
-// A one-commit template repository whose init script records its arguments.
-const withTemplate = use => {
+// A git on PATH that refuses --initial-branch as git before 2.28 does, and
+// passes everything else to the real one.
+const oldGit = () => {
+  const real = spawnSync("sh", ["-c", "command -v git"], {
+    encoding: "utf8",
+  }).stdout.trim()
+  const bin = path.join(dir, "bin")
+  mkdirSync(bin)
+  writeFileSync(
+    path.join(bin, "git"),
+    `#!/bin/sh
+for a in "$@"; do
+  case "$a" in
+    --initial-branch*) echo "error: unknown option \\\`$a'" >&2; exit 129 ;;
+  esac
+done
+exec "${real}" "$@"
+`,
+  )
+  chmodSync(path.join(bin, "git"), 0o755)
+  return { PATH: `${bin}${path.delimiter}${process.env.PATH}` }
+}
+
+test("#68 a copy starts on main with a git older than 2.28", () => {
+  const run = createWith(
+    oldGit(),
+    "[init]\n\tdefaultBranch = master\n",
+    "sample-system",
+    ...VALUES,
+    "--from",
+    ROOT,
+    "--no-init",
+  )
+  assert.equal(run.status, 0, run.stderr)
+  const head = git("symbolic-ref", "--short", "HEAD")
+  assert.equal(head.stdout.trim(), "main")
+})
+
+// A one-commit template repository whose init script records its arguments,
+// and exits 1 after recording them when `failing`.
+const withTemplate = (use, { failing = false } = {}) => {
   const template = path.join(dir, "template")
   mkdirSync(path.join(template, "scripts"), { recursive: true })
   writeFileSync(
     path.join(template, "scripts/init.mjs"),
     `import { writeFileSync } from "node:fs"
-if (!process.argv.includes("--check"))
+if (!process.argv.includes("--check")) {
   writeFileSync("argv.json", JSON.stringify(process.argv.slice(2)))
+  ${failing ? "process.exit(1)" : ""}
+}
 `,
   )
   const run = (...args) =>
@@ -161,4 +206,29 @@ test("#68 with --author, the output says nothing about where it came from", () =
     assert.doesNotMatch(run.stdout, /^LICENSE names/m)
     assert.equal(initAuthor(), "Sample Author")
   })
+})
+
+test("#68 when init fails, the retry line carries the author the output named", () => {
+  withTemplate(
+    template => {
+      const run = create(
+        "[user]\n\tname = Sample Bot\n",
+        "sample-system",
+        ...VALUES,
+        "--from",
+        template,
+      )
+      assert.notEqual(run.status, 0)
+      assert.match(
+        run.stdout,
+        /^LICENSE names Sample Bot as the copyright holder, from git's user\.name;/m,
+      )
+      assert.match(
+        run.stderr,
+        /^ {2}node scripts\/init\.mjs .* --author 'Sample Bot'(?: |$)/m,
+      )
+      assert.equal(initAuthor(), "Sample Bot")
+    },
+    { failing: true },
+  )
 })
