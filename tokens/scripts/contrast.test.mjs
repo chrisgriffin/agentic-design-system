@@ -74,8 +74,14 @@ function textPairs(css) {
   const rules = parseRules(css)
   if (!rules.length) return []
   const root = rules[0].cls
-  const find = (cls, state) =>
-    rules.find(r => r.cls === cls && r.state === state)?.decls
+  // A class or state written in more than one block is every block, merged
+  // in source order, as the browser's cascade does.
+  const find = (cls, state) => {
+    const matches = rules.filter(r => r.cls === cls && r.state === state)
+    return matches.length
+      ? Object.assign({}, ...matches.map(r => r.decls))
+      : undefined
+  }
   const modifiers = [null, ...new Set(rules.map(r => r.cls))].filter(
     c => c !== root,
   )
@@ -175,6 +181,21 @@ test("#60 the pair reader follows the cascade a browser does", () => {
       .filter(p => p.where.startsWith(".root.ghost:"))
       .map(p => `${p.where} ${p.bg}`),
     [".root.ghost:active --ads-color-accent-subtle"],
+  )
+  // A class or state repeated in a later block is merged in, not dropped:
+  // a second modifier block, a second root block and a second state block.
+  const repeated = `${css}
+    .ghost { color: var(--ads-color-fg-muted); }
+    .root { color: var(--ads-color-fg-default); }
+    .root { &:active { color: var(--ads-color-fg-subtle); } }
+  `
+  assert.deepEqual(
+    textPairs(repeated).map(p => `${p.where} ${p.fg} on ${p.bg}`),
+    [
+      ".root --ads-color-fg-default on --ads-color-accent-default",
+      ".root:active --ads-color-fg-subtle on --ads-color-accent-active",
+      ".root.ghost --ads-color-fg-muted on --ads-color-bg-canvas",
+    ],
   )
   assert.throws(() => textPairs(".a .b { color: red; }"), /cannot model/)
   assert.throws(() => textPairs(".a { color: red; }"), /cannot resolve/)

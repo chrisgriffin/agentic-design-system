@@ -171,11 +171,11 @@
       },
       "hover": {
         "$type": "color",
-        "$value": "{color.red.600}",
+        "$value": "{color.red.700}",
         "$extensions": {
           "mode": {
-            "light": "{color.red.600}",
-            "dark": "{color.red.600}"
+            "light": "{color.red.700}",
+            "dark": "{color.red.300}"
           }
         }
       },
