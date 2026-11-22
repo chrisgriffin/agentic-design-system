@@ -30,7 +30,9 @@ and your GitHub username (or takes them as `--prefix` and
 `--owner`, with `--author <name>`, `--description <text>`, `--figma-file <key>`
 and `--dir <path>` when you want them),
 clones the template's default branch into `my-system/` as a new git
-repository, and runs the init script there. It needs Node 22, git and no
+repository on `main`, the branch its build check and Pages deploy run on, and
+runs the init script there. Without `--author` it says which name it writes
+into `LICENSE`: git's `user.name`, else `--owner`. It needs Node 22, git and no
 account or token.
 
 In a copy you made by hand, run the init script yourself:
