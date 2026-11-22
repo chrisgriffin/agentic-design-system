@@ -47,7 +47,8 @@
   background: transparent;
   color: var(--ads-color-accent-default);
 
-  &:hover {
+  &:hover,
+  &:active {
     background: var(--ads-color-accent-subtle);
   }
 }

@@ -114,8 +114,9 @@ what the token CSS keys off. Docs come from `@storybook/addon-docs`.
 `@storybook/addon-a11y` shows an accessibility panel beside each story; it
 reports to whoever is looking and fails nothing. What fails is the gate: every
 component's test runs axe-core over its variants in jsdom, so a violation turns
-`npm run verify` red. Colour contrast needs a real browser, so only the panel
-checks it.
+`npm run verify` red. jsdom cannot measure colour contrast, so
+`tokens/scripts/contrast.test.mjs` does instead: every text pair a component
+stylesheet sets must reach 4.5:1 in both themes, or the gate fails naming it.
 
 ## Development
 

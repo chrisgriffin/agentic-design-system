@@ -9,7 +9,8 @@ export async function expectNoViolations(container: HTMLElement) {
   const { violations } = await axe.run(container, {
     rules: {
       // jsdom has no layout and no computed colour, so axe cannot measure
-      // contrast here. Off explicitly, so nobody reads a silent pass into it.
+      // contrast here. Off explicitly, so nobody reads a silent pass into it;
+      // tokens/scripts/contrast.test.mjs checks the stylesheets' text pairs.
       "color-contrast": { enabled: false },
     },
   })
