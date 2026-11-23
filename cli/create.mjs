@@ -34,8 +34,8 @@ const USAGE = `usage: npx github:chrisgriffin/agentic-design-system [--prefix <p
 
 Sets up the template's default branch in the folder under your name, prefix
 and owner, installs it and runs its gate. The folder must be empty, or in a
-git repository with nothing uncommitted under it, so git can give back every
-file the setup replaces. In a repository it keeps the history and the branch;
+git repository with nothing uncommitted or ignored under it, so git can give
+back every file the setup replaces. In a repository it keeps the history and the branch;
 anywhere else it starts a repository on main. In a terminal, a missing prefix
 or owner is asked for. Nothing is committed: read the diff, then commit.`
 
@@ -199,9 +199,14 @@ try {
 }
 if (existing && !existing.isDirectory())
   fail(`${target} exists and is not a folder; nothing was written.`)
-// The nearest folder that exists says whether the target is in a repository.
+// The nearest folder that exists says whether the target is in a repository;
+// the first one missing on the way is what a failed copy removes.
 let probe = target
-while (!existsSync(probe)) probe = path.dirname(probe)
+let made
+while (!existsSync(probe)) {
+  made = probe
+  probe = path.dirname(probe)
+}
 let inRepo = false
 try {
   inRepo =
@@ -217,19 +222,40 @@ if (hadFiles && !inRepo)
   fail(
     `${target} is not empty and not in a git repository, so nothing could give back what the setup replaces; nothing was written. Run it in an empty folder, or in a git repository with everything committed.`,
   )
+// A git command whose failure is one message naming what failed, never a
+// stack trace.
+const gitOr = (what, ...gitArgs) => {
+  try {
+    return git(...gitArgs)
+  } catch (error) {
+    fail(`${what}\n${String(error.stderr || error.message).trim()}`)
+  }
+}
 if (hadFiles) {
-  const changes = git(
+  // Ignored files are listed too: git holds no copy of them, and the copy, the
+  // init script's walk and its specs/ and cli/ removal reach them as well.
+  const lines = gitOr(
+    `reading git status in ${target} failed; nothing was written.`,
     "-C",
     target,
     "status",
     "--porcelain",
     "--untracked-files=all",
+    "--ignored",
     "--",
     ".",
-  ).trimEnd()
-  if (changes)
+  )
+    .split("\n")
+    .filter(Boolean)
+  const changes = lines.filter(line => !line.startsWith("!! "))
+  const ignored = lines.filter(line => line.startsWith("!! "))
+  if (changes.length)
     fail(
-      `${target} has changes git could not give back; commit or stash them first. Nothing was written.\n${changes}`,
+      `${target} has changes git could not give back; commit or stash them first. Nothing was written.\n${changes.join("\n")}`,
+    )
+  if (ignored.length)
+    fail(
+      `${target} holds files git ignores, so git could not give them back; move them out first. Nothing was written.\n${ignored.join("\n")}`,
     )
 }
 
@@ -278,9 +304,9 @@ const replaced = hadFiles ? files("").filter(there) : []
 try {
   cpSync(staging, target, { recursive: true })
 } catch (error) {
-  // An empty or new target is put back as it was; in a repository, git holds
-  // everything that was there.
-  if (!existing) rmSync(target, { recursive: true, force: true })
+  // An empty or new target is put back as it was, with any folder made on the
+  // way to it; in a repository, git holds everything that was there.
+  if (!existing) rmSync(made, { recursive: true, force: true })
   else if (!hadFiles)
     for (const entry of readdirSync(target))
       rmSync(path.join(target, entry), { recursive: true, force: true })
@@ -296,9 +322,24 @@ rmSync(staging, { recursive: true, force: true })
 // starts there. HEAD is pointed at main rather than passing --initial-branch,
 // which git before 2.28 does not know. A repository with history keeps its
 // branch.
-if (!inRepo) git("-C", target, "init", "--quiet")
+const copied = `the template was copied into ${target}, but`
+if (!inRepo)
+  gitOr(
+    `${copied} starting a git repository there failed. Run git init and git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
+    "-C",
+    target,
+    "init",
+    "--quiet",
+  )
 if (!succeeds("-C", target, "rev-parse", "--verify", "--quiet", "HEAD"))
-  git("-C", target, "symbolic-ref", "HEAD", "refs/heads/main")
+  gitOr(
+    `${copied} pointing its repository at main failed. Run git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
+    "-C",
+    target,
+    "symbolic-ref",
+    "HEAD",
+    "refs/heads/main",
+  )
 
 if (init) {
   // The author init would default to, resolved in the copy as init resolves

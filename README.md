@@ -31,7 +31,7 @@ and your GitHub username (or takes them as `--prefix` and `--owner`, with
 `--author <name>`, `--description <text>` and `--figma-file <key>` when you
 want them), copies the template's default branch in and runs the init script
 there. The folder must be empty, or in a git repository with nothing
-uncommitted under it, so git can give back every file it replaces (a GitHub
+uncommitted or ignored under it, so git can give back every file it replaces (a GitHub
 repo's first README and LICENSE, say); its closing line names each one. A
 repository keeps its history and branch; a folder that is not in one gets a
 new repository on `main`, the branch its build check and Pages deploy run on. Without `--author` it says which name it writes

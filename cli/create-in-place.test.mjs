@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -41,7 +42,7 @@ afterEach(() => {
 })
 
 // Run in `cwd`, under a git config of its own, so the machine has no say.
-const create = (cwd, ...args) => {
+const createWith = (env, cwd, ...args) => {
   const gitconfig = path.join(dir, "gitconfig")
   writeFileSync(gitconfig, "[init]\n\tdefaultBranch = trunk\n")
   return spawnSync(
@@ -54,9 +55,26 @@ const create = (cwd, ...args) => {
         ...process.env,
         GIT_CONFIG_GLOBAL: gitconfig,
         GIT_CONFIG_NOSYSTEM: "1",
+        ...env,
       },
     },
   )
+}
+const create = (cwd, ...args) => createWith({}, cwd, ...args)
+// A git on PATH that runs `script` (sh, with "$@" the arguments and $real the
+// real git) before handing everything to the real one.
+const wrappedGit = script => {
+  const real = spawnSync("sh", ["-c", "command -v git"], {
+    encoding: "utf8",
+  }).stdout.trim()
+  const bin = path.join(dir, "bin")
+  mkdirSync(bin)
+  writeFileSync(
+    path.join(bin, "git"),
+    `#!/bin/sh\nreal="${real}"\n${script}\nexec "$real" "$@"\n`,
+  )
+  chmodSync(path.join(bin, "git"), 0o755)
+  return { PATH: `${bin}${path.delimiter}${process.env.PATH}` }
 }
 const git = (cwd, ...args) =>
   spawnSync(
@@ -159,4 +177,82 @@ test("#75 --dir in a repo sets up that folder, made when missing, with no repo o
   assert.ok(existsSync(path.join(made, "package.json")))
   assert.ok(!existsSync(path.join(made, ".git")), "it started a nested repo")
   assert.match(run.stdout, /Next: cd packages\/tokens, read it/)
+})
+
+// An ignored file is one git holds no copy of, in each place the setup reaches
+// it: the init script's #44 step, the copy, and the removal of specs/.
+for (const [what, ignore, file] of [
+  ["node_modules", "node_modules/\n", "node_modules/x/index.js"],
+  ["file at a template path", "package-lock.json\n", "package-lock.json"],
+  ["file under specs/", "specs/notes.md\n", "specs/notes.md"],
+])
+  test(`#75 a repo with an ignored ${what} is refused, listing it, untouched`, () => {
+    githubRepo()
+    writeFileSync(path.join(repo, ".gitignore"), ignore)
+    git(repo, "add", ".gitignore")
+    git(repo, "commit", "--quiet", "-m", "ignore")
+    mkdirSync(path.dirname(path.join(repo, file)), { recursive: true })
+    writeFileSync(path.join(repo, file), "mine\n")
+    const before = readdirSync(repo).sort()
+    const run = create(repo)
+    refusesUntouched(run, before)
+    assert.match(
+      run.stderr,
+      /holds files git ignores, so git could not give them back; move them out first\. Nothing was written\./,
+    )
+    assert.match(run.stderr, new RegExp(`^!! ${file.split("/")[0]}`, "m"))
+    assert.equal(readFileSync(path.join(repo, file), "utf8"), "mine\n")
+  })
+
+test("#75 a git status that fails is one message, nothing written", () => {
+  githubRepo()
+  writeFileSync(path.join(repo, ".git/index"), "not an index")
+  const before = readdirSync(repo).sort()
+  const run = create(repo)
+  refusesUntouched(run, before)
+  assert.match(
+    run.stderr,
+    /^reading git status in .+ failed; nothing was written\.$/m,
+  )
+})
+
+for (const [what, script, said] of [
+  [
+    "starting a repository",
+    'test "$3" = init && { echo "fatal: no init" >&2; exit 128; }',
+    /, but starting a git repository there failed\. Run git init /,
+  ],
+  [
+    "pointing it at main",
+    'test "$3" = symbolic-ref && { echo "fatal: no ref" >&2; exit 128; }',
+    /, but pointing its repository at main failed\. Run git symbolic-ref /,
+  ],
+])
+  test(`#75 a git failure ${what} after the copy is one message saying what to run`, () => {
+    const run = createWith(wrappedGit(script), repo)
+    assert.equal(run.status, 1)
+    assert.doesNotMatch(run.stderr, /^\s+at /m)
+    assert.match(run.stderr, said)
+    assert.match(run.stderr, /^fatal: no (init|ref)$/m)
+  })
+
+test("#75 a failed copy removes the folders it made on the way to --dir", () => {
+  // While the template is cloned, a file appears where the folder goes, so
+  // the copy fails after it made the folders above it.
+  const env = wrappedGit(
+    'if [ "$1" = clone ]; then mkdir -p "$(dirname "$BLOCK")" && : > "$BLOCK"; fi',
+  )
+  const run = createWith(
+    { ...env, BLOCK: path.join(dir, "a/b/sample-system") },
+    dir,
+    "--dir",
+    "a/b/sample-system",
+  )
+  assert.equal(run.status, 1)
+  assert.doesNotMatch(run.stderr, /^\s+at /m)
+  assert.match(
+    run.stderr,
+    /^copying the template into .+ failed; nothing was written\.$/m,
+  )
+  assert.ok(!existsSync(path.join(dir, "a")), "it left a/b/ behind")
 })
