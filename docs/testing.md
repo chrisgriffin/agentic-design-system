@@ -21,7 +21,7 @@ The tests prove that the token build emits what the components may use and nothi
 - `npm run lint` — ESLint from `eslint.config.mjs`, which spreads `@chrisgriffin/config/eslint` first.
 - `npm run lint:styles` — Stylelint over every `.css` file: a color, fill or stroke, font family, size or weight, line height, border radius, margin or padding, gap, or transition or animation duration or timing value that is not a `--ads-*` property fails (other sizes, such as `width`, are not checked), and so does a property name the built CSS does not define.
 - `npm run drift:verify` — `design-delta verify`: every contract validated, then compared with its component and stylesheet; an error-severity finding fails it, and a component no contract references is one (`coverage/uncontracted-component`, raised to `error` in `design-delta.json`).
-- `npm test` — `node --test` over `tokens/scripts/*.test.mjs`, then `vitest run` over `components/**/*.test.tsx` and `test-utils/**/*.test.ts` in jsdom (`test-utils/contract-coverage.test.ts` in Node, since it runs the engine).
+- `npm test` — `node --test` over `tokens/scripts/*.test.mjs`<!-- init --> and `cli/*.test.mjs`<!-- /init -->, then `vitest run` over `components/**/*.test.tsx` and `test-utils/**/*.test.ts` in jsdom (`test-utils/contract-coverage.test.ts` in Node, since it runs the engine).
 
 `storybook-check.yml` is the Storybook gate, `storybook / ci`, and the only check that builds this checkout's Storybook: `npm run build:tokens && npm run build-storybook`, the Storybook build also running the engine's audit for the Design Drift page. Run it with `verify` before pushing a change to a component, a story or `.storybook/`.
 

@@ -9,7 +9,7 @@ npm run build:tokens      # tokens/json → tokens/css/tokens.css (semantic --ad
 npm run drift:verify      # design-delta: every contract against its code and styles
 npm run scaffold -- name  # a new component directory plus a draft contract
 npm run storybook         # the stories, the Tokens page, the Design Drift page
-npm run typecheck         # tsc --noEmit: components, .storybook, test-utils, types, vitest.setup.ts
+npm run typecheck         # tsc --noEmit: components, tokens/scripts, .storybook, test-utils, types, vitest.setup.ts
 npm run verify            # the gate CI runs as build / ci, typecheck included; Storybook builds in storybook / ci
 ```
 
