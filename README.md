@@ -61,6 +61,10 @@ which of the template's examples and decision records to keep; then it
 rewrites the docs that still describe the template, sets the brand tokens,
 runs `npm run verify` and the Storybook build, and deletes itself. It commits
 nothing either.
+An agent already in a session elsewhere reads the skill's file, as the create
+command's closing line says, and takes any answers its brief already gives.
+Putting the new system on GitHub is the owner's to do: `docs/releasing.md`
+lists the steps.
 
 ## Tokens
 
