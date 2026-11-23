@@ -21,17 +21,20 @@ has no contract at all.
 ## Starting your own
 
 ```bash
-npx github:chrisgriffin/agentic-design-system my-system
+npx github:chrisgriffin/agentic-design-system
 ```
 
-Run it where you want the new folder: it refuses when `my-system` already
-exists there and is not an empty folder. It asks for a custom property prefix
-and your GitHub username (or takes them as `--prefix` and
-`--owner`, with `--author <name>`, `--description <text>`, `--figma-file <key>`
-and `--dir <path>` when you want them),
-clones the template's default branch into `my-system/` as a new git
-repository on `main`, the branch its build check and Pages deploy run on, and
-runs the init script there. Without `--author` it says which name it writes
+Run it in the folder that will be the system, usually a fresh clone of the
+repo you made for it, or point it at another with `--dir <path>`. The folder
+names the system unless `--name` does. It asks for a custom property prefix
+and your GitHub username (or takes them as `--prefix` and `--owner`, with
+`--author <name>`, `--description <text>` and `--figma-file <key>` when you
+want them), copies the template's default branch in and runs the init script
+there. The folder must be empty, or in a git repository with nothing
+uncommitted or ignored under it, so git can give back every file it replaces (a GitHub
+repo's first README and LICENSE, say); its closing line names each one. A
+repository keeps its history and branch; a folder that is not in one gets a
+new repository on `main`, the branch its build check and Pages deploy run on. Without `--author` it says which name it writes
 into `LICENSE`: git's `user.name`, else `--owner`. It needs Node 22, git and no
 account or token.
 

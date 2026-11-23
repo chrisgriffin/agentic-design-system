@@ -32,11 +32,14 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true })
 })
 
-// spawnSync gives the child no terminal, so it never stops to ask.
+// spawnSync gives the child no terminal, so it never stops to ask. The folder
+// it sets up is <dir>/sample-system, whose name is the system's by default.
 const create = (...args) =>
-  spawnSync(process.execPath, [CREATE, ...args, "--dir", dir], {
-    encoding: "utf8",
-  })
+  spawnSync(
+    process.execPath,
+    [CREATE, ...args, "--dir", path.join(dir, "sample-system")],
+    { encoding: "utf8" },
+  )
 
 // A refusal is one message, never a stack trace.
 const refusesCleanly = run => {
@@ -55,26 +58,20 @@ test("--help calls --owner your GitHub username", () => {
 })
 
 test("with no terminal, a missing value exits 1 and names the flag", () => {
-  const run = create("sample-system", "--owner", "sample-owner")
+  const run = create("--owner", "sample-owner")
   assert.equal(run.status, 1)
   assert.match(run.stderr, /^missing --prefix/)
   assert.deepEqual(readdirSync(dir), [])
 })
 
 test("a value the init script refuses exits 1 and writes nothing", () => {
-  const run = create("Sample_System", ...VALUES)
+  const run = create("--name", "Sample_System", ...VALUES)
   assert.equal(run.status, 1)
   assert.deepEqual(readdirSync(dir), [])
 })
 
 test("#56 a refused value is named, with the init script's reason", () => {
-  const run = create(
-    "sample-system",
-    "--prefix",
-    "Bad",
-    "--owner",
-    "sample-owner",
-  )
+  const run = create("--prefix", "Bad", "--owner", "sample-owner")
   refusesCleanly(run)
   assert.match(
     run.stderr,
@@ -84,14 +81,24 @@ test("#56 a refused value is named, with the init script's reason", () => {
   assert.deepEqual(readdirSync(dir), [])
 })
 
-test("#56 a refused name is shown as <name>, the argument create takes", () => {
-  const run = create("Bad_Name", "--prefix", "ads", "--owner", "o")
+test("#56 a refused name is shown as --name, the flag create takes", () => {
+  const run = create("--name", "Bad_Name", "--prefix", "ads", "--owner", "o")
   refusesCleanly(run)
   assert.match(
     run.stderr,
-    /^<name> "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npx /,
+    /^--name "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npx /,
   )
-  assert.doesNotMatch(run.stderr, /--name/)
+  assert.deepEqual(readdirSync(dir), [])
+})
+
+test("#75 a folder name that is not kebab-case is refused, naming --name", () => {
+  const run = spawnSync(
+    process.execPath,
+    [CREATE, ...VALUES, "--dir", path.join(dir, "My System")],
+    { encoding: "utf8" },
+  )
+  refusesCleanly(run)
+  assert.match(run.stderr, /^--name "My System" is not valid: kebab-case/)
   assert.deepEqual(readdirSync(dir), [])
 })
 
@@ -107,17 +114,17 @@ test("#56 each usage states the prefix rule its refusal states", () => {
   }
 })
 
-test("a folder that exists and is not empty is refused, untouched", () => {
+test("#75 a folder that is not empty and not in a git repository is refused, untouched", () => {
   mkdirSync(path.join(dir, "sample-system"))
   writeFileSync(path.join(dir, "sample-system/keep.txt"), "mine\n")
-  const run = create("sample-system", ...VALUES)
-  assert.equal(run.status, 1)
-  assert.match(run.stderr, /exists and is not empty/)
+  const run = create(...VALUES, "--from", ROOT, "--no-init")
+  refusesCleanly(run)
+  assert.match(run.stderr, /is not empty and not in a git repository/)
   assert.deepEqual(readdirSync(path.join(dir, "sample-system")), ["keep.txt"])
 })
 
 test("it writes the template as a new git repository", () => {
-  const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  const run = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const made = path.join(dir, "sample-system")
   for (const file of ["package.json", ".gitignore", "scripts/init.mjs", ".git"])
@@ -129,7 +136,7 @@ test("it writes the template as a new git repository", () => {
 })
 
 test("init in a copy with node_modules and no committed lock stops unchanged (#44)", () => {
-  const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  const run = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const made = path.join(dir, "sample-system")
   mkdirSync(path.join(made, "node_modules"))
@@ -146,11 +153,7 @@ test("init in a copy with node_modules and no committed lock stops unchanged (#4
 })
 
 test("an unknown option is refused with the usage, before any write", () => {
-  for (const args of [
-    ["--figma", "abc", "sample-system"],
-    ["sample-system", "-x"],
-    ["sample-system", "--figma-file=abc"],
-  ]) {
+  for (const args of [["--figma", "abc"], ["-x"], ["--figma-file=abc"]]) {
     const run = create(...args, ...VALUES)
     refusesCleanly(run)
     assert.match(run.stderr, /^unknown option /)
@@ -159,17 +162,14 @@ test("an unknown option is refused with the usage, before any write", () => {
   assert.deepEqual(readdirSync(dir), [])
 })
 
-test("a value flag with no value, or a second name, is refused", () => {
+test("a value flag with no value, or a positional argument, is refused", () => {
   for (const [args, message] of [
+    [["--owner", "sample-owner", "--prefix"], /^--prefix needs a value/],
+    [["--prefix", "--owner", "sample-owner"], /^--prefix needs a value/],
     [
-      ["sample-system", "--owner", "sample-owner", "--prefix"],
-      /^--prefix needs a value/,
+      ["sample-system", ...VALUES],
+      /^unexpected argument "sample-system": the system is set up in the current folder, or the one --dir names, and --name names it\n/,
     ],
-    [
-      ["sample-system", "--prefix", "--owner", "sample-owner"],
-      /^--prefix needs a value/,
-    ],
-    [["sample-system", "other", ...VALUES], /^one name only/],
   ]) {
     const run = spawnSync(process.execPath, [CREATE, ...args], {
       encoding: "utf8",
@@ -183,7 +183,7 @@ test("a value flag with no value, or a second name, is refused", () => {
 
 test("a target that is a file is refused, untouched", () => {
   writeFileSync(path.join(dir, "sample-system"), "mine\n")
-  const run = create("sample-system", ...VALUES)
+  const run = create(...VALUES)
   refusesCleanly(run)
   assert.match(run.stderr, /exists and is not a folder; nothing was written/)
   assert.deepEqual(readdirSync(dir), ["sample-system"])
@@ -191,14 +191,14 @@ test("a target that is a file is refused, untouched", () => {
 
 test("an empty target folder is used", () => {
   mkdirSync(path.join(dir, "sample-system"))
-  const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  const run = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   assert.ok(existsSync(path.join(dir, "sample-system/package.json")))
   assert.deepEqual(readdirSync(dir), ["sample-system"])
 })
 
 test("the next step names the folder it made, wherever --dir put it", () => {
-  const run = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  const run = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const made = path.join(dir, "sample-system")
   assert.ok(run.stdout.includes(`Next: cd ${made},`), run.stdout)
@@ -206,7 +206,6 @@ test("the next step names the folder it made, wherever --dir put it", () => {
 
 test("a clone that fails exits 1 and leaves nothing behind", () => {
   const run = create(
-    "sample-system",
     ...VALUES,
     "--from",
     path.join(dir, "no-such-template"),
@@ -223,7 +222,14 @@ test("with no git on PATH it exits 1 saying so and leaves nothing behind", () =>
     symlinkSync(process.execPath, path.join(bin, "node"))
     const run = spawnSync(
       process.execPath,
-      [CREATE, "sample-system", ...VALUES, "--from", ROOT, "--dir", dir],
+      [
+        CREATE,
+        ...VALUES,
+        "--from",
+        ROOT,
+        "--dir",
+        path.join(dir, "sample-system"),
+      ],
       { encoding: "utf8", env: { ...process.env, PATH: bin } },
     )
     refusesCleanly(run)
@@ -263,7 +269,7 @@ test("#56 the cloned template's refusal carries its init script's reason", () =>
 }
 `,
     template => {
-      const run = create("sample-system", ...VALUES, "--from", template)
+      const run = create(...VALUES, "--from", template)
       refusesCleanly(run)
       assert.match(
         run.stderr,
@@ -275,7 +281,7 @@ test("#56 the cloned template's refusal carries its init script's reason", () =>
   )
 })
 
-test("#56 the cloned template's refusal shows its init's --name as <name>", () => {
+test("#56 the cloned template's refusal of the name shows --name", () => {
   withTemplate(
     `if (process.argv.includes("--check")) {
   console.error('--name "sample-system" is not valid: a reason\\n\\nusage: x')
@@ -283,11 +289,11 @@ test("#56 the cloned template's refusal shows its init's --name as <name>", () =
 }
 `,
     template => {
-      const run = create("sample-system", ...VALUES, "--from", template)
+      const run = create(...VALUES, "--from", template)
       refusesCleanly(run)
       assert.match(
         run.stderr,
-        /refuses them: <name> "sample-system" is not valid: a reason$/m,
+        /refuses them: --name "sample-system" is not valid: a reason$/m,
       )
       assert.deepEqual(readdirSync(dir), [])
     },
@@ -312,7 +318,7 @@ test("#56 a cloned init that crashes or warns is never shown as its reason", () 
     ],
   ])
     withTemplate(source, template => {
-      const run = create("sample-system", ...VALUES, "--from", template)
+      const run = create(...VALUES, "--from", template)
       refusesCleanly(run)
       assert.match(
         run.stderr,
@@ -335,7 +341,7 @@ test("#56 a warning ahead of a cloned init's refusal is dropped, the refusal kep
 }
 `,
     template => {
-      const run = create("sample-system", ...VALUES, "--from", template)
+      const run = create(...VALUES, "--from", template)
       refusesCleanly(run)
       assert.match(
         run.stderr,
@@ -352,7 +358,7 @@ test("the cloned template's own init script decides before the copy is kept", ()
   withTemplate(
     "process.exit(process.argv.includes('--check') ? 1 : 0)\n",
     template => {
-      const run = create("sample-system", ...VALUES, "--from", template)
+      const run = create(...VALUES, "--from", template)
       refusesCleanly(run)
       assert.match(run.stderr, /cloned template's init script refuses them/)
       assert.deepEqual(readdirSync(dir), [])
@@ -369,7 +375,6 @@ if (!process.argv.includes("--check"))
 `,
     template => {
       const run = create(
-        "sample-system",
         ...VALUES,
         "--author",
         "Sample Author",
@@ -404,14 +409,7 @@ if (!process.argv.includes("--check"))
         ["--author", "--help"],
       ]) {
         const made = path.join(dir, "sample-system")
-        const run = create(
-          "sample-system",
-          ...VALUES,
-          f,
-          text,
-          "--from",
-          template,
-        )
+        const run = create(...VALUES, f, text, "--from", template)
         assert.equal(run.status, 0, `${f} ${text}: ${run.stderr}`)
         const argv = JSON.parse(
           readFileSync(path.join(made, "argv.json"), "utf8"),
@@ -455,11 +453,10 @@ test("the init script refuses --author or --description with no value (#49)", ()
     )
     refusesCleanly(run)
     assert.match(run.stderr, new RegExp(`^${f} needs a value\n\nusage: `))
-    const missing = spawnSync(
-      process.execPath,
-      [CREATE, "sample-system", ...VALUES, f],
-      { encoding: "utf8", cwd: dir },
-    )
+    const missing = spawnSync(process.execPath, [CREATE, ...VALUES, f], {
+      encoding: "utf8",
+      cwd: dir,
+    })
     refusesCleanly(missing)
     assert.match(missing.stderr, new RegExp(`^${f} needs a value`))
   }
@@ -488,7 +485,7 @@ test("#52 the init script refuses an argument it does not recognize, naming it",
   // come before that step's own stop. The copy is cloned from the committed
   // template, so it is handed this checkout's script.
   const made = path.join(dir, "sample-system")
-  const copy = create("sample-system", ...VALUES, "--from", ROOT, "--no-init")
+  const copy = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(copy.status, 0, copy.stderr)
   writeFileSync(path.join(made, "scripts/init.mjs"), readFileSync(INIT))
   mkdirSync(path.join(made, "node_modules"))
@@ -595,7 +592,7 @@ test("#52 the init script still takes every switch its usage lists", () => {
 
 test("an author or description with a line break is refused (#49)", () => {
   for (const f of ["--author", "--description"]) {
-    const run = create("sample-system", ...VALUES, f, "two\nlines")
+    const run = create(...VALUES, f, "two\nlines")
     refusesCleanly(run)
     assert.deepEqual(readdirSync(dir), [])
   }
