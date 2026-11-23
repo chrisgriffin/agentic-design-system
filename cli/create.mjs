@@ -18,7 +18,7 @@ import path from "node:path"
 import { createInterface } from "node:readline/promises"
 import { fileURLToPath } from "node:url"
 
-import { gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
+import { authorFrom, gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
 const USAGE = `usage: npx github:chrisgriffin/agentic-design-system <name> [--prefix <prefix>] [--owner <github-username>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet] [--dir <path>]
 
@@ -134,10 +134,12 @@ const initArgs = [
   ...(figma === undefined ? [] : ["--figma-file", figma]),
   ...(fleet ? ["--fleet"] : []),
 ]
-// Quoted for a shell, since an author or description can hold spaces.
-const quoted = initArgs
-  .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
-  .join(" ")
+// Quoted for a shell, since an author or description can hold spaces; built
+// when it is shown, so it carries every argument pushed by then.
+const quoted = () =>
+  initArgs
+    .map(a => (/^[\w./:@-]+$/.test(a) ? a : `'${a.replaceAll("'", "'\\''")}'`))
+    .join(" ")
 // The reason init gives, which names each value it refused (#56): only lines
 // shaped like init's refusals, so a crash's stack trace or a Node warning is
 // never shown as one; a template whose init gives none gets the values it was
@@ -159,7 +161,7 @@ const initRefusal = dir => {
     .map(line => line.replace(/^--name /, "<name> "))
   return reasons.length
     ? reasons.join("\n")
-    : `a value is missing or not valid: ${quoted}`
+    : `a value is missing or not valid: ${quoted()}`
 }
 // Asked of this copy first, so a bad value fails before the network.
 const refused = initRefusal(root)
@@ -210,10 +212,14 @@ step("checking the values", () => {
   if (why)
     throw new Error(`the cloned template's init script refuses them: ${why}`)
 })
-// A new system starts its own history.
+// A new system starts its own history, on main, which its build check and
+// Pages deploy run on, whatever git's own default branch is (#68). HEAD is
+// pointed at main after init, not with --initial-branch, which git before 2.28
+// does not know.
 step("starting a new git history", () => {
   rmSync(path.join(staging, ".git"), { recursive: true, force: true })
   git("-C", staging, "init", "--quiet")
+  git("-C", staging, "symbolic-ref", "HEAD", "refs/heads/main")
 })
 step(`moving the copy to ${target}`, () => {
   if (existing) rmdirSync(target)
@@ -227,13 +233,23 @@ step(`moving the copy to ${target}`, () => {
 staging = made = undefined
 
 if (init) {
+  // The author init would default to, resolved in the copy as init resolves
+  // it, said before the install's output and handed to init so the name said
+  // is the name written (#68).
+  if (author === undefined) {
+    const chosen = authorFrom(target, owner)
+    console.log(
+      `LICENSE names ${chosen.author} as the copyright holder, from ${chosen.from}; pass --author to name someone else.`,
+    )
+    initArgs.push("--author", chosen.author)
+  }
   const run = spawnSync(process.execPath, ["scripts/init.mjs", ...initArgs], {
     cwd: target,
     stdio: "inherit",
   })
   if (run.status !== 0)
     fail(
-      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted}`,
+      `\n${target} was created, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted()}`,
     )
 }
 const relative = path.relative(process.cwd(), target)

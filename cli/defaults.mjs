@@ -1,4 +1,5 @@
-// The defaults the create command offers when it asks for a value.
+// The defaults the create command offers when it asks for a value, and the
+// LICENSE author it and scripts/init.mjs fall back to when --author is not given.
 import { execFileSync } from "node:child_process"
 
 // A GitHub login: letters, digits and hyphens, the shape scripts/init.mjs
@@ -19,7 +20,7 @@ export const ownerFrom = gitName => {
 }
 
 // git's user.name as seen from `cwd`, trimmed; undefined when none is set.
-// scripts/init.mjs imports it too, while cli/ is still in the copy.
+// scripts/init.mjs reaches it through authorFrom, while cli/ is still in the copy.
 export const gitUserName = cwd => {
   try {
     return (
@@ -32,4 +33,14 @@ export const gitUserName = cwd => {
   } catch {
     return undefined
   }
+}
+
+// The LICENSE copyright holder when --author is not given: git's user.name in
+// `cwd`, else the owner, with where it came from, for the line that says so.
+// scripts/init.mjs and the create command both take it from here (#68).
+export const authorFrom = (cwd, owner) => {
+  const gitName = gitUserName(cwd)
+  return gitName === undefined
+    ? { author: owner, from: "--owner" }
+    : { author: gitName, from: "git's user.name" }
 }
