@@ -213,6 +213,25 @@ describe("variantCases", () => {
     expect(codeEnums(annotated)).toEqual([["size", ["sm"]]])
     expect(variantCases(annotated)).toEqual([["size sm", { size: "sm" }]])
   })
+
+  test.each([
+    ["missing", { type: "enum" }],
+    ["empty", { type: "enum", values: [] }],
+    ["holding only objects", { type: "enum", values: [{ value: "sm" }] }],
+  ])(
+    "#71 throws, naming the prop, for an enum whose values are %s",
+    (_, size) => {
+      expect(() =>
+        variantCases(contract({ size, tone: { type: "enum", values: ["a"] } })),
+      ).toThrow('enum prop "size" has no string or number values')
+    },
+  )
+
+  test("#71 does not throw for a design-only enum with no values", () => {
+    expect(
+      variantCases(contract({ state: { type: "enum", code: "none" } })),
+    ).toEqual([["defaults", {}]])
+  })
 })
 
 const contracts = Object.entries(
@@ -370,6 +389,26 @@ describe("readsContract", () => {
 test("finds the contracts", () => {
   expect(contracts.length).toBeGreaterThan(0)
 })
+
+/**
+ * Holds the rule that no contract leaves its component with no accessibility
+ * case (#71): `variantCases` throws on a code-side enum with no usable value,
+ * and the failure here names the contract file and the prop.
+ */
+test.each(contracts)(
+  "%s gives at least one accessibility case",
+  (path, json) => {
+    let cases: ReturnType<typeof variantCases>
+    try {
+      cases = variantCases(json)
+    } catch (error) {
+      throw new Error(`${path}: ${(error as Error).message}`)
+    }
+    expect(cases.length, `${path} gives no accessibility case`).toBeGreaterThan(
+      0,
+    )
+  },
+)
 
 const withCodeEnums = contracts.filter(([, json]) => codeEnums(json).length > 0)
 

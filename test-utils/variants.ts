@@ -46,7 +46,10 @@ export function codeEnums(
  * `[title, props]` pair, so a value added to the contract gets a case with no
  * test edit. An enum marked `"code": "none"` is design-only and never a prop,
  * so it gets none. A contract with no code-side enum gives one case, the
- * component's defaults.
+ * component's defaults. A code-side enum with no string or number value (its
+ * `values` missing, empty or holding only other things) throws, naming the
+ * prop: it would empty the product and leave the component with no case at
+ * all (#71).
  *
  * The props are cast to the component's own type: a contract value that type
  * does not know yet is exactly the case to run, and `drift:verify` reports a
@@ -55,7 +58,15 @@ export function codeEnums(
 export function variantCases<P>(
   contract: ContractProps,
 ): [string, Partial<P>][] {
-  const combos = codeEnums(contract).reduce<Record<string, ContractValue>[]>(
+  const enums = codeEnums(contract)
+  const empty = enums.filter(([, values]) => values.length === 0)
+  if (empty.length > 0)
+    throw new Error(
+      `enum prop ${empty.map(([name]) => `"${name}"`).join(", ")} has no ` +
+        "string or number values, so it would give no accessibility case",
+    )
+
+  const combos = enums.reduce<Record<string, ContractValue>[]>(
     (acc, [name, values]) =>
       acc.flatMap(combo => values.map(value => ({ ...combo, [name]: value }))),
     [{}],
