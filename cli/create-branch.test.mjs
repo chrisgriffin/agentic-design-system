@@ -34,8 +34,7 @@ afterEach(() => {
 const create = (config, ...args) => createWith({}, config, ...args)
 const createWith = (env, config, ...args) => {
   writeFileSync(gitconfig, config)
-  const out = path.join(dir, "out")
-  return spawnSync(process.execPath, [CREATE, ...args, "--dir", out], {
+  return spawnSync(process.execPath, [CREATE, ...args, "--dir", copy()], {
     cwd: dir,
     encoding: "utf8",
     env: {
@@ -63,7 +62,6 @@ for (const machineDefault of ["master", "trunk"])
   test(`#68 a copy starts on main when git's default branch is ${machineDefault}`, () => {
     const run = create(
       `[init]\n\tdefaultBranch = ${machineDefault}\n`,
-      "sample-system",
       ...VALUES,
       "--from",
       ROOT,
@@ -75,14 +73,7 @@ for (const machineDefault of ["master", "trunk"])
   })
 
 test("#68 the branch a copy starts on is one its build check runs on", () => {
-  const run = create(
-    "",
-    "sample-system",
-    ...VALUES,
-    "--from",
-    ROOT,
-    "--no-init",
-  )
+  const run = create("", ...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const branch = git("symbolic-ref", "--short", "HEAD").stdout.trim()
   assert.ok(
@@ -118,7 +109,6 @@ test("#68 a copy starts on main with a git older than 2.28", () => {
   const run = createWith(
     oldGit(),
     "[init]\n\tdefaultBranch = master\n",
-    "sample-system",
     ...VALUES,
     "--from",
     ROOT,
@@ -165,7 +155,6 @@ test("#68 with no --author, the output names git's user.name as the LICENSE hold
   withTemplate(template => {
     const run = create(
       "[user]\n\tname = sample-bot[bot]\n",
-      "sample-system",
       ...VALUES,
       "--from",
       template,
@@ -181,7 +170,7 @@ test("#68 with no --author, the output names git's user.name as the LICENSE hold
 
 test("#68 with no --author and no git user.name, the output names the owner", () => {
   withTemplate(template => {
-    const run = create("", "sample-system", ...VALUES, "--from", template)
+    const run = create("", ...VALUES, "--from", template)
     assert.equal(run.status, 0, run.stderr)
     assert.match(
       run.stdout,
@@ -195,7 +184,6 @@ test("#68 with --author, the output says nothing about where it came from", () =
   withTemplate(template => {
     const run = create(
       "[user]\n\tname = sample-bot[bot]\n",
-      "sample-system",
       ...VALUES,
       "--author",
       "Sample Author",
@@ -213,7 +201,6 @@ test("#68 when init fails, the retry line carries the author the output named", 
     template => {
       const run = create(
         "[user]\n\tname = Sample Bot\n",
-        "sample-system",
         ...VALUES,
         "--from",
         template,
