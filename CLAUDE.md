@@ -34,7 +34,7 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 | a font family in `tokens/json/primitives/typography.json` | the font links in `.storybook/preview-head.html`                                                                        |
 | a semantic token's `$extensions.mode`                     | `modeSelectors` in `terrazzo.config.mjs`, and the theme test in `tokens/scripts/tokens.test.mjs`                        |
 | a prop or an element in `<name>.tsx`                      | `<name>.contract.json` (props, anatomy) and `<name>.figma.tsx`; `npm run drift:verify` reports the first two            |
-| a job name in `.github/workflows/*.yml`                   | the branch ruleset on GitHub, which requires each check by name (admin-only)                                            |
+| a job name in `.github/workflows/*.yml`                   | the branch ruleset on GitHub, which requires each check by name (admin-only), and the check list in `docs/releasing.md` |
 | `components/badge/*`                                      | the templates in `scripts/scaffold-component.mjs`, which copy its shape                                                 |
 
 ## Agent layer
