@@ -20,7 +20,14 @@ import { fileURLToPath } from "node:url"
 const ROOT = fileURLToPath(new URL("..", import.meta.url))
 const CREATE = path.join(ROOT, "cli/create.mjs")
 const VALUES = ["--prefix", "sds", "--owner", "sample-owner"]
-const TEMPLATE_README = readFileSync(path.join(ROOT, "README.md"), "utf8")
+// The create command clones the committed template, so that is what lands.
+const TEMPLATE_README = spawnSync(
+  "git",
+  ["-C", ROOT, "show", "HEAD:README.md"],
+  {
+    encoding: "utf8",
+  },
+).stdout
 
 let dir
 let repo

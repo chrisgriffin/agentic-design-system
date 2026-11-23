@@ -17,8 +17,8 @@ building. It runs once: the last step deletes it.
    run the init step from the README's "Starting your own" first, and stop
    without changing anything.
 2. Run `git status --short`, and `git rev-parse --verify HEAD`, which fails
-   in a copy with no commit yet (the create command starts a new history and
-   commits nothing). If either shows uncommitted work, it is init's: ask the
+   in a copy with no commit yet (the create command commits nothing, and
+   starts a new history where there was no repository). If either shows uncommitted work, it is init's: ask the
    owner to commit it first, so this skill's diff can be read on its own. If
    they decline, go on; with no commit, `git status` lists every file, so
    keep your own list of what you change and give it in the final summary.

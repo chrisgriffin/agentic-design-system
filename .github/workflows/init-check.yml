@@ -31,7 +31,7 @@ jobs:
     with:
       node_version: "22"
       run: |
-        env -u NODE_AUTH_TOKEN GIT_SSH_COMMAND=false npx -y -p npm@11 -- node cli/create.mjs created-system --prefix cds --owner sample-owner --dir "$RUNNER_TEMP" --from "$PWD"
+        env -u NODE_AUTH_TOKEN GIT_SSH_COMMAND=false npx -y -p npm@11 -- node cli/create.mjs created-system --prefix cds --owner sample-owner --dir "$RUNNER_TEMP/created-system" --from "$PWD"
         node -e 'const fs = require("fs"), bare = f => { const l = JSON.parse(fs.readFileSync(f)); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(process.argv[1]) !== bare(process.argv[2])) { console.error("#44: the created lock file differs from the template'"'"'s past its name and bin"); process.exit(1) }' package-lock.json "$RUNNER_TEMP/created-system/package-lock.json"
         (cd "$RUNNER_TEMP/created-system" && npx -y npm@10 ci --dry-run) || { echo "#44: npm 10 ci refuses the created lock file"; exit 1; }
         test ! -e "$RUNNER_TEMP/created-system/cli"
