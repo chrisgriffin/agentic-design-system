@@ -114,14 +114,15 @@ Tokens page reads); change the two together, always.
 3. Find the pairs to check in the component stylesheets: each rule that sets
    a `color` token over a `background` token, and each accent token used as
    text on the canvas. Text must reach 4.5:1 against what it sits on, in both
-   themes. Check every pair, not only the accent's: the template's own
-   success and danger badges fall short in both themes.
+   themes. Check every pair, not only the accent's: the success and danger
+   badges too. `node --test tokens/scripts/contrast.test.mjs` finds and checks
+   them all, naming each pair that falls short, its theme and its ratio.
 4. Where a pair falls short, change which step its semantic token aliases in
    that theme, adjust a step's value, or add a step to a short ramp. Never
    lower the bar or switch a check off. In the dark theme, expect a conflict:
    no accent step carries white `fg.on-accent` text at 4.5:1 and also reads
    as `accent.default` text on the near-black canvas. The usual way out is to
-   alias dark `fg.on-accent` to a dark neutral step. Tell the owner which pairs
+   alias dark `fg.on-accent` to a dark neutral step, as the template does. Tell the owner which pairs
    conflicted and what you chose, and let them change it.
 5. Run `npm run build:tokens`. Never edit the built CSS by hand.
 
@@ -141,7 +142,8 @@ ADR's text as written (step 4).
    columns misaligned.
 2. Run `npm run verify` and fix what fails until it passes. Fix the cause:
    never loosen a lint rule, a test or a `design-delta.json` severity.
-3. Run `npm run build-storybook`. Contrast is only checked in a browser, so
+3. Run `npm run build-storybook`. The gate checks the text pairs component
+   stylesheets set; anything else on a page is only checked in a browser, so
    tell the owner to open `npm run storybook`, look at each story's
    accessibility panel in both themes, and read the Tokens page.
 
