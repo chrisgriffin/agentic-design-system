@@ -44,6 +44,14 @@ through `release-pr.yml`. Merging it runs steps 4 and 5 above.
 - A tag and a GitHub Release, nothing more: `create-github-release.yml` passes no build command, no assets and no registry.
 - The Storybook at the repo's GitHub Pages URL, rebuilt by `deploy-pages.yml` from the same push to `main`.
 
-## Manual steps
+## Setting up on GitHub
 
-None. Merging the `release/next` PR is the only human step.
+Once, for a new repo, by its owner: nothing in this repo creates or configures one.
+
+1. Create an empty repository and push `main` to it.
+2. Branch `develop` from `main` and push it. Work merges there (step 1 above).
+3. In Settings → Pages, set the source to GitHub Actions, so `deploy-pages.yml` can publish the Storybook.
+4. Add a `RELEASE_PR_TOKEN` repository secret: a fine-grained personal access token with read and write access to this repo's contents and pull requests. Without it the release PR still opens, but its checks never start on their own.
+5. Add a branch ruleset on `main` and `develop` that requires a pull request and the checks `build / ci` and `storybook / ci`. A check is required by its job's name, so renaming a job in `.github/workflows/` means changing the ruleset too.
+
+After that, merging the `release/next` PR is the only human step.

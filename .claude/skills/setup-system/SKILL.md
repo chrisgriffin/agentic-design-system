@@ -35,7 +35,9 @@ than this system.
 ## 2. Interview the owner
 
 Ask one question at a time and wait for the answer. Every question accepts
-"keep what's there", which leaves that part as it is.
+"keep what's there", which leaves that part as it is. When the owner's request
+already answers a question (an agent handed a brief, say), take that answer
+and ask only what is left.
 
 1. What is this system for, and who builds with it? Two or three sentences.
 2. Its one-line description. Init wrote the README's first line and
@@ -154,3 +156,6 @@ ADR's text as written (step 4).
 2. Show the owner `git status --short` (or, with no commit yet, your own
    list from step 0) and one line for each change this skill made.
 3. Commit nothing: the owner reads the diff and commits it.
+4. Point the owner at "Setting up on GitHub" in `docs/releasing.md`: the
+   repo, its branches, Pages, the release token and the ruleset are theirs
+   to set up.
