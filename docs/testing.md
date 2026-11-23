@@ -46,7 +46,7 @@ Narrower runs while working: `npx vitest run components/badge` for one component
 - `cli/init-manifest.test.mjs` — `scripts/init.mjs` on a temp copy of the template, with stub `npm` and `npx` on the path whose install, dock and format steps each change `package.json` and `package-lock.json`: every change survives init, and only `bin` and the lock's root `bin` are removed (#62).
 - `cli/lockfile.test.mjs` — no `minimatch` in `package-lock.json` resolves inside GHSA-g3hv-75wg-m249's range (`>= 7.0.0, < 11.0.1`), the advisory `package.json`'s `minimatch` override fixes, and the range check counts its bounds and a pre-release of 11.0.1 as the advisory does (#43).
 - `cli/setup-skill.test.mjs` — the setup skill a copy runs after init (#59): it ships as `.claude/skills/setup-system/SKILL.md` with that name in its frontmatter, every repo path it names exists and is none init removes, it names nothing init rewrites or strips (the template's name and prefix, the placeholder Figma key, an `<!-- init -->` marker, the init script, the create command or its check), both closing lines name `/setup-system`, and create's names the skill's file (#73).
-- `cli/github-setup.test.mjs` — the checks "Setting up on GitHub" in `docs/releasing.md` tells a new repo's ruleset to require are exactly the pull-request CI jobs a copy keeps (#73).
+- `cli/github-setup.test.mjs` — the checks "Setting up on GitHub" in `docs/releasing.md` tells a new repo's ruleset to require are exactly the pull-request CI jobs a copy keeps, and the section names every secret `release-pr.yml` and `sync-main-to-develop.yml` pass and the `sync/main-to-develop-*` PR a release leaves for a human (#73).
 
 <!-- /init -->
 

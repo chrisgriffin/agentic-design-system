@@ -54,4 +54,6 @@ Once, for a new repo, by its owner: nothing in this repo creates or configures o
 4. Add a `RELEASE_PR_TOKEN` repository secret: a fine-grained personal access token with read and write access to this repo's contents and pull requests. Without it the release PR still opens, but its checks never start on their own.
 5. Add a branch ruleset on `main` and `develop` that requires a pull request and the checks `build / ci` and `storybook / ci`. A check is required by its job's name, so renaming a job in `.github/workflows/` means changing the ruleset too.
 
-After that, merging the `release/next` PR is the only human step.
+After that, a release takes two human merges: the `release/next` PR, and then the `sync/main-to-develop-*` PR that step 5 of "How a release happens" opens, because the ruleset on `develop` names no bypass actor and so refuses the sync's push.
+
+A copy made with `--fleet` also needs an `OPS_GH_TOKEN` repository secret, the fleet's token for its conflict sweep. A copy made without `--fleet` cannot hold one, and `release-pr.yml` passes it anyway: the shared body's first step starts the fleet's conflict sweep with `OPS_GH_TOKEN` and fails when it is unset. So in such a copy Release PR fails on every push to `develop` and no `release/next` PR opens, until that shared step skips itself when the secret is unset.

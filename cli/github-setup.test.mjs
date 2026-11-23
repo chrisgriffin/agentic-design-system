@@ -35,3 +35,18 @@ test("#73 the setup in docs/releasing.md names every pull-request check a copy k
   assert.ok(kept.length >= 2, `only ${kept.join(", ")} found`)
   assert.deepEqual(named, kept)
 })
+
+test("#73 the setup in docs/releasing.md names every secret and human merge a copy's release needs", () => {
+  const setup = read("docs/releasing.md")
+    .split(/^## /m)
+    .find(s => s.startsWith("Setting up on GitHub"))
+  // The release workflows every copy keeps, whether or not it is made with --fleet.
+  for (const f of ["release-pr.yml", "sync-main-to-develop.yml"]) {
+    const yml = read(".github/workflows/" + f)
+    for (const [, secret] of yml.matchAll(/\bsecrets\.([A-Z_]+)/g))
+      assert.ok(setup.includes(`\`${secret}\``), `${f} passes ${secret}`)
+  }
+  // develop's ruleset refuses sync-main-to-develop's push, which then opens a PR.
+  assert.match(setup, /`sync\/main-to-develop-\*` PR/)
+  assert.doesNotMatch(setup, /only human step/)
+})
