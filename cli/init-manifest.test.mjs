@@ -55,6 +55,12 @@ before(() => {
     recursive: true,
     filter: src => !SKIP.has(path.basename(src)),
   })
+  // A release branch's changelog names the template and its create command;
+  // the copy is given one so #79 holds on release/next, not just on develop.
+  writeFileSync(
+    path.join(copy, "CHANGELOG.md"),
+    `${readFileSync(path.join(copy, "CHANGELOG.md"), "utf8").trimEnd()}\n\n## 0.1.0 (2026-11-23)\n\n### Features\n\n* **cli:** make the create command publishable as create-agentic-ds and name the repo agentic-ds\n`,
+  )
   const bin = path.join(dir, "bin")
   mkdirSync(bin)
   for (const name of ["npm", "npx"]) {
@@ -144,4 +150,10 @@ test("#79 no file of the copy names the template or its create command", () => {
     naming.map(file => path.relative(copy, file)),
     [],
   )
+})
+
+test("the copy starts its own changelog, with none of the template's releases", () => {
+  const changelog = readFileSync(path.join(copy, "CHANGELOG.md"), "utf8")
+  assert.match(changelog, /^# Changelog/)
+  assert.doesNotMatch(changelog, /^## /m)
 })

@@ -266,6 +266,17 @@ if (!fleet)
     ".github/workflows/claude-mention.yml",
   )
 
+// CHANGELOG.md is the template's release history, which names the template and
+// its create command; a system starts its own, so only the lines above the
+// first release heading stay.
+const changelog = path.join(root, "CHANGELOG.md")
+if (existsSync(changelog)) {
+  const text = readFileSync(changelog, "utf8")
+  const first = text.search(/^## /m)
+  if (first !== -1)
+    writeFileSync(changelog, `${text.slice(0, first).trimEnd()}\n`)
+}
+
 const run = cmd => execSync(cmd, { cwd: root, stdio: "inherit" })
 run("npm ci --no-audit --no-fund")
 run("npx design-delta dock")
