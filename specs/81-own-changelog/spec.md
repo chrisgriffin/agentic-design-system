@@ -22,8 +22,12 @@ The v0.1.0 release PR (#13) fails `build / ci` and `init / ci`: on `release/next
 - [x] a system created by init starts its own changelog with none of the template's releases
 - [x] the #79 test stays strict
 - [x] a test fails if a release entry leaks into a copy
-- [x] **Runnable:** `node --test cli/init-manifest.test.mjs` passes 7 of 7 (2 fail with `scripts/init.mjs` as on `develop`).
+- [x] **Runnable:** `node --test cli/init-manifest.test.mjs` passes 7 of 7 (with `scripts/init.mjs` as on `develop`, 4 pass and 3 fail: the #79 check and both #81 tests).
 
 ## Out of scope
 
 - The release workflow itself, and the template's own changelog.
+
+## Corrections
+
+- 2026-11-24: the Runnable line's red half said 2 tests fail on `develop`'s `scripts/init.mjs`; 3 do (4 pass, 3 fail). The new fixture gives the copy a changelog naming `create-agentic-ds`, so the #79 check fails there too, as `tasks.md` T001 already said. How the criterion is measured changed; no requirement did.
