@@ -22,6 +22,6 @@ jobs:
   dispatch:
     uses: chrisgriffin/workflows/.github/workflows/_reusable-claude-mention.yml@v1
     with:
-      target: agentic-design-system
+      target: agentic-ds
     secrets:
       OPS_GH_TOKEN: ${{ secrets.OPS_GH_TOKEN }}

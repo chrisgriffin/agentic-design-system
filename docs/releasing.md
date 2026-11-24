@@ -1,6 +1,6 @@
 # Releasing
 
-A release of agentic-design-system is a `vX.Y.Z` tag with a GitHub Release, whose notes are that version's `CHANGELOG.md` entry. The template is a private package: a release attaches no file and publishes to no registry.
+A release of agentic-ds is a `vX.Y.Z` tag with a GitHub Release, whose notes are that version's `CHANGELOG.md` entry<!-- init -->, and the create command published to npm as `create-agentic-ds`<!-- /init -->. The Release attaches no file.
 
 ## How a release happens
 
@@ -12,7 +12,8 @@ A release of agentic-design-system is a `vX.Y.Z` tag with a GitHub Release, whos
    back into `develop` has nothing to release and changes nothing.
 3. A human merges `release/next` into `main`. That merge is the release.
 4. The merge runs `create-github-release.yml`, which tags `vX.Y.Z` and
-   creates the GitHub Release from that version's `CHANGELOG.md` entry.
+   creates the GitHub Release from that version's `CHANGELOG.md` entry<!-- init -->, and
+   `publish.yml`, which publishes the create command to npm (below)<!-- /init -->.
 5. `sync-main-to-develop.yml` merges `main` back into `develop`. When the
    merge conflicts, or `develop`'s ruleset refuses the push, it opens a
    `sync/main-to-develop-*` PR instead, for a human to merge.
@@ -41,8 +42,23 @@ through `release-pr.yml`. Merging it runs steps 4 and 5 above.
 
 ## What this repo ships
 
-- A tag and a GitHub Release, nothing more: `create-github-release.yml` passes no build command, no assets and no registry.
+- A tag and a GitHub Release: `create-github-release.yml` passes no build command, no assets and no registry, so it publishes nothing.
 - The Storybook at the repo's GitHub Pages URL, rebuilt by `deploy-pages.yml` from the same push to `main`.
+
+<!-- init -->
+
+- The `create-agentic-ds` npm package, which `npm create agentic-ds` runs: the create command, published to the public npm registry by `publish.yml` with the `NPM_TOKEN` secret. `publish.yml` is this repo's own workflow, not a stub, and a created system does not receive it: `scripts/init.mjs` removes it and sets the system's `package.json` to its own name and `private`.
+- `publish.yml` runs when a `release/*` or `hotfix/*` PR merges into `main`, beside step 4, at the version `package.json` holds on the merge commit, and by hand from the Actions tab on `main`, to retry a publish that failed. A version the registry already has is skipped, green.
+- The package holds `cli/create.mjs`, `cli/defaults.mjs` and `scripts/init.mjs` (`package.json`'s `files`) plus the README and LICENSE npm always adds, and installs nothing with it; `cli/pack.test.mjs` holds that list. The template itself is cloned when the command runs.
+- It is published with provenance: npm records which commit and workflow run built it. That needs the job's `id-token: write`, which `publish.yml` grants, and a `repository.url` in `package.json` naming this repo.
+
+Before the first publish, once, by the repo's owner:
+
+1. Pick the npm account that will own `create-agentic-ds`; the first publish claims the name.
+2. Make an access token on that account that can publish a package that does not exist yet: a granular token with read and write access to all packages, since one limited to selected packages has none to select. It can be narrowed to `create-agentic-ds` after the first publish.
+3. Add it as the `NPM_TOKEN` repository secret before merging the release. Without it the publish job fails after the tag and Release are made; add the secret, then run `publish.yml` by hand on `main`.
+
+<!-- /init -->
 
 ## Setting up on GitHub
 

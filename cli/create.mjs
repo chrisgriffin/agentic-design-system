@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Sets up a named design system from this template in the folder it is run
-// in: `npx github:chrisgriffin/agentic-design-system`. It clones the template,
+// in: `npm create agentic-ds` from a release on npm, where this package is
+// create-agentic-ds, or `npx github:chrisgriffin/agentic-ds` from
+// the default branch. It clones the template,
 // copies it into the folder and hands over to the copy's own scripts/init.mjs,
 // which rewrites the values, installs and runs the gate.
 import { execFileSync, spawnSync } from "node:child_process"
@@ -21,7 +23,7 @@ import { fileURLToPath } from "node:url"
 
 import { authorFrom, gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
 
-const USAGE = `usage: npx github:chrisgriffin/agentic-design-system [--prefix <prefix>] [--owner <github-username>] [--name <name>] [--dir <path>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
+const USAGE = `usage: npm create agentic-ds -- [--prefix <prefix>] [--owner <github-username>] [--name <name>] [--dir <path>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
   --prefix      the custom property prefix: a lowercase letter, then lowercase letters and digits (as in --ads-*)
   --owner       your GitHub username

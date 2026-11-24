@@ -9,6 +9,7 @@
 - [ ] T002 `package.json` and `package-lock.json`: name, bin, `files`, not private.
 - [ ] T003 `scripts/init.mjs`: name, `private`, `files`, `publish.yml`.
 - [ ] T004 `.github/workflows/publish.yml`; `create-github-release.yml`'s comment; `init-check.yml`'s manifest checks.
+- [ ] T008 The rename to `agentic-ds`: `repository.url`, init's template name, the README, docs, `CLAUDE.md`, the mention stub, the usage line, and `cli/old-name.test.mjs`.
 - [ ] T005 `README.md`, `docs/architecture.md`, `docs/releasing.md`, `docs/testing.md`, `CLAUDE.md`, `cli/create.mjs`'s header comment.
 
 ## Phase 3: Green

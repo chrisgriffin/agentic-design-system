@@ -14,6 +14,7 @@ const skill = existsSync(new URL(file, root))
 const REMOVED = [
   "scripts/init.mjs",
   ".github/workflows/init-check.yml",
+  ".github/workflows/publish.yml",
   "cli",
   "specs",
 ]
@@ -39,7 +40,7 @@ test("#59 init leaves the skill whole", () => {
   // init rewrites the name and prefix everywhere and strips init markers, and
   // init-check.yml fails a copy whose Markdown names the init script.
   for (const s of [
-    "agentic-design-system",
+    "agentic-ds",
     "--ads-",
     "FIGMA_FILE_KEY",
     "<!-- init -->",

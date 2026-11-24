@@ -1,4 +1,4 @@
-# agentic-design-system — context for Claude
+# agentic-ds — context for Claude
 
 A template for a design system a coding agent can work in without drifting from its tokens and contracts. How it works, for a person: [README.md](README.md).
 
@@ -45,7 +45,7 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 
 ## CI
 
-Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one.
+Every workflow in `.github/workflows/` is a thin stub calling a reusable workflow in the public [chrisgriffin/workflows](https://github.com/chrisgriffin/workflows) repo at its `v1` tag, except the Pages deploy, which is GitHub's standard one<!-- init -->, and `publish.yml`, which publishes the create command to npm<!-- /init -->.
 The gate is `npm run verify`; `storybook / ci` is the only check that builds this checkout's Storybook<!-- init --> (`init / ci` builds the renamed copy's)<!-- /init -->, and `deploy-pages.yml` builds it again on a push to `main` to deploy it.
 Accessibility: every component test calls `expectNoViolations` (`test-utils/axe.ts`, axe-core in jsdom), so a violation fails the gate; fix the component, never the rule.
 jsdom cannot measure contrast, so `tokens/scripts/contrast.test.mjs` holds every text pair a component stylesheet sets to 4.5:1 in both themes; fix the token, never the bar. The Storybook a11y addon only shows a panel and fails nothing.

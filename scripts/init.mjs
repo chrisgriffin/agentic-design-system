@@ -16,7 +16,7 @@ import { authorFrom } from "../cli/defaults.mjs"
 
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
-  --name        the package and repo name, kebab-case (today: agentic-design-system)
+  --name        the package and repo name, kebab-case (today: agentic-ds)
   --prefix      the custom property prefix: a lowercase letter, then lowercase letters and digits (today: ads, as in --ads-*)
   --owner       your GitHub username (today: chrisgriffin)
   --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
@@ -26,8 +26,9 @@ const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix
 
 Rewrites the name, prefix and owner everywhere they appear, writes the author
 and description, installs, docks the engine, runs npm run verify and builds the
-Storybook, then removes itself, its CI check, the template's specs/, this README
-section and every docs passage marked <!-- init -->.
+Storybook, then removes itself, its CI check, the create command and its npm
+publish workflow, the template's specs/, this README section and every docs
+passage marked <!-- init -->.
 Nothing is committed: read the diff, then commit.`
 
 // A value flag takes the next argument whatever it is, so free text that
@@ -148,7 +149,7 @@ const walk = dir =>
 // The template's own values. The owner is replaced only where it names this
 // repo: the shared config and the public workflows stay the dependencies they are.
 const TEMPLATE = {
-  name: "agentic-design-system",
+  name: "agentic-ds",
   prefix: "ads",
   owner: "chrisgriffin",
   description:
@@ -223,9 +224,12 @@ for (const rel of walk("").filter(f => f.endsWith(".md"))) {
 }
 
 // The create command belongs to the template, not to a system made from it:
-// its folder, its bin and its tests leave the copy. The bin goes last, with the
-// folder, so a copy whose gate failed below still reads as one init has not
-// finished: the setup skill stops where it finds a bin.
+// its folder, its bin and its tests leave the copy, and so does everything
+// that publishes it to npm as create-agentic-ds: the package name, the files
+// list and publish.yml. A system is private until its owner says otherwise.
+// The bin goes last, with the folder, so a copy whose gate failed below still
+// reads as one init has not finished: the setup skill stops where it finds a
+// bin.
 const CLI_TESTS = " cli/*.test.mjs"
 const manifest = path.join(root, "package.json")
 // Each write reads the file afresh, so no step's change is written over (#62).
@@ -235,6 +239,9 @@ const edit = (file, change) => {
   writeFileSync(file, JSON.stringify(json, null, 2) + "\n")
 }
 edit(manifest, pkg => {
+  pkg.name = name
+  pkg.private = true
+  delete pkg.files
   pkg.description = description
   pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
 })
@@ -246,7 +253,13 @@ edit(lockfile, lock => {
 })
 
 // specs/ is the template's build history; a system starts its own.
-const removed = [self, ".github/workflows/init-check.yml", "cli", "specs"]
+const removed = [
+  self,
+  ".github/workflows/init-check.yml",
+  ".github/workflows/publish.yml",
+  "cli",
+  "specs",
+]
 if (!fleet)
   removed.push(
     ".github/workflows/evaluator-gate.yml",

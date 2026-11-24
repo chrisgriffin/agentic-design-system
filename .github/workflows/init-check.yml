@@ -11,6 +11,8 @@ name: Init Check
 # or description (#49).
 # Both fail when the copy has no setup skill, and the init run when its
 # closing line does not name it (#59).
+# Both fail when the copy keeps the create command's package name, bin, files
+# list or publish workflow, or is not private (#79).
 # scripts/init.mjs removes this file from a copy, so a copy never runs it.
 
 on:
@@ -35,6 +37,7 @@ jobs:
         node -e 'const fs = require("fs"), bare = f => { const l = JSON.parse(fs.readFileSync(f)); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(process.argv[1]) !== bare(process.argv[2])) { console.error("#44: the created lock file differs from the template'"'"'s past its name and bin"); process.exit(1) }' package-lock.json "$RUNNER_TEMP/created-system/package-lock.json"
         (cd "$RUNNER_TEMP/created-system" && npx -y npm@10 ci --dry-run) || { echo "#44: npm 10 ci refuses the created lock file"; exit 1; }
         test ! -e "$RUNNER_TEMP/created-system/cli"
+        node -e 'const fs = require("fs"), [dir, name] = process.argv.slice(1), p = JSON.parse(fs.readFileSync(dir + "/package.json")); if (p.name !== name || p.private !== true || p.bin || p.files || p.publishConfig || fs.existsSync(dir + "/.github/workflows/publish.yml")) { console.error("#79: " + name + " inherited the create command'"'"'s package name, bin or publish settings"); process.exit(1) }' "$RUNNER_TEMP/created-system" created-system
         test ! -e "$RUNNER_TEMP/created-system/scripts/init.mjs"
         test ! -e "$RUNNER_TEMP/created-system/specs" || { echo "#49: the template's specs/ survived create"; exit 1; }
         grep -qx 'The created-system design system.' "$RUNNER_TEMP/created-system/README.md" || { echo "#49: create left the template's README description"; exit 1; }
@@ -48,6 +51,7 @@ jobs:
         node -e 'const fs = require("fs"), { execSync } = require("child_process"), bare = t => { const l = JSON.parse(t); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(fs.readFileSync("package-lock.json", "utf8")) !== bare(execSync("git show HEAD:./package-lock.json", { encoding: "utf8" }))) { console.error("#44: init kept a re-resolved lock file instead of the committed one"); process.exit(1) }'
         test ! -f scripts/init.mjs
         test ! -e cli
+        node -e 'const fs = require("fs"), [dir, name] = process.argv.slice(1), p = JSON.parse(fs.readFileSync(dir + "/package.json")); if (p.name !== name || p.private !== true || p.bin || p.files || p.publishConfig || fs.existsSync(dir + "/.github/workflows/publish.yml")) { console.error("#79: " + name + " inherited the create command'"'"'s package name, bin or publish settings"); process.exit(1) }' . sample-system
         test ! -e specs || { echo "#49: the template's specs/ survived init"; exit 1; }
         grep -qx "Copyright (c) $(date +%Y) Sample Author" LICENSE || { echo "#49: LICENSE does not name --author"; exit 1; }
         grep -qx 'Sample tokens.' README.md || { echo "#49: the README intro is not --description"; exit 1; }
