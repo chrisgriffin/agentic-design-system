@@ -91,6 +91,19 @@ lists the steps.
 Token files are plain JSON with one-line diffs, so any DTCG editor works on
 them as-is.
 
+Both tiers are wider than the three example components on purpose: a copy
+starts with whole ramps and a whole semantic layer, so the next component
+needs no new token. `design-delta.json` records that choice, so
+`npm run drift:audit` reports `0 review(s)` on a fresh copy:
+
+- `tokens/token-unreferenced` ignores `tokens/json/primitives/*`, for itself
+  and for `tokens/token-unemitted`. A primitive only ships through a semantic
+  alias, so one nothing aliases is a spare palette step, not drift.
+- Each semantic token no component uses yet is an `exemptions` entry, by its
+  literal id, `accepted` with its reason. When a component starts using one,
+  the audit reports that entry as `coverage/stale-exemption`: delete it. A
+  semantic token you add is never covered, so an unused one is reported.
+
 ## Components
 
 Three examples under `components/`, each a directory of the same seven files:
