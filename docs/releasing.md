@@ -55,8 +55,9 @@ through `release-pr.yml`. Merging it runs steps 4 and 5 above.
 Before the first publish, once, by the repo's owner:
 
 1. Pick the npm account that will own `create-agentic-ds`; the first publish claims the name.
-2. Make an access token on that account that can publish a package that does not exist yet: a granular token with read and write access to all packages, since one limited to selected packages has none to select. It can be narrowed to `create-agentic-ds` after the first publish.
+2. Make an access token on that account that can publish a package that does not exist yet: a granular token with read and write access to all packages, since one limited to selected packages has none to select. It can be narrowed to `create-agentic-ds` after the first publish. Tick "bypass two-factor authentication": npm requires 2FA on a publish unless the token bypasses it, and CI cannot answer a 2FA prompt. Set its expiry: npm caps a token with write access at 90 days (7 by default), so pick the longest it allows and note the date.
 3. Add it as the `NPM_TOKEN` repository secret before merging the release. Without it the publish job fails after the tag and Release are made; add the secret, then run `publish.yml` by hand on `main`.
+4. Before the token expires, make a new one the same way (narrowed to `create-agentic-ds` once it exists) and replace the `NPM_TOKEN` secret with it. An expired token fails the publish job the same way a missing one does, with the same fix: replace the secret, then run `publish.yml` by hand on `main`.
 
 <!-- /init -->
 

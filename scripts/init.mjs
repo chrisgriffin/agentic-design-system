@@ -16,7 +16,7 @@ import { authorFrom } from "../cli/defaults.mjs"
 
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
-  --name        the package and repo name, kebab-case (today: agentic-ds)
+  --name        the repo name, and the package name init sets, kebab-case (today: the repo is agentic-ds, the package create-agentic-ds)
   --prefix      the custom property prefix: a lowercase letter, then lowercase letters and digits (today: ads, as in --ads-*)
   --owner       your GitHub username (today: chrisgriffin)
   --author      the copyright holder in LICENSE (default: git's user.name, else --owner)
