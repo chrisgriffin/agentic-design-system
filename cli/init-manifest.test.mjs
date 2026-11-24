@@ -9,6 +9,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs"
 import { tmpdir } from "node:os"
@@ -173,4 +174,37 @@ test("#81 the copy starts at version 0.0.0, not the template's", () => {
   assert.equal(pkg.version, "0.0.0")
   assert.equal(lock.version, "0.0.0")
   assert.equal(lock.packages[""].version, "0.0.0")
+})
+
+// The template's unused tokens are a decision, recorded in design-delta.json
+// (README § Tokens), so the audit lists nothing: here, and in a copy init has
+// renamed, whether or not its tokens/css has been built yet (#35).
+const audit = cwd => {
+  const out = spawnSync(
+    path.join(ROOT, "node_modules/.bin/design-delta"),
+    ["audit", "--json"],
+    { cwd, encoding: "utf8" },
+  )
+  assert.equal(out.status, 0, out.stderr)
+  return JSON.parse(out.stdout).findings.map(f => `${f.ruleId} ${f.entity}`)
+}
+
+test("#35 the template's audit reports no finding", () => {
+  assert.deepEqual(audit(ROOT), [])
+})
+
+test("#35 an init'd copy's audit reports no finding, before and after its token build", () => {
+  symlinkSync(path.join(ROOT, "node_modules"), path.join(copy, "node_modules"))
+  rmSync(path.join(copy, "tokens/css"), { recursive: true, force: true })
+  assert.deepEqual(audit(copy), [], "with no tokens/css")
+  const build = spawnSync(process.execPath, ["tokens/scripts/build-css.mjs"], {
+    cwd: copy,
+    encoding: "utf8",
+  })
+  assert.equal(build.status, 0, build.stderr)
+  assert.match(
+    readFileSync(path.join(copy, "tokens/css/tokens.css"), "utf8"),
+    /--sds-/,
+  )
+  assert.deepEqual(audit(copy), [], "with tokens/css built")
 })
