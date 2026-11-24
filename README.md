@@ -1,4 +1,4 @@
-# agentic-design-system
+# agentic-ds
 
 A design system template an agent can build in and keep honest.
 
@@ -21,7 +21,7 @@ has no contract at all.
 ## Starting your own
 
 ```bash
-npx github:chrisgriffin/agentic-design-system
+npm create agentic-ds
 ```
 
 Run it in the folder that will be the system, usually a fresh clone of the
@@ -38,6 +38,13 @@ new repository on `main`, the branch its build check and Pages deploy run on. Wi
 into `LICENSE`: git's `user.name`, else `--owner`. It needs Node 22, git and no
 account or token.
 
+`npm create agentic-ds` runs the latest release of the create command, which
+npm holds as `create-agentic-ds`; with npm, flags go after a `--`, as in
+`npm create agentic-ds -- --prefix my --owner my-username`.
+`npx github:chrisgriffin/agentic-ds` runs the default branch's copy instead,
+and takes the flags as they are. Either way the template it copies in is the
+default branch's.
+
 In a copy you made by hand, run the init script yourself:
 
 ```bash
@@ -51,7 +58,7 @@ Connect stubs when given one, installs with `npm ci` from the template's lock
 file (renamed, never re-resolved, so whichever npm you run it with, CI's
 `npm ci` accepts it; if you already installed in the copy, it first restores
 the committed lock, and stops when there is none), docks the engine, runs `npm run verify`,
-builds the Storybook and then removes itself, its CI check, the create command, the template's `specs/` and this section. Pass `--fleet` to keep
+builds the Storybook and then removes itself, its CI check, the create command and its npm publish workflow, the template's `specs/` and this section; the system's `package.json` carries your name and `private: true`. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the diff, then commit.
 
@@ -110,7 +117,7 @@ a contract, or when a component has no contract: `design-delta.json` raises
 
 `npm run storybook` serves the component stories plus two system pages, and
 `npm run build-storybook` writes `storybook-static/`, published to
-[GitHub Pages](https://chrisgriffin.github.io/agentic-design-system/) on every
+[GitHub Pages](https://chrisgriffin.github.io/agentic-ds/) on every
 push to `main`.
 
 - **Tokens** renders every semantic token from the build manifest, the colors

@@ -3,8 +3,10 @@ import { spawnSync } from "node:child_process"
 import {
   chmodSync,
   cpSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -17,7 +19,8 @@ import { fileURLToPath } from "node:url"
 // scripts/init.mjs on a copy of the template, with npm and npx replaced by
 // stubs on PATH: the install, dock and format steps each leave a mark in
 // package.json and package-lock.json, and verify and the Storybook build pass.
-// init must keep every mark and remove only bin (#62).
+// init must keep every mark and remove only bin (#62), and the copy must
+// inherit nothing of the published create command (#79).
 const ROOT = fileURLToPath(new URL("..", import.meta.url))
 const SKIP = new Set([
   ".git",
@@ -110,4 +113,35 @@ test("#62 package-lock.json keeps what the install, dock and format steps wrote,
   assert.equal(lock.packages[""].bin, undefined)
   assert.equal(lock.name, "sample-system")
   assert.equal(lock.packages[""].name, "sample-system")
+})
+
+test("#79 the copy inherits no package name, bin or publish settings", () => {
+  assert.equal(pkg.name, "sample-system")
+  assert.equal(pkg.private, true)
+  for (const key of ["bin", "files", "publishConfig"])
+    assert.equal(pkg[key], undefined, `package.json keeps ${key}`)
+  assert.ok(
+    !existsSync(path.join(copy, ".github/workflows/publish.yml")),
+    "the copy keeps publish.yml",
+  )
+})
+
+// The template's name is rewritten everywhere, so a leftover would read
+// create-sample-system: both spellings are looked for.
+test("#79 no file of the copy names the template or its create command", () => {
+  const files = dir =>
+    readdirSync(dir, { withFileTypes: true }).flatMap(e =>
+      e.isDirectory()
+        ? files(path.join(dir, e.name))
+        : [path.join(dir, e.name)],
+    )
+  const naming = files(copy).filter(file =>
+    /agentic-ds|create-sample-system|npm create/.test(
+      readFileSync(file, "utf8"),
+    ),
+  )
+  assert.deepEqual(
+    naming.map(file => path.relative(copy, file)),
+    [],
+  )
 })

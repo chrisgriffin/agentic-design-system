@@ -1,16 +1,20 @@
 {
-  "name": "agentic-design-system",
+  "name": "create-agentic-ds",
   "version": "0.0.0",
-  "private": true,
   "description": "A design system template an agent can build in and keep honest: DTCG tokens, component contracts, Storybook, and the design-delta gate.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "agentic-design-system": "cli/create.mjs"
+    "create-agentic-ds": "cli/create.mjs"
   },
+  "files": [
+    "cli/create.mjs",
+    "cli/defaults.mjs",
+    "scripts/init.mjs"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chrisgriffin/agentic-design-system.git"
+    "url": "git+https://github.com/chrisgriffin/agentic-ds.git"
   },
   "engines": {
     "node": ">=22"

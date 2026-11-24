@@ -50,7 +50,7 @@ const refusesCleanly = run => {
 test("--help prints the usage line and exits 0", () => {
   const run = create("--help")
   assert.equal(run.status, 0)
-  assert.match(run.stdout.split("\n")[0], /^usage: npx github:/)
+  assert.match(run.stdout.split("\n")[0], /^usage: npm create agentic-ds -- \[/)
 })
 
 test("--help calls --owner your GitHub username", () => {
@@ -75,7 +75,7 @@ test("#56 a refused value is named, with the init script's reason", () => {
   refusesCleanly(run)
   assert.match(
     run.stderr,
-    /^--prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits\n\nusage: npx /,
+    /^--prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits\n\nusage: npm create /,
   )
   assert.doesNotMatch(run.stderr, /sample-owner/, "it listed every value")
   assert.deepEqual(readdirSync(dir), [])
@@ -86,7 +86,7 @@ test("#56 a refused name is shown as --name, the flag create takes", () => {
   refusesCleanly(run)
   assert.match(
     run.stderr,
-    /^--name "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npx /,
+    /^--name "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npm create /,
   )
   assert.deepEqual(readdirSync(dir), [])
 })
