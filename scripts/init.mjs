@@ -27,8 +27,9 @@ const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix
 Rewrites the name, prefix and owner everywhere they appear, writes the author
 and description, installs, docks the engine, runs npm run verify and builds the
 Storybook, then removes itself, its CI check, the create command and its npm
-publish workflow, the template's specs/, this README section and every docs
-passage marked <!-- init -->.
+publish workflow, the template's specs/ and CHANGELOG.md release entries (the
+preamble stays, and version starts at 0.0.0), this README section and every
+docs passage marked <!-- init -->.
 Nothing is committed: read the diff, then commit.`
 
 // A value flag takes the next argument whatever it is, so free text that
@@ -238,8 +239,11 @@ const edit = (file, change) => {
   change(json)
   writeFileSync(file, JSON.stringify(json, null, 2) + "\n")
 }
+// version starts at 0.0.0 with the changelog below, so a system's first
+// release is its own, not the next one in the template's line (#81).
 edit(manifest, pkg => {
   pkg.name = name
+  pkg.version = "0.0.0"
   pkg.private = true
   delete pkg.files
   pkg.description = description
@@ -250,6 +254,7 @@ edit(manifest, pkg => {
 // npm 10 on CI's Node 22 needs (#44). npm ci below installs it and writes nothing.
 edit(lockfile, lock => {
   lock.name = lock.packages[""].name = name
+  lock.version = lock.packages[""].version = "0.0.0"
 })
 
 // specs/ is the template's build history; a system starts its own.
@@ -268,11 +273,14 @@ if (!fleet)
 
 // CHANGELOG.md is the template's release history, which names the template and
 // its create command; a system starts its own, so only the lines above the
-// first release heading stay.
+// first release heading stay (#81). A minor release is written as `## x.y.z`,
+// a patch as `### [x.y.z](…)`: the release workflow finds the first entry with
+// this same pattern, so either level is a release heading.
+const RELEASE_HEADING = /^###? \[?v?[0-9]/m
 const changelog = path.join(root, "CHANGELOG.md")
 if (existsSync(changelog)) {
   const text = readFileSync(changelog, "utf8")
-  const first = text.search(/^## /m)
+  const first = text.search(RELEASE_HEADING)
   if (first !== -1)
     writeFileSync(changelog, `${text.slice(0, first).trimEnd()}\n`)
 }

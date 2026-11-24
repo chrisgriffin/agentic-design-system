@@ -6,7 +6,9 @@ name: Init Check
 # named system that still passes the gate, restoring the committed lock file
 # over one an earlier install re-resolved (#44). The script runs the verify chain
 # and the Storybook build itself and removes itself, this file, the docs
-# passages marked <!-- init --> and the two fleet-only stubs.
+# passages marked <!-- init --> and the two fleet-only stubs, and drops the
+# template's CHANGELOG.md release entries, keeping only the preamble, and
+# resets its version to 0.0.0 (#81).
 # Both runs fail when the copy keeps the template's specs/, copyright holder
 # or description (#49).
 # Both fail when the copy has no setup skill, and the init run when its

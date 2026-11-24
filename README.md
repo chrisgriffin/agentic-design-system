@@ -58,7 +58,7 @@ Connect stubs when given one, installs with `npm ci` from the template's lock
 file (renamed, never re-resolved, so whichever npm you run it with, CI's
 `npm ci` accepts it; if you already installed in the copy, it first restores
 the committed lock, and stops when there is none), docks the engine, runs `npm run verify`,
-builds the Storybook and then removes itself, its CI check, the create command and its npm publish workflow, the template's `specs/` and this section; the system's `package.json` carries your name and `private: true`. Pass `--fleet` to keep
+builds the Storybook and then removes itself, its CI check, the create command and its npm publish workflow, the template's `specs/`, the release entries in `CHANGELOG.md` (only its preamble stays, and the version starts at `0.0.0`) and this section; the system's `package.json` carries your name and `private: true`. Pass `--fleet` to keep
 `evaluator-gate.yml` and `claude-mention.yml`, which need a private operator
 behind them; without it they are removed. Nothing is committed: read the diff, then commit.
 
