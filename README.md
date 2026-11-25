@@ -73,6 +73,13 @@ command's closing line says, and takes any answers its brief already gives.
 Putting the new system on GitHub is the owner's to do: `docs/releasing.md`
 lists the steps.
 
+To watch the create command run from a checkout of the template, run
+`npm run demo`: it sets up a fresh `demo-ds` folder in your temp folder from
+the last commit (it warns when you have uncommitted changes), with the prompts
+live, so Enter takes each default, then prints the folder and its `git status`.
+Flags after `--` go to the create command: `npm run demo -- --no-init` stops
+after the copy.
+
 ## Tokens
 
 - `tokens/json/primitives/` holds literal values (a neutral ramp, one accent

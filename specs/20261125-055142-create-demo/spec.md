@@ -22,11 +22,11 @@ Watching the create command run today takes a hand-built command line: a fresh f
 
 ## Success criteria
 
-- [ ] `npm run demo` sets up a fresh demo folder from the local checkout, with live prompts, and ends on that folder's path and `git status`.
-- [ ] Arguments after `--` reach the create command, and the demo exits with its exit code.
-- [ ] A checkout with uncommitted changes gets a warning before the run.
-- [ ] A system created from the template has no `demo` script.
-- [ ] **Runnable:** `node --test cli/demo.test.mjs cli/init-manifest.test.mjs` passes 14 of 14 (on `develop` it fails: `cli/demo.test.mjs` does not exist).
+- [x] `npm run demo` sets up a fresh demo folder from the local checkout, with live prompts, and ends on that folder's path and `git status`.
+- [x] Arguments after `--` reach the create command, and the demo exits with its exit code.
+- [x] A checkout with uncommitted changes gets a warning before the run.
+- [x] A system created from the template has no `demo` script.
+- [x] **Runnable:** `node --test cli/demo.test.mjs cli/init-manifest.test.mjs` passes 14 of 14 (on `develop` it fails: `cli/demo.test.mjs` does not exist).
 
 ## Out of scope
 
