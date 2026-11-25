@@ -57,14 +57,28 @@ test("arguments reach the create command, and its exit code is the demo's", () =
 })
 
 // The create command clones, so an uncommitted change is not in the demo.
-test("a checkout with uncommitted changes is warned before the run", () => {
+// A clone of this checkout is clean whatever this checkout holds, so the
+// clean run and the dirty one are both its.
+test("a checkout with uncommitted changes is warned before the run, and a clean one is not", () => {
   const checkout = path.join(dir, "checkout")
   execFileSync("git", ["clone", "--quiet", ROOT, checkout])
+  // The clone holds the demo as committed here; this run tests the file on disk.
   copyFileSync(
     path.join(ROOT, "cli/demo.mjs"),
     path.join(checkout, "cli/demo.mjs"),
   )
-  const run = demoIn(checkout, ...VALUES)
-  assert.equal(run.status, 0, run.stderr)
-  assert.match(run.stderr, /uncommitted changes/)
+  execFileSync("git", [
+    "-C",
+    checkout,
+    "update-index",
+    "--assume-unchanged",
+    "cli/demo.mjs",
+  ])
+  const clean = demoIn(checkout, ...VALUES)
+  assert.equal(clean.status, 0, clean.stderr)
+  assert.doesNotMatch(clean.stderr, /uncommitted changes/)
+  writeFileSync(path.join(checkout, "uncommitted.txt"), "not committed")
+  const dirty = demoIn(checkout, ...VALUES)
+  assert.equal(dirty.status, 0, dirty.stderr)
+  assert.match(dirty.stderr, /uncommitted changes/)
 })
