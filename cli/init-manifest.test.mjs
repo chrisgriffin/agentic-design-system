@@ -141,6 +141,10 @@ test("#79 the copy inherits no package name, bin or publish settings", () => {
   )
 })
 
+test("the copy has no demo script, which runs the create command init removes", () => {
+  assert.equal(pkg.scripts.demo, undefined)
+})
+
 // The template's name is rewritten everywhere, so a leftover would read
 // create-sample-system: both spellings are looked for.
 test("#79 no file of the copy names the template or its create command", () => {
