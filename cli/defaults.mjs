@@ -44,3 +44,18 @@ export const authorFrom = (cwd, owner) => {
     ? { author: owner, from: "--owner" }
     : { author: gitName, from: "git's user.name" }
 }
+
+// The create command's flags that take a value, and of those the free-text ones,
+// which cli/demo.mjs reads too, to find the folder a passed-through --dir names.
+export const VALUE_FLAGS = new Set([
+  "--prefix",
+  "--owner",
+  "--name",
+  "--author",
+  "--description",
+  "--figma-file",
+  "--dir",
+  "--from",
+])
+// Free text, so a value starting with "-" is the value, not a flag (#49).
+export const TEXT_FLAGS = new Set(["--author", "--description"])

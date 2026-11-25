@@ -2,12 +2,12 @@
 
 ## Phase 1: tests first
 
-- [x] T001 `cli/demo.test.mjs`: with `TMPDIR` set to a temp folder, `node cli/demo.mjs --prefix dd --owner sample-owner --no-init` exits 0, writes `demo-ds` there, prints its path and `git status`; a stale file in `demo-ds` is gone after a second run; a refused value (`--prefix 9`) exits 1; a dirty checkout copy gets the warning
+- [x] T001 `cli/demo.test.mjs`: with `TMPDIR` set to a temp folder, `node cli/demo.mjs --prefix dd --owner sample-owner --no-init` exits 0, writes `demo-ds` there, prints its path and `git status`; a stale file in `demo-ds` is gone after a second run; a refused value (`--prefix 9`) exits 1; a dirty checkout copy gets the warning; a passed-through `--dir` (the last of several) is the folder set up and reported on, `demo-ds` untouched; a refused named folder is left as it was; `--author --dir` names no folder
 - [x] T002 `cli/init-manifest.test.mjs`: the created copy's `package.json` has no `demo` script; confirm T001 and T002 fail
 
 ## Phase 2: the demo
 
-- [x] T003 `cli/demo.mjs`: the warning, the fresh folder, the create run with the terminal passed through, the closing path and `git status`, the create command's exit code
+- [x] T003 `cli/demo.mjs`: the warning, the fresh folder (or the passed-through `--dir`, read with the flag sets moved to `cli/defaults.mjs`), the create run with the terminal passed through, the closing path and `git status`, the create command's exit code
 - [x] T004 `package.json`: `"demo": "node cli/demo.mjs"`
 - [x] T005 `scripts/init.mjs`: drop `scripts.demo` from a created system's `package.json`
 

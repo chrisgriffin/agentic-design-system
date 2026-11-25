@@ -7,8 +7,8 @@
 
 ## Design
 
-- `cli/demo.mjs`, about 30 lines: resolve the checkout from its own path; when `git status --porcelain` there prints anything, warn on stderr; `rmSync` then `mkdirSync` `path.join(os.tmpdir(), "demo-ds")`; `spawnSync(process.execPath, [cli/create.mjs, "--from", root, "--dir", folder, ...process.argv.slice(2)], { stdio: "inherit" })`; then print the folder and `git -C <folder> status --short`, and exit with the create command's status.
-- The create command's parser keeps the last value a flag is given, so a passed-through `--dir` or `--from` overrides the demo's.
+- `cli/demo.mjs`, about 60 lines: resolve the checkout from its own path; when `git status --porcelain` there prints anything, warn on stderr that the template it copies is the last commit; read the last passed-through `--dir` with the create command's `VALUE_FLAGS` and `TEXT_FLAGS`, which move to `cli/defaults.mjs` so both read them; with none, `rmSync` then `mkdirSync` `path.join(os.tmpdir(), "demo-ds")`; `spawnSync(process.execPath, [cli/create.mjs, "--from", root, "--dir", folder, ...process.argv.slice(2)], { stdio: "inherit" })`; then print that folder and `git -C <folder> status --short`, and exit with the create command's status.
+- The create command's parser keeps the last value a flag is given, so a passed-through `--dir` or `--from` overrides the demo's; the demo reads `--dir` the same way, so it reports on the folder the create command used, and never wipes one the person named.
 - The folder is `demo-ds`, so the system is named `demo-ds` and the prefix prompt offers `dd`.
 - `os.tmpdir()` reads `TMPDIR`, so the test points the demo at a temp folder of its own without a flag the demo would otherwise need.
 - `package.json`: `"demo": "node cli/demo.mjs"`. `scripts/init.mjs`: `delete pkg.scripts.demo` in the edit that already rewrites `scripts.test`.
@@ -17,6 +17,7 @@
 
 - `cli/demo.mjs` (new), `cli/demo.test.mjs` (new)
 - `package.json`, `scripts/init.mjs`, `cli/init-manifest.test.mjs`
+- `cli/defaults.mjs`, `cli/create.mjs`: the create command's flag sets, shared with the demo
 - `README.md`, `docs/architecture.md`, `docs/testing.md`
 
 ## Surfaces touched

@@ -21,7 +21,14 @@ import path from "node:path"
 import { createInterface } from "node:readline/promises"
 import { fileURLToPath } from "node:url"
 
-import { authorFrom, gitUserName, ownerFrom, prefixFrom } from "./defaults.mjs"
+import {
+  authorFrom,
+  gitUserName,
+  ownerFrom,
+  prefixFrom,
+  TEXT_FLAGS,
+  VALUE_FLAGS,
+} from "./defaults.mjs"
 
 const USAGE = `usage: npm create agentic-ds -- [--prefix <prefix>] [--owner <github-username>] [--name <name>] [--dir <path>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
@@ -51,18 +58,6 @@ const fail = message => {
 
 // --from and --no-init are for the tests and CI: another template source, and
 // a copy left before the install and the gate.
-const VALUE_FLAGS = new Set([
-  "--prefix",
-  "--owner",
-  "--name",
-  "--author",
-  "--description",
-  "--figma-file",
-  "--dir",
-  "--from",
-])
-// Free text, so a value starting with "-" is the value, not a flag (#49).
-const TEXT_FLAGS = new Set(["--author", "--description"])
 const SWITCHES = new Set(["--fleet", "--no-init", "--help", "-h"])
 const values = {}
 const switches = new Set()
