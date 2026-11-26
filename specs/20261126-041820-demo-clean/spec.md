@@ -19,9 +19,9 @@
 
 ## Success criteria
 
-- [ ] `npm run demo -- --clean` after a demo run removes `demo-ds` from the temp folder and exits 0; run again, it says nothing was there and exits 0.
-- [ ] `--clean` with another argument exits 1 and removes nothing.
-- [ ] **Runnable:** `node --test cli/demo.test.mjs` passes, including its `--clean` tests (on `develop`, `node cli/demo.mjs --clean` exits 1: the create command refuses `--clean` as an unknown option), and `npm test` stays green.
+- [x] `npm run demo -- --clean` after a demo run removes `demo-ds` from the temp folder and exits 0; run again, it says nothing was there and exits 0.
+- [x] `--clean` with another argument exits 1 and removes nothing.
+- [x] **Runnable:** `node --test cli/demo.test.mjs` passes, including its `--clean` tests (on `develop`, `node cli/demo.mjs --clean` exits 1: the create command refuses `--clean` as an unknown option), and `npm test` stays green.
 
 ## Out of scope
 

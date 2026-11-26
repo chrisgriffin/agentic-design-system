@@ -80,6 +80,8 @@ count of what `git status` shows there. The template it copies is the last commi
 uncommitted changes); the create command itself runs from your files. Flags
 after `--` go to the create command: `npm run demo -- --no-init` stops after
 the copy, and `--dir` sets up, and reports on, a folder of your own instead.
+When you are done, `npm run demo -- --clean` removes the `demo-ds` folder; it
+never removes a folder `--dir` named.
 
 ## Tokens
 

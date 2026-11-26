@@ -129,3 +129,30 @@ test("--dir as another flag's value names no folder", () => {
   assert.ok(existsSync(path.join(folder(), "scripts/init.mjs")))
   assert.ok(endsOn(run.stdout, folder()), run.stdout)
 })
+
+// --clean removes the demo's own folder and nothing else (#90).
+test("--clean removes demo-ds and runs nothing else, and says so when nothing is there", () => {
+  assert.equal(demo(...VALUES).status, 0)
+  assert.ok(existsSync(folder()))
+  const run = demo("--clean")
+  assert.equal(run.status, 0, run.stderr)
+  assert.ok(!existsSync(folder()))
+  assert.match(run.stdout, /^ {2}✓ Removed {2}/m)
+  assert.ok(run.stdout.includes(folder()), run.stdout)
+  assert.doesNotMatch(run.stdout, /Demo|git status/)
+  const again = demo("--clean")
+  assert.equal(again.status, 0, again.stderr)
+  assert.match(again.stdout, /^ {2}✓ Clean {5}nothing at /m)
+})
+
+test("--clean with another argument is refused and removes nothing", () => {
+  const mine = path.join(dir, "mine")
+  mkdirSync(mine)
+  writeFileSync(path.join(mine, "keep.txt"), "the person's own")
+  mkdirSync(folder())
+  const run = demo("--clean", "--dir", mine)
+  assert.equal(run.status, 1)
+  assert.match(run.stderr, /^ {2}✗ --clean takes no other argument/m)
+  assert.ok(existsSync(path.join(mine, "keep.txt")))
+  assert.ok(existsSync(folder()))
+})
