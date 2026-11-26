@@ -3,7 +3,7 @@
 // follows (shown as that tool prints it), aligned rows and numbered steps.
 // Color, and a step line that turns from pending to done in place, only on a
 // terminal with NO_COLOR unset; piped, as in the tests and CI, it is plain text.
-import { styleText } from "node:util"
+import { stripVTControlCharacters, styleText } from "node:util"
 
 export const colored = stream => Boolean(stream.isTTY) && !process.env.NO_COLOR
 
@@ -28,11 +28,22 @@ export const title = (name, what) =>
 
 export const tick = (label, detail) => line(out("green", "✓"), label, detail)
 
+// Columns a line takes on a terminal: a wide (East Asian) character takes two.
+const columns = text =>
+  [...stripVTControlCharacters(text)].reduce(
+    (sum, char) => sum + (char.codePointAt(0) >= 0x2e80 ? 2 : 1),
+    0,
+  )
+
 // A step that takes a while: on a terminal its line shows as pending until the
-// returned function marks it done; piped, only the done line is written.
+// returned function marks it done; piped, only the done line is written. A
+// pending line as wide as the terminal or wider is not written either: it
+// would wrap, and clearing it erases only the row the cursor is on.
 export const pending = (label, detail) => {
-  if (colored(process.stdout)) {
-    process.stdout.write(line(out("dim", "◇"), label, detail))
+  const text = line(out("dim", "◇"), label, detail)
+  const width = process.stdout.columns
+  if (colored(process.stdout) && width && columns(text) < width) {
+    process.stdout.write(text)
     open = true
   }
   return () => {

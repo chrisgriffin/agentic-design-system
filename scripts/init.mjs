@@ -9,6 +9,7 @@ import {
   rmSync,
   statSync,
   writeFileSync,
+  writeSync,
 } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -289,12 +290,26 @@ if (existsSync(changelog)) {
     writeFileSync(changelog, `${text.slice(0, first).trimEnd()}\n`)
 }
 
+// Under the create command, a failed command is handed to it on fd 3, which it
+// opens for this, and is not printed here: create's failure line names it with
+// the retry, so the run ends on one ✗ line (#88). False when fd 3 is not open.
+const handOff = cmd => {
+  if (!process.env.CREATE_AGENTIC_DS) return false
+  try {
+    writeSync(3, cmd)
+    return true
+  } catch {
+    return false
+  }
+}
+
 // Each command's own output, under a header naming it; a failure is one line.
 const run = cmd => {
   console.log(header(cmd))
   try {
     execSync(cmd, { cwd: root, stdio: "inherit" })
   } catch {
+    if (handOff(cmd)) process.exit(1)
     console.error(
       `\n${failure(`${cmd} failed; fix the cause, then run init again.`)}`,
     )

@@ -363,16 +363,19 @@ if (init) {
     )
     initArgs.push("--author", chosen.author)
   }
+  // fd 3 carries back the command init stopped at, if it stopped at one.
   const run = spawnSync(process.execPath, ["scripts/init.mjs", ...initArgs], {
     cwd: target,
-    stdio: "inherit",
+    stdio: ["inherit", "inherit", "inherit", "pipe"],
     // init leaves the next steps to the closing below.
     env: { ...process.env, CREATE_AGENTIC_DS: "1" },
   })
-  if (run.status !== 0)
+  if (run.status !== 0) {
+    const failed = run.output?.[3]?.toString().trim()
     fail(
-      `\n${target} was set up, but its init script failed. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted()}`,
+      `\n${target} was set up, but its init script failed${failed ? ` at ${failed}` : ""}. Fix the cause, then run it again there:\n  node scripts/init.mjs ${quoted()}`,
     )
+  }
 }
 const relative = path.relative(process.cwd(), target)
 const shown =
