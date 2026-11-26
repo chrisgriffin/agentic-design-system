@@ -141,6 +141,17 @@ test("#79 the copy inherits no package name, bin or publish settings", () => {
   )
 })
 
+test("the copy keeps its MCP server, named for the system, and its test (#94)", () => {
+  const mcp = JSON.parse(readFileSync(path.join(copy, ".mcp.json"), "utf8"))
+  assert.deepEqual(mcp.mcpServers, {
+    "sample-system": { command: "node", args: ["scripts/mcp.mjs"] },
+  })
+  assert.ok(existsSync(path.join(copy, "scripts/mcp.mjs")))
+  assert.equal(pkg.scripts.mcp, "node scripts/mcp.mjs")
+  assert.match(pkg.scripts.test, / scripts\/\*\.test\.mjs /)
+  assert.doesNotMatch(pkg.scripts.test, /cli\//)
+})
+
 test("the copy has no demo or demo:clean script, which run the cli/ init removes", () => {
   assert.equal(pkg.scripts.demo, undefined)
   assert.equal(pkg.scripts["demo:clean"], undefined)

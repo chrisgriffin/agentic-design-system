@@ -198,6 +198,13 @@ dock's stub, pointing at the installed engine's own skill.
 `components/badge` plus the contract the engine drafts from its props.
 `CLAUDE.md` is the rulebook an agent reads first.
 
+`.mcp.json` connects an agent to the system's own MCP server, `npm run mcp`,
+read-only: `get_component_usage` gives a component's folder, exports and
+stories, `get_theme_tokens` each semantic token's value in light and dark,
+and `get_rules` the invariants from `CLAUDE.md`. It also passes through every
+tool `design-delta mcp` serves (contracts, tokens, coverage, drift), so an
+agent connects to one server.
+
 ## License
 
 MIT.

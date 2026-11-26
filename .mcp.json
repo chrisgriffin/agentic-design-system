@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "agentic-ds": { "command": "node", "args": ["scripts/mcp.mjs"] }
+  }
+}

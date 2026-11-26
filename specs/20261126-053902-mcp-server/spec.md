@@ -23,10 +23,10 @@ design-delta already serves a project's contracts, tokens and drift over MCP, bu
 
 ## Success criteria
 
-- [ ] An MCP client connected to `npm run mcp` lists `get_component_usage`, `get_theme_tokens`, `get_rules` and design-delta's tools, and gets an answer from each kind.
-- [ ] `get_theme_tokens` gives a color token different values in light and dark.
-- [ ] A created system's `.mcp.json` names the server by the system's name, and its gate runs the server's test.
-- [ ] **Runnable:** `node --test scripts/mcp.test.mjs` passes (on `develop` it fails: `scripts/mcp.test.mjs` does not exist), and `npm test` stays green.
+- [x] An MCP client connected to `npm run mcp` lists `get_component_usage`, `get_theme_tokens`, `get_rules` and design-delta's tools, and gets an answer from each kind.
+- [x] `get_theme_tokens` gives a color token different values in light and dark.
+- [x] A created system's `.mcp.json` names the server by the system's name, and its gate runs the server's test.
+- [x] **Runnable:** `node --test scripts/mcp.test.mjs` passes (on `develop` it fails: `scripts/mcp.test.mjs` does not exist), and `npm test` stays green.
 
 ## Out of scope
 

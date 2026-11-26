@@ -41,7 +41,7 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 
 - `.claude/settings.json` wires three hooks: `bash-guard.sh` before every Bash call, `post-edit-check.sh` (Prettier, and Stylelint on CSS) and `design-delta-verify.mjs` after every edit. A failing hook feeds its text back; fix the cause, never the hook.
 - `.claude/skills/design-delta/SKILL.md` is a stub pointing at the installed engine's own skill; read that one, then `design-delta.json`'s `_`-prefixed keys.
-- `design-delta` also serves contracts and tokens over MCP (`npx design-delta mcp`), read-only.
+- `npm run mcp` (`scripts/mcp.mjs`, connected by `.mcp.json`) is the system's MCP server, read-only: `get_component_usage`, `get_theme_tokens` and `get_rules`, plus every `design-delta mcp` tool (contracts, tokens, drift), passed through.
 
 ## CI
 
