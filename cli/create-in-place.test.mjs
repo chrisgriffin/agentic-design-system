@@ -103,7 +103,7 @@ test("#75 with no --dir it sets up the folder it is run in, named after it", () 
   assert.deepEqual(readdirSync(dir).sort(), ["gitconfig", "sample-system"])
   assert.match(
     run.stdout,
-    / {4}1  read the diff, then commit\n {4}2  run \/setup-system in Claude Code here\n/,
+    / {4}1 {2}read the diff, then commit\n {4}2 {2}run \/setup-system in Claude Code here\n/,
   )
   const check = spawnSync(
     process.execPath,
@@ -131,7 +131,7 @@ test("#75 in a clean repo it keeps the history and branch and names what it repl
   )
   assert.match(
     run.stdout,
-    /✓ Replaced  LICENSE, README\.md \(git diff shows what changed\)/,
+    /✓ Replaced {2}LICENSE, README\.md \(git diff shows what changed\)/,
   )
   assert.match(git(repo, "status", "--porcelain").stdout, /^ M README\.md$/m)
 })
@@ -179,7 +179,10 @@ test("#75 --dir in a repo sets up that folder, made when missing, with no repo o
   const made = path.join(repo, "packages/tokens")
   assert.ok(existsSync(path.join(made, "package.json")))
   assert.ok(!existsSync(path.join(made, ".git")), "it started a nested repo")
-  assert.match(run.stdout, / {4}1  cd packages\/tokens\n {4}2  read the diff/)
+  assert.match(
+    run.stdout,
+    / {4}1 {2}cd packages\/tokens\n {4}2 {2}read the diff/,
+  )
 })
 
 // An ignored file is one git holds no copy of, in each place the setup reaches
