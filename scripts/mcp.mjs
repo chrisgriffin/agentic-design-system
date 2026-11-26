@@ -12,6 +12,9 @@ import { createInterface } from "node:readline"
 import { fileURLToPath } from "node:url"
 
 const PROTOCOL_VERSION = "2024-11-05"
+// How long design-delta's server gets to answer the handshake or one call
+// before the asker is told it did not, so a hung child never stops the queue.
+const DELTA_TIMEOUT_MS = Number(process.env.MCP_DELTA_TIMEOUT_MS) || 30_000
 const root = fileURLToPath(new URL("..", import.meta.url))
 const read = rel => readFileSync(path.join(root, rel), "utf8")
 const { name, version } = JSON.parse(read("package.json"))
@@ -20,7 +23,7 @@ const TOOLS = [
   {
     name: "get_component_usage",
     description:
-      "How to use a component: the folder to import it from, the names its index.ts exports and its stories file, each story a working example. Its props, anatomy and token bindings are get_contract's.",
+      "How to use a component: the folder to import it from, the names its index.ts exports and its stories file, each story a working example. Its props, anatomy and token bindings are get_contract's. Exports are read from `export { … }` and `export type { … }` lists (a name's own `type` and an `as` alias included), `export const`/`let`/`function`/`class`/`enum`, `export type`/`interface`, `export default` (as default) and `export * as`; an `export * from` is listed under starFrom, its names not followed.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "e.g. badge" } },
@@ -52,12 +55,35 @@ const components = () =>
     .map(entry => entry.name)
     .sort()
 
-// The names a line like `export { A, B } from` or `export type { C } from` gives.
-const exported = (source, type) =>
-  [...source.matchAll(/^export (type )?\{([^}]*)\}/gm)]
-    .filter(([, isType]) => Boolean(isType) === type)
-    .flatMap(([, , names]) => names.split(",").map(n => n.trim()))
-    .filter(Boolean)
+// The names an index.ts exports, values and types apart: `export { A, type
+// B, C as D }`, `export type { E }`, `export const F`, `export interface G`,
+// `export default`, `export * as H from`, and the modules an `export * from` re-exports whole.
+const exported = source => {
+  const values = []
+  const types = []
+  const starFrom = []
+  for (const [, isType, list] of source.matchAll(
+    /^export\s+(type\s+)?\{([^}]*)\}/gm,
+  ))
+    for (const entry of list.split(",")) {
+      const match = entry.trim().match(/^(type\s+)?(\S+)(?:\s+as\s+(\S+))?$/)
+      if (!match) continue
+      const [, ownType, local, alias] = match
+      ;(isType || ownType ? types : values).push(alias ?? local)
+    }
+  for (const [, kind, id] of source.matchAll(
+    /^export\s+(?:declare\s+)?(?:abstract\s+)?(?:async\s+)?(const|let|var|function\*?|class|enum|type|interface)\s+([A-Za-z_$][\w$]*)/gm,
+  ))
+    (kind === "type" || kind === "interface" ? types : values).push(id)
+  // `export default function Name` is imported as the default, not as Name.
+  if (/^export\s+default\b/m.test(source)) values.push("default")
+  for (const [, ns, from] of source.matchAll(
+    /^export\s+(?:type\s+)?\*\s*(?:as\s+([A-Za-z_$][\w$]*)\s+)?from\s+["']([^"']+)["']/gm,
+  ))
+    if (ns) values.push(ns)
+    else starFrom.push(from)
+  return { values, types, starFrom }
+}
 
 const sections = (text, headings) =>
   headings
@@ -81,7 +107,7 @@ const own = {
     return {
       id,
       importFrom: dir,
-      exports: { values: exported(index, false), types: exported(index, true) },
+      exports: exported(index),
       stories: existsSync(path.join(root, stories))
         ? { file: stories, source: read(stories) }
         : null,
@@ -139,6 +165,7 @@ const own = {
 // design-delta's own server, run behind this one: its module is not in its
 // package's exports, so it is reached through its bin, as an agent would.
 let delta
+let child
 const startDelta = () =>
   (delta ??= new Promise(resolve => {
     const waiting = new Map()
@@ -148,7 +175,20 @@ const startDelta = () =>
       new Promise(answer => {
         if (failed) return answer({ error: { code: -32603, message: failed } })
         const id = ++next
-        waiting.set(id, answer)
+        const timer = setTimeout(() => {
+          waiting.delete(id)
+          answer({
+            error: {
+              code: -32603,
+              message: `design-delta mcp did not answer ${method} within ${DELTA_TIMEOUT_MS} ms`,
+            },
+          })
+        }, DELTA_TIMEOUT_MS)
+        timer.unref()
+        waiting.set(id, message => {
+          clearTimeout(timer)
+          answer(message)
+        })
         child.stdin.write(
           `${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`,
         )
@@ -159,7 +199,7 @@ const startDelta = () =>
         answer({ error: { code: -32603, message: failed } })
       waiting.clear()
     }
-    let child
+    const unavailable = () => failed
     try {
       const pkgRoot = fileURLToPath(
         new URL("..", import.meta.resolve("design-delta")),
@@ -174,14 +214,16 @@ const startDelta = () =>
       })
     } catch (error) {
       failed = `design-delta could not start: ${error.message}`
-      return resolve({ ask, tools: [] })
+      return resolve({ ask, tools: [], unavailable })
     }
     let stderr = ""
     child.stderr.on("data", chunk => (stderr += chunk))
     child.on("error", error =>
       fail(`design-delta could not start: ${error.message}`),
     )
-    child.on("exit", code =>
+    // `close`, not `exit`: it waits for the child's stdout to drain, so a reply
+    // already written is read before the pending asks are failed.
+    child.on("close", code =>
       fail(
         `design-delta mcp exited (${code})${stderr ? `: ${stderr.trim()}` : ""}`,
       ),
@@ -203,12 +245,24 @@ const startDelta = () =>
       capabilities: {},
       clientInfo: { name, version },
     }).then(async init => {
-      if (init.error) return resolve({ ask, tools: [] })
+      // A handshake that failed or timed out leaves a child that cannot be
+      // trusted to answer: every later ask fails at once with the reason.
+      const stop = message => {
+        fail(message)
+        child.kill()
+        resolve({ ask, tools: [], unavailable })
+      }
+      if (init.error) return stop(init.error.message)
       child.stdin.write(
         `${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" })}\n`,
       )
       const list = await ask("tools/list", {})
-      resolve({ ask, tools: list.result?.tools ?? [] })
+      if (list.error) return stop(list.error.message)
+      // An own tool's name wins: a child tool of the same name is dropped.
+      const tools = (list.result?.tools ?? []).filter(
+        tool => !Object.hasOwn(own, tool.name),
+      )
+      resolve({ ask, tools, unavailable })
     })
   }))
 
@@ -223,10 +277,25 @@ const text = result => ({
   isError: Boolean(result.error),
 })
 
-const handle = async ({ id, method, params } = {}) => {
+const isObject = value =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+
+const handle = async message => {
+  // null, a number, a string, a boolean or an array is not a request.
+  if (!isObject(message))
+    return failure(null, -32600, "Invalid Request: not a JSON-RPC object")
+  const { id, method, params } = message
   const notification = id === undefined || id === null
-  if (typeof method !== "string" || method.startsWith("notifications/"))
-    return notification ? null : failure(id, -32602, "no method")
+  if (typeof method === "string" && method.startsWith("notifications/"))
+    return null
+  // A request with no method is answered even with no id, as JSON-RPC 2.0
+  // says: its id could not be read, so the error's is null.
+  if (typeof method !== "string")
+    return failure(
+      notification ? null : id,
+      -32600,
+      "Invalid Request: no method",
+    )
   switch (method) {
     case "initialize":
       startDelta()
@@ -248,7 +317,17 @@ const handle = async ({ id, method, params } = {}) => {
           return reply(id, text({ error: error.message }))
         }
       }
-      const { ask } = await startDelta()
+      const { ask, tools, unavailable } = await startDelta()
+      if (!tools.some(entry => entry.name === tool)) {
+        const known = [...TOOLS, ...tools].map(entry => entry.name).join(", ")
+        const why = unavailable()
+          ? `; design-delta's tools are unavailable: ${unavailable()}`
+          : ""
+        return reply(
+          id,
+          text({ error: `unknown tool "${tool}" (known: ${known})${why}` }),
+        )
+      }
       const answer = await ask("tools/call", params)
       return answer.error
         ? reply(id, text({ error: answer.error.message }))
@@ -275,8 +354,21 @@ createInterface({ input: process.stdin })
           `${JSON.stringify(failure(null, -32700, "not JSON"))}\n`,
         )
       }
-      const response = await handle(message)
+      let response
+      try {
+        response = await handle(message)
+      } catch (error) {
+        const id = isObject(message) ? (message.id ?? null) : null
+        response = failure(id, -32603, `Internal error: ${error.message}`)
+      }
       if (response) process.stdout.write(`${JSON.stringify(response)}\n`)
     })
   })
-  .on("close", () => queue.then(() => process.exit(0)))
+  // No process.exit: it can cut off a reply still being written to a pipe.
+  // Stopping the child lets the process end once stdout has drained.
+  .on("close", () =>
+    queue.then(() => {
+      process.exitCode = 0
+      child?.kill()
+    }),
+  )

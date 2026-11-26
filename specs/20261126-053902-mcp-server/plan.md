@@ -6,7 +6,7 @@ Node 22, ES modules, no new dependency. design-delta 0.27 ships `design-delta mc
 
 ## Design
 
-- `scripts/mcp.mjs`: reads stdin lines, answers each request with one stdout line. Own tools are handled in-process; any other tool name is forwarded to a `design-delta mcp` child started on first need (its `bin` resolved from `import.meta.resolve("design-delta")`), after an `initialize` handshake. `tools/list` is the own tools then the child's.
+- `scripts/mcp.mjs`: reads stdin lines, answers each request with one stdout line. Own tools are handled in-process; any other tool name is forwarded to a `design-delta mcp` child started on first need (its `bin` resolved from `import.meta.resolve("design-delta")`), after an `initialize` handshake. `tools/list` is the own tools then the child's, less any child tool named like an own tool. The handshake and each forwarded call time out (`MCP_DELTA_TIMEOUT_MS`, 30 s) with an error, so a hung child never stops the own tools; the child's failure is read on `close`, after its stdout drains. A line that is not a JSON-RPC object is `-32600`.
 - `get_theme_tokens` runs `build-manifest.mjs` in a fresh `node` each call, so an edited token source is read, not a cached import.
 - `get_component_usage` reads `components/<id>/index.ts` and `<id>.stories.tsx`; the id must be a kebab-case folder that exists.
 - `get_rules` cuts the two `##` sections out of `CLAUDE.md`.
