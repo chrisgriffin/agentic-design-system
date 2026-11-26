@@ -6,7 +6,7 @@ Node 22, no dependency. `cli/demo.mjs` already computes the default folder (`pat
 
 ## Design
 
-- In `cli/demo.mjs`, before the uncommitted-changes warning: if `args` includes `--clean`, refuse with `failure(...)` and exit 1 when any other argument is given; otherwise `rmSync` the default folder when it exists, print `tick("Removed", folder)` or `tick("Clean", "nothing at <folder>")`, and exit 0.
+- In `cli/demo.mjs`, before the uncommitted-changes warning: if `--clean` is given in a flag's place (read as the create command reads flags, so a free-text flag's value is skipped), refuse with `failure(...)` and exit 1 when any other argument is given; otherwise `rmSync` the default folder when it exists, print `tick("Removed", folder)` or `tick("Clean", "nothing at <folder>")`, and exit 0.
 - Tests in `cli/demo.test.mjs`, with `TMPDIR` pointed at a temp folder as the others do.
 
 ## Surfaces touched

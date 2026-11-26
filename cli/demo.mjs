@@ -21,11 +21,14 @@ const git = (cwd, ...rest) =>
     stdio: ["ignore", "pipe", "pipe"],
   })
 
-// The last --dir given, read the way the create command reads its flags: a
-// flag's value is skipped, so `--author --dir` names an author, not a folder.
-const passedDir = args => {
+// The flags given and the last --dir, read the way the create command reads
+// them: a flag's value is skipped, so `--author --dir` names an author, not a
+// folder, and `--description --clean` is a description, not --clean.
+const readArgs = args => {
+  const flags = new Set()
   let dir
   for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith("-")) flags.add(args[i])
     if (!VALUE_FLAGS.has(args[i])) continue
     const value = args[i + 1]
     if (value === undefined) break
@@ -33,15 +36,15 @@ const passedDir = args => {
     if (args[i] === "--dir") dir = value
     i++
   }
-  return dir
+  return { flags, dir }
 }
 
-const named = passedDir(args)
+const { flags, dir: named } = readArgs(args)
 const folder = path.resolve(named ?? path.join(tmpdir(), "demo-ds"))
 
 // --clean removes the demo's own folder and runs nothing else (#90). It takes
 // no other argument: a folder --dir names is the person's, never removed.
-if (args.includes("--clean")) {
+if (flags.has("--clean")) {
   if (args.length > 1) {
     console.error(
       failure(

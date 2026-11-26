@@ -68,7 +68,7 @@ test("arguments reach the create command, and its exit code is the demo's", () =
 // The create command clones, so an uncommitted change is not in the template
 // it copies (the create command itself runs from disk). A clone of this checkout is clean whatever this checkout holds, so the
 // clean run and the dirty one are both its.
-test("a checkout with uncommitted changes is warned before the run, and a clean one is not", () => {
+const cleanCheckout = () => {
   const checkout = path.join(dir, "checkout")
   execFileSync("git", ["clone", "--quiet", ROOT, checkout])
   // The clone holds the demo as committed here; this run tests the files on
@@ -83,6 +83,11 @@ test("a checkout with uncommitted changes is warned before the run, and a clean 
     "--assume-unchanged",
     ...files,
   ])
+  return checkout
+}
+
+test("a checkout with uncommitted changes is warned before the run, and a clean one is not", () => {
+  const checkout = cleanCheckout()
   const clean = demoIn(checkout, ...VALUES)
   assert.equal(clean.status, 0, clean.stderr)
   assert.doesNotMatch(clean.stderr, /uncommitted changes/)
@@ -137,12 +142,44 @@ test("--clean removes demo-ds and runs nothing else, and says so when nothing is
   const run = demo("--clean")
   assert.equal(run.status, 0, run.stderr)
   assert.ok(!existsSync(folder()))
-  assert.match(run.stdout, /^ {2}✓ Removed {2}/m)
-  assert.ok(run.stdout.includes(folder()), run.stdout)
-  assert.doesNotMatch(run.stdout, /Demo|git status/)
+  // One line and nothing else: the create command never ran.
+  assert.equal(run.stdout, `  ✓ Removed   ${folder()}\n`)
   const again = demo("--clean")
   assert.equal(again.status, 0, again.stderr)
-  assert.match(again.stdout, /^ {2}✓ Clean {5}nothing at /m)
+  assert.equal(again.stdout, `  ✓ Clean     nothing at ${folder()}\n`)
+})
+
+// FR-001: --clean runs nothing else, the uncommitted-changes warning included.
+test("--clean in a checkout with uncommitted changes removes demo-ds without the warning", () => {
+  const checkout = cleanCheckout()
+  writeFileSync(path.join(checkout, "uncommitted.txt"), "not committed")
+  mkdirSync(folder())
+  const run = demoIn(checkout, "--clean")
+  assert.equal(run.status, 0, run.stderr)
+  assert.equal(run.stderr, "")
+  assert.equal(run.stdout, `  ✓ Removed   ${folder()}\n`)
+  assert.ok(!existsSync(folder()))
+})
+
+// --clean is the demo's flag only in a flag's place: as a free-text flag's
+// value it is that value, and the demo runs as it would with any other.
+for (const flag of ["--description", "--author"])
+  test(`--clean as ${flag}'s value is that value, and the demo runs`, () => {
+    const run = demo(...VALUES, flag, "--clean")
+    assert.equal(run.status, 0, run.stderr)
+    assert.doesNotMatch(run.stderr, /--clean takes no other argument/)
+    assert.ok(existsSync(path.join(folder(), "scripts/init.mjs")))
+    assert.ok(endsOn(run.stdout, folder()), run.stdout)
+  })
+
+// After a flag that takes no value from a dash word, --clean is a flag again,
+// as the create command reads it: refused, since it is not alone.
+test("--clean after --dir is --clean, and is refused with the other argument", () => {
+  mkdirSync(folder())
+  const run = demo("--dir", "--clean")
+  assert.equal(run.status, 1)
+  assert.match(run.stderr, /^ {2}✗ --clean takes no other argument/m)
+  assert.ok(existsSync(folder()))
 })
 
 test("--clean with another argument is refused and removes nothing", () => {
