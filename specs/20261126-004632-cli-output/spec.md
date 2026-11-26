@@ -24,11 +24,11 @@ The create command, the init script it hands over to, and `npm run demo` each en
 
 ## Success criteria
 
-- [ ] A create run in a terminal shows a title, a tick per step, a header above each tool's output, an aligned summary and numbered next steps.
-- [ ] Piped output, and output with `NO_COLOR` set, holds no escape codes.
-- [ ] A failed gate command ends on one failure line naming it, not a stack trace, and the exit code is 1.
-- [ ] The demo ends on its folder and one line counting `git status`, not the whole list.
-- [ ] **Runnable:** `node --test cli/ui.test.mjs` passes (on `develop` it fails: `cli/ui.test.mjs` does not exist), and `npm test` stays green.
+- [x] A create run in a terminal shows a title, a tick per step, a header above each tool's output, an aligned summary and numbered next steps.
+- [x] Piped output, and output with `NO_COLOR` set, holds no escape codes.
+- [x] A failed gate command ends on one failure line naming it, not a stack trace, and the exit code is 1.
+- [x] The demo ends on its folder and one line counting `git status`, not the whole list.
+- [x] **Runnable:** `node --test cli/ui.test.mjs` passes (on `develop` it fails: `cli/ui.test.mjs` does not exist), and `npm test` stays green.
 
 ## Out of scope
 
