@@ -11,7 +11,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { TEXT_FLAGS, VALUE_FLAGS } from "./defaults.mjs"
-import { rows, warn } from "./ui.mjs"
+import { failure, rows, tick, warn } from "./ui.mjs"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
@@ -21,11 +21,14 @@ const git = (cwd, ...rest) =>
     stdio: ["ignore", "pipe", "pipe"],
   })
 
-// The last --dir given, read the way the create command reads its flags: a
-// flag's value is skipped, so `--author --dir` names an author, not a folder.
-const passedDir = args => {
+// The flags given and the last --dir, read the way the create command reads
+// them: a flag's value is skipped, so `--author --dir` names an author, not a
+// folder, and `--description --clean` is a description, not --clean.
+const readArgs = args => {
+  const flags = new Set()
   let dir
   for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith("-")) flags.add(args[i])
     if (!VALUE_FLAGS.has(args[i])) continue
     const value = args[i + 1]
     if (value === undefined) break
@@ -33,11 +36,30 @@ const passedDir = args => {
     if (args[i] === "--dir") dir = value
     i++
   }
-  return dir
+  return { flags, dir }
 }
 
-const named = passedDir(args)
+const { flags, dir: named } = readArgs(args)
 const folder = path.resolve(named ?? path.join(tmpdir(), "demo-ds"))
+
+// --clean removes the demo's own folder and runs nothing else (#90). It takes
+// no other argument: a folder --dir names is the person's, never removed.
+if (flags.has("--clean")) {
+  if (args.length > 1) {
+    console.error(
+      failure(
+        "--clean takes no other argument: it removes only the demo's own folder.",
+      ),
+    )
+    process.exit(1)
+  }
+  const there = existsSync(folder)
+  rmSync(folder, { recursive: true, force: true })
+  console.log(
+    there ? tick("Removed", folder) : tick("Clean", `nothing at ${folder}`),
+  )
+  process.exit(0)
+}
 
 // The create command clones, so the template it copies is this checkout's last
 // commit; the create command itself, and the init check it runs first, are the
