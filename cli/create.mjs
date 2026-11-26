@@ -16,7 +16,7 @@ import {
   rmSync,
   statSync,
 } from "node:fs"
-import { tmpdir } from "node:os"
+import { homedir, tmpdir } from "node:os"
 import path from "node:path"
 import { createInterface } from "node:readline/promises"
 import { fileURLToPath } from "node:url"
@@ -29,6 +29,7 @@ import {
   TEXT_FLAGS,
   VALUE_FLAGS,
 } from "./defaults.mjs"
+import { failure, next, pending, prompt, tick, title } from "./ui.mjs"
 
 const USAGE = `usage: npm create agentic-ds -- [--prefix <prefix>] [--owner <github-username>] [--name <name>] [--dir <path>] [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
@@ -52,7 +53,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
 
 const fail = message => {
-  console.error(message)
+  console.error(failure(message))
   process.exit(1)
 }
 
@@ -106,12 +107,16 @@ const missing = [
 ].filter(([value]) => !value)
 if (missing.length && !process.stdin.isTTY)
   fail(`missing ${missing.map(([, label]) => label).join(", ")}\n\n${USAGE}`)
+// A path under the home folder, shown from ~.
+const tilde = p =>
+  p === homedir() || p.startsWith(homedir() + path.sep)
+    ? `~${p.slice(homedir().length)}`
+    : p
+console.log(title("agentic-ds", "new design system"))
 if (missing.length) {
   const rl = createInterface({ input: process.stdin, output: process.stdout })
   const ask = async (question, fallback) =>
-    (
-      await rl.question(`${question}${fallback ? ` (${fallback})` : ""}: `)
-    ).trim() || fallback
+    (await rl.question(prompt(question, fallback))).trim() || fallback
   // Input that closes mid-question (Ctrl-D) rejects the pending answer.
   try {
     prefix ||= await ask("Custom property prefix", prefixFrom(name))
@@ -272,15 +277,19 @@ const step = (what, action) => {
 staging = step("creating a temporary folder", () =>
   mkdtempSync(path.join(tmpdir(), `${name}-`)),
 )
+const cloned = pending("Template", tilde(from))
 step(`cloning ${from}`, () =>
   git("clone", "--quiet", "--depth", "1", from, staging),
 )
+cloned()
 // The clone's own init script is the one that will run, so it decides.
+const checked = pending("Values", `prefix --${prefix}-, owner ${owner}`)
 step("checking the values", () => {
   const why = initRefusal(staging)
   if (why)
     throw new Error(`the cloned template's init script refuses them: ${why}`)
 })
+checked()
 rmSync(path.join(staging, ".git"), { recursive: true, force: true })
 
 // The files already there that the copy writes over, for the closing line.
@@ -298,6 +307,7 @@ const there = rel => {
 }
 const replaced = hadFiles ? files("").filter(there) : []
 
+const copied = pending("Folder", tilde(target))
 try {
   cpSync(staging, target, { recursive: true })
 } catch (error) {
@@ -313,16 +323,17 @@ try {
   )
 }
 rmSync(staging, { recursive: true, force: true })
+copied()
 
 // A system's build check and Pages deploy run on main, whatever git's own
 // default branch is (#68), so a new repository, or one with no commit yet,
 // starts there. HEAD is pointed at main rather than passing --initial-branch,
 // which git before 2.28 does not know. A repository with history keeps its
 // branch.
-const copied = `the template was copied into ${target}, but`
+const intoTarget = `the template was copied into ${target}, but`
 if (!inRepo)
   gitOr(
-    `${copied} starting a git repository there failed. Run git init and git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
+    `${intoTarget} starting a git repository there failed. Run git init and git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
     "-C",
     target,
     "init",
@@ -330,7 +341,7 @@ if (!inRepo)
   )
 if (!succeeds("-C", target, "rev-parse", "--verify", "--quiet", "HEAD"))
   gitOr(
-    `${copied} pointing its repository at main failed. Run git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
+    `${intoTarget} pointing its repository at main failed. Run git symbolic-ref HEAD refs/heads/main there, then node scripts/init.mjs ${quoted()}.`,
     "-C",
     target,
     "symbolic-ref",
@@ -345,13 +356,18 @@ if (init) {
   if (author === undefined) {
     const chosen = authorFrom(target, owner)
     console.log(
-      `LICENSE names ${chosen.author} as the copyright holder, from ${chosen.from}; pass --author to name someone else.`,
+      tick(
+        "Author",
+        `${chosen.author}, from ${chosen.from}; pass --author to name someone else`,
+      ),
     )
     initArgs.push("--author", chosen.author)
   }
   const run = spawnSync(process.execPath, ["scripts/init.mjs", ...initArgs], {
     cwd: target,
     stdio: "inherit",
+    // init leaves the next steps to the closing below.
+    env: { ...process.env, CREATE_AGENTIC_DS: "1" },
   })
   if (run.status !== 0)
     fail(
@@ -363,9 +379,15 @@ const shown =
   relative && !relative.startsWith("..") && !path.isAbsolute(relative)
     ? relative
     : target
-const over = replaced.length
-  ? `, replacing ${replaced.join(", ")} (git diff shows what changed)`
-  : ""
+if (replaced.length)
+  console.log(
+    `\n${tick("Replaced", `${replaced.join(", ")} (git diff shows what changed)`)}`,
+  )
+const where = relative ? "there" : "here"
 console.log(
-  `\nSet up ${target}${over}. Next: ${relative ? `cd ${shown}, ` : ""}read it and commit, then run /setup-system in Claude Code there (a session opened elsewhere reads ${shown}/.claude/skills/setup-system/SKILL.md and follows it).`,
+  next([
+    ...(relative ? [`cd ${shown}`] : []),
+    "read the diff, then commit",
+    `run /setup-system in Claude Code ${where}\n(a session opened elsewhere reads ${shown}/.claude/skills/setup-system/SKILL.md and follows it)`,
+  ]),
 )

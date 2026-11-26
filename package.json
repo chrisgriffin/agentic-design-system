@@ -10,6 +10,7 @@
   "files": [
     "cli/create.mjs",
     "cli/defaults.mjs",
+    "cli/ui.mjs",
     "scripts/init.mjs"
   ],
   "repository": {
