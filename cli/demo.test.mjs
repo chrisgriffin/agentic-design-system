@@ -193,3 +193,16 @@ test("--clean with another argument is refused and removes nothing", () => {
   assert.ok(existsSync(path.join(mine, "keep.txt")))
   assert.ok(existsSync(folder()))
 })
+
+// npm run demo:clean is npm run demo -- --clean with no -- to forget (#92).
+test("npm run demo:clean removes demo-ds", () => {
+  mkdirSync(folder())
+  const run = spawnSync("npm", ["run", "--silent", "demo:clean"], {
+    cwd: ROOT,
+    encoding: "utf8",
+    env: { ...process.env, TMPDIR: dir },
+  })
+  assert.equal(run.status, 0, run.stderr)
+  assert.ok(!existsSync(folder()))
+  assert.match(run.stdout, /^ {2}✓ Removed {3}/m)
+})
