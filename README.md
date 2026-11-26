@@ -32,7 +32,7 @@ and your GitHub username (or takes them as `--prefix` and `--owner`, with
 want them), copies the template's default branch in and runs the init script
 there. The folder must be empty, or in a git repository with nothing
 uncommitted or ignored under it, so git can give back every file it replaces (a GitHub
-repo's first README and LICENSE, say); its closing line names each one. A
+repo's first README and LICENSE, say); it names each one before its next steps. A
 repository keeps its history and branch; a folder that is not in one gets a
 new repository on `main`, the branch its build check and Pages deploy run on. Without `--author` it says which name it writes
 into `LICENSE`: git's `user.name`, else `--owner`. It needs Node 22, git and no
@@ -69,14 +69,14 @@ rewrites the docs that still describe the template, sets the brand tokens,
 runs `npm run verify` and the Storybook build, and deletes itself. It commits
 nothing either.
 An agent already in a session elsewhere reads the skill's file, as the create
-command's closing line says, and takes any answers its brief already gives.
+command's next steps say, and takes any answers its brief already gives.
 Putting the new system on GitHub is the owner's to do: `docs/releasing.md`
 lists the steps.
 
 To watch the create command run from a checkout of the template, run
 `npm run demo`: it sets up a fresh `demo-ds` folder in your temp folder with
-the prompts live, so Enter takes each default, then prints the folder and its
-`git status`. The template it copies is the last commit (it warns when you have
+the prompts live, so Enter takes each default, then prints the folder and a
+count of what `git status` shows there. The template it copies is the last commit (it warns when you have
 uncommitted changes); the create command itself runs from your files. Flags
 after `--` go to the create command: `npm run demo -- --no-init` stops after
 the copy, and `--dir` sets up, and reports on, a folder of your own instead.

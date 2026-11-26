@@ -7,12 +7,15 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
+  writeSync,
 } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { authorFrom } from "../cli/defaults.mjs"
+import { failure, header, next, rows, tick } from "../cli/ui.mjs"
 
 const USAGE = `usage: node scripts/init.mjs --name <kebab-name> --prefix <prefix> --owner <github-username> [--author <name>] [--description <text>] [--figma-file <key>] [--fleet]
 
@@ -287,7 +290,32 @@ if (existsSync(changelog)) {
     writeFileSync(changelog, `${text.slice(0, first).trimEnd()}\n`)
 }
 
-const run = cmd => execSync(cmd, { cwd: root, stdio: "inherit" })
+// Under the create command, a failed command is handed to it on fd 3, which it
+// opens for this, and is not printed here: create's failure line names it with
+// the retry, so the run ends on one ✗ line (#88). False when fd 3 is not open.
+const handOff = cmd => {
+  if (!process.env.CREATE_AGENTIC_DS) return false
+  try {
+    writeSync(3, cmd)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// Each command's own output, under a header naming it; a failure is one line.
+const run = cmd => {
+  console.log(header(cmd))
+  try {
+    execSync(cmd, { cwd: root, stdio: "inherit" })
+  } catch {
+    if (handOff(cmd)) process.exit(1)
+    console.error(
+      `\n${failure(`${cmd} failed; fix the cause, then run init again.`)}`,
+    )
+    process.exit(1)
+  }
+}
 run("npm ci --no-audit --no-fund")
 run("npx design-delta dock")
 run("npx prettier --write . --log-level warn")
@@ -296,14 +324,40 @@ run("npm run verify")
 // before the removals: a failed build leaves the script for a second run.
 run("npm run build-storybook")
 
-for (const rel of removed)
-  if (existsSync(path.join(root, rel)))
-    rmSync(path.join(root, rel), { recursive: true })
+// Folders are shown with a trailing /, the workflows under one entry.
+const gone = []
+const workflows = []
+for (const rel of removed) {
+  const at = path.join(root, rel)
+  if (!existsSync(at)) continue
+  if (rel.startsWith(".github/workflows/")) workflows.push(path.basename(rel))
+  else gone.push(statSync(at).isDirectory() ? `${rel}/` : rel)
+  rmSync(at, { recursive: true })
+}
+if (workflows.length) gone.push(`.github/workflows/ ${workflows.join(" ")}`)
 // npm ci writes neither file and Prettier ignores both, but the dock step, or
 // a step added later, may change them, so they are read again and only bin
 // leaves (#62).
 edit(manifest, pkg => delete pkg.bin)
 edit(lockfile, lock => delete lock.packages[""].bin)
+console.log(`\n${tick(`${name} is ready`)}\n`)
 console.log(
-  `\n${name}: ${changed.size} files rewritten (prefix --${prefix}-, owner ${owner}, author ${author}${figma ? `, Figma file ${figma}` : ""}); removed ${removed.join(", ")}.\nverify and the Storybook build are green. Read the diff and commit it, then run /setup-system in Claude Code here to write your own docs and brand.`,
+  rows([
+    ["Prefix", `--${prefix}-`],
+    ["Owner", owner],
+    ["Author", author],
+    ["Figma", figma],
+    ["Rewritten", `${changed.size} files`],
+    ["Removed", gone.join(", ")],
+    ["Checks", "npm run verify ✓  npm run build-storybook ✓"],
+  ]),
 )
+// Under the create command, which prints these itself once it is done, with
+// the folder to cd to; run on its own, the last line names /setup-system (#59).
+if (!process.env.CREATE_AGENTIC_DS)
+  console.log(
+    next([
+      "read the diff, then commit",
+      "run /setup-system in Claude Code here to write your own docs and brand",
+    ]),
+  )

@@ -11,6 +11,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { TEXT_FLAGS, VALUE_FLAGS } from "./defaults.mjs"
+import { rows, warn } from "./ui.mjs"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const args = process.argv.slice(2)
@@ -43,7 +44,9 @@ const folder = path.resolve(named ?? path.join(tmpdir(), "demo-ds"))
 // files on disk.
 if (git(root, "status", "--porcelain").trim())
   console.error(
-    `${root} has uncommitted changes; the template the demo copies is its last commit, without them.`,
+    warn(
+      `${root} has uncommitted changes; the template the demo copies is its last commit, without them.`,
+    ),
   )
 
 // Only the demo's own folder is wiped: a folder the person named is theirs.
@@ -56,7 +59,6 @@ const run = spawnSync(
   [path.join(root, "cli/create.mjs"), "--from", root, "--dir", folder, ...args],
   { stdio: "inherit" },
 )
-console.log(`\nDemo: ${folder}`)
 // A run refused before the copy leaves no repository of its own to show.
 const inRepository = () => {
   try {
@@ -65,9 +67,25 @@ const inRepository = () => {
     return false
   }
 }
-if (
+// git status counted by kind, not listed: a new system is every file untracked.
+const status = () => {
+  const lines = git(folder, "status", "--porcelain").split("\n").filter(Boolean)
+  const untracked = lines.filter(line => line.startsWith("??")).length
+  const counts = [
+    [untracked, "untracked"],
+    [lines.length - untracked, "changed"],
+  ].filter(([n]) => n)
+  return counts.length
+    ? counts.map(([n, kind]) => `${n} ${kind}`).join(", ")
+    : "clean"
+}
+const shown =
   existsSync(folder) &&
   (named ? inRepository() : existsSync(path.join(folder, ".git")))
+console.log(
+  `\n${rows([
+    ["Demo", folder],
+    ["git status", shown ? status() : undefined],
+  ])}`,
 )
-  console.log(git(folder, "status", "--short"))
 process.exit(run.status ?? 1)
