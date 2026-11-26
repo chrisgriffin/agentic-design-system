@@ -41,12 +41,13 @@ test("#79 the package is create-agentic-ds, with the bin npm create runs", () =>
   assert.deepEqual(lock.packages[""].bin, pkg.bin)
 })
 
-test("#79 npm pack holds the create command, its two scripts and nothing else", () => {
+test("#79 npm pack holds the create command, its scripts and nothing else", () => {
   assert.deepEqual(packed, [
     "LICENSE",
     "README.md",
     "cli/create.mjs",
     "cli/defaults.mjs",
+    "cli/ui.mjs",
     "package.json",
     "scripts/init.mjs",
   ])
@@ -70,7 +71,7 @@ test("#79 the packed files alone run the command, up to init's own refusal", () 
       { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
     )
     assert.equal(run.status, 1)
-    assert.match(run.stderr, /^--prefix "Bad" is not valid: /)
+    assert.match(run.stderr, /^ {2}✗ --prefix "Bad" is not valid: /)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

@@ -162,7 +162,7 @@ test("#68 with no --author, the output names git's user.name as the LICENSE hold
     assert.equal(run.status, 0, run.stderr)
     assert.match(
       run.stdout,
-      /^LICENSE names sample-bot\[bot\] as the copyright holder, from git's user\.name; pass --author to name someone else\.$/m,
+      /^ {2}✓ Author {4}sample-bot\[bot\], from git's user\.name; pass --author to name someone else$/m,
     )
     assert.equal(initAuthor(), "sample-bot[bot]", "init wrote another name")
   })
@@ -174,7 +174,7 @@ test("#68 with no --author and no git user.name, the output names the owner", ()
     assert.equal(run.status, 0, run.stderr)
     assert.match(
       run.stdout,
-      /^LICENSE names sample-owner as the copyright holder, from --owner; pass --author to name someone else\.$/m,
+      /^ {2}✓ Author {4}sample-owner, from --owner; pass --author to name someone else$/m,
     )
     assert.equal(initAuthor(), "sample-owner")
   })
@@ -191,7 +191,7 @@ test("#68 with --author, the output says nothing about where it came from", () =
       template,
     )
     assert.equal(run.status, 0, run.stderr)
-    assert.doesNotMatch(run.stdout, /^LICENSE names/m)
+    assert.doesNotMatch(run.stdout, /✓ Author/)
     assert.equal(initAuthor(), "Sample Author")
   })
 })
@@ -208,7 +208,7 @@ test("#68 when init fails, the retry line carries the author the output named", 
       assert.notEqual(run.status, 0)
       assert.match(
         run.stdout,
-        /^LICENSE names Sample Bot as the copyright holder, from git's user\.name;/m,
+        /^ {2}✓ Author {4}Sample Bot, from git's user\.name;/m,
       )
       assert.match(
         run.stderr,

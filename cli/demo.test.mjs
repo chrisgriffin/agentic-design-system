@@ -34,13 +34,21 @@ const demoIn = (root, ...args) =>
 const demo = (...args) => demoIn(ROOT, ...args)
 const folder = () => path.join(dir, "demo-ds")
 
+// The closing row naming the folder the demo ends on (#88).
+const endsOn = (stdout, f) =>
+  stdout
+    .split("\n")
+    .some(
+      line => line.replace(/^ {4}Demo +/, "") === f && /^ {4}Demo /.test(line),
+    )
+
 test("the demo sets up demo-ds in the temp folder and ends on its path and git status", () => {
   const run = demo(...VALUES)
   assert.equal(run.status, 0, run.stderr)
   assert.ok(existsSync(path.join(folder(), "scripts/init.mjs")))
-  assert.match(run.stdout, new RegExp(`Demo: ${folder()}`))
+  assert.ok(endsOn(run.stdout, folder()), run.stdout)
   // A new repository with nothing committed: every file is untracked.
-  assert.match(run.stdout, /^\?\? package\.json$/m)
+  assert.match(run.stdout, /^ {4}git status {2}\d+ untracked$/m)
 })
 
 test("each run starts from a fresh folder", () => {
@@ -100,8 +108,8 @@ test("a passed-through --dir is the folder the demo sets up and reports on", () 
   assert.ok(existsSync(path.join(named, "scripts/init.mjs")))
   assert.ok(!existsSync(first))
   assert.ok(existsSync(path.join(folder(), "untouched.txt")))
-  assert.ok(run.stdout.includes(`Demo: ${named}\n`))
-  assert.match(run.stdout, /^\?\? package\.json$/m)
+  assert.ok(endsOn(run.stdout, named), run.stdout)
+  assert.match(run.stdout, /^ {4}git status {2}\d+ untracked$/m)
 })
 
 test("a --dir the create command refuses is left as it was", () => {
@@ -111,13 +119,13 @@ test("a --dir the create command refuses is left as it was", () => {
   const run = demo(...VALUES, "--dir", named)
   assert.equal(run.status, 1)
   assert.ok(existsSync(path.join(named, "mine.txt")))
-  assert.ok(run.stdout.includes(`Demo: ${named}\n`))
-  assert.doesNotMatch(run.stdout, /\?\? /)
+  assert.ok(endsOn(run.stdout, named), run.stdout)
+  assert.doesNotMatch(run.stdout, /git status/)
 })
 
 test("--dir as another flag's value names no folder", () => {
   const run = demo(...VALUES, "--author", "--dir")
   assert.equal(run.status, 0, run.stderr)
   assert.ok(existsSync(path.join(folder(), "scripts/init.mjs")))
-  assert.ok(run.stdout.includes(`Demo: ${folder()}\n`))
+  assert.ok(endsOn(run.stdout, folder()), run.stdout)
 })

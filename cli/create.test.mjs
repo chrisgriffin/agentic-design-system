@@ -60,7 +60,7 @@ test("--help calls --owner your GitHub username", () => {
 test("with no terminal, a missing value exits 1 and names the flag", () => {
   const run = create("--owner", "sample-owner")
   assert.equal(run.status, 1)
-  assert.match(run.stderr, /^missing --prefix/)
+  assert.match(run.stderr, /^ {2}✗ missing --prefix/)
   assert.deepEqual(readdirSync(dir), [])
 })
 
@@ -75,7 +75,7 @@ test("#56 a refused value is named, with the init script's reason", () => {
   refusesCleanly(run)
   assert.match(
     run.stderr,
-    /^--prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits\n\nusage: npm create /,
+    /^ {2}✗ --prefix "Bad" is not valid: a lowercase letter, then lowercase letters and digits\n\nusage: npm create /,
   )
   assert.doesNotMatch(run.stderr, /sample-owner/, "it listed every value")
   assert.deepEqual(readdirSync(dir), [])
@@ -86,7 +86,7 @@ test("#56 a refused name is shown as --name, the flag create takes", () => {
   refusesCleanly(run)
   assert.match(
     run.stderr,
-    /^--name "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npm create /,
+    /^ {2}✗ --name "Bad_Name" is not valid: kebab-case, [^\n]*\n\nusage: npm create /,
   )
   assert.deepEqual(readdirSync(dir), [])
 })
@@ -98,7 +98,7 @@ test("#75 a folder name that is not kebab-case is refused, naming --name", () =>
     { encoding: "utf8" },
   )
   refusesCleanly(run)
-  assert.match(run.stderr, /^--name "My System" is not valid: kebab-case/)
+  assert.match(run.stderr, /^ {2}✗ --name "My System" is not valid: kebab-case/)
   assert.deepEqual(readdirSync(dir), [])
 })
 
@@ -156,7 +156,7 @@ test("an unknown option is refused with the usage, before any write", () => {
   for (const args of [["--figma", "abc"], ["-x"], ["--figma-file=abc"]]) {
     const run = create(...args, ...VALUES)
     refusesCleanly(run)
-    assert.match(run.stderr, /^unknown option /)
+    assert.match(run.stderr, /^ {2}✗ unknown option /)
     assert.match(run.stderr, /usage: /)
   }
   assert.deepEqual(readdirSync(dir), [])
@@ -164,11 +164,11 @@ test("an unknown option is refused with the usage, before any write", () => {
 
 test("a value flag with no value, or a positional argument, is refused", () => {
   for (const [args, message] of [
-    [["--owner", "sample-owner", "--prefix"], /^--prefix needs a value/],
-    [["--prefix", "--owner", "sample-owner"], /^--prefix needs a value/],
+    [["--owner", "sample-owner", "--prefix"], /^ {2}✗ --prefix needs a value/],
+    [["--prefix", "--owner", "sample-owner"], /^ {2}✗ --prefix needs a value/],
     [
       ["sample-system", ...VALUES],
-      /^unexpected argument "sample-system": the system is set up in the current folder, or the one --dir names, and --name names it\n/,
+      /^ {2}✗ unexpected argument "sample-system": the system is set up in the current folder, or the one --dir names, and --name names it\n/,
     ],
   ]) {
     const run = spawnSync(process.execPath, [CREATE, ...args], {
@@ -201,7 +201,7 @@ test("the next step names the folder it made, wherever --dir put it", () => {
   const run = create(...VALUES, "--from", ROOT, "--no-init")
   assert.equal(run.status, 0, run.stderr)
   const made = path.join(dir, "sample-system")
-  assert.ok(run.stdout.includes(`Next: cd ${made},`), run.stdout)
+  assert.ok(run.stdout.includes(`1  cd ${made}\n`), run.stdout)
 })
 
 test("a clone that fails exits 1 and leaves nothing behind", () => {
@@ -212,7 +212,7 @@ test("a clone that fails exits 1 and leaves nothing behind", () => {
     "--no-init",
   )
   refusesCleanly(run)
-  assert.match(run.stderr, /^cloning .* failed; nothing was written/)
+  assert.match(run.stderr, /^ {2}✗ cloning .* failed; nothing was written/)
   assert.deepEqual(readdirSync(dir), [])
 })
 
@@ -458,7 +458,7 @@ test("the init script refuses --author or --description with no value (#49)", ()
       cwd: dir,
     })
     refusesCleanly(missing)
-    assert.match(missing.stderr, new RegExp(`^${f} needs a value`))
+    assert.match(missing.stderr, new RegExp(`^ {2}✗ ${f} needs a value`))
   }
   assert.deepEqual(readdirSync(dir), [])
 })

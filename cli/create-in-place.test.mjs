@@ -101,7 +101,10 @@ test("#75 with no --dir it sets up the folder it is run in, named after it", () 
   assert.equal(run.status, 0, run.stderr)
   assert.ok(existsSync(path.join(repo, "package.json")))
   assert.deepEqual(readdirSync(dir).sort(), ["gitconfig", "sample-system"])
-  assert.match(run.stdout, /Next: read it and commit, then run \/setup-system/)
+  assert.match(
+    run.stdout,
+    / {4}1  read the diff, then commit\n {4}2  run \/setup-system in Claude Code here\n/,
+  )
   const check = spawnSync(
     process.execPath,
     [
@@ -128,7 +131,7 @@ test("#75 in a clean repo it keeps the history and branch and names what it repl
   )
   assert.match(
     run.stdout,
-    /, replacing LICENSE, README\.md \(git diff shows what changed\)\./,
+    /✓ Replaced  LICENSE, README\.md \(git diff shows what changed\)/,
   )
   assert.match(git(repo, "status", "--porcelain").stdout, /^ M README\.md$/m)
 })
@@ -176,7 +179,7 @@ test("#75 --dir in a repo sets up that folder, made when missing, with no repo o
   const made = path.join(repo, "packages/tokens")
   assert.ok(existsSync(path.join(made, "package.json")))
   assert.ok(!existsSync(path.join(made, ".git")), "it started a nested repo")
-  assert.match(run.stdout, /Next: cd packages\/tokens, read it/)
+  assert.match(run.stdout, / {4}1  cd packages\/tokens\n {4}2  read the diff/)
 })
 
 // An ignored file is one git holds no copy of, in each place the setup reaches
@@ -212,7 +215,7 @@ test("#75 a git status that fails is one message, nothing written", () => {
   refusesUntouched(run, before)
   assert.match(
     run.stderr,
-    /^reading git status in .+ failed; nothing was written\.$/m,
+    /^ {2}✗ reading git status in .+ failed; nothing was written\.$/m,
   )
 })
 
@@ -252,7 +255,7 @@ test("#75 a failed copy removes the folders it made on the way to --dir", () => 
   assert.doesNotMatch(run.stderr, /^\s+at /m)
   assert.match(
     run.stderr,
-    /^copying the template into .+ failed; nothing was written\.$/m,
+    /^ {2}✗ copying the template into .+ failed; nothing was written\.$/m,
   )
   assert.ok(!existsSync(path.join(dir, "a")), "it left a/b/ behind")
 })
