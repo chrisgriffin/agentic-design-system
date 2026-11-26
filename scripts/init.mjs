@@ -251,8 +251,9 @@ edit(manifest, pkg => {
   delete pkg.files
   pkg.description = description
   pkg.scripts.test = pkg.scripts.test.replace(CLI_TESTS, "")
-  // npm run demo runs cli/create.mjs, which goes with cli/ below.
+  // npm run demo and demo:clean run cli/demo.mjs, which goes with cli/ below.
   delete pkg.scripts.demo
+  delete pkg.scripts["demo:clean"]
 })
 // The lock file is renamed here, not by an install, so it stays the template's:
 // npm install lets the local npm re-resolve it, and npm 11 drops an entry the

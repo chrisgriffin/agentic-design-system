@@ -17,9 +17,9 @@
 
 ## Success criteria
 
-- [ ] `npm run demo:clean` removes `demo-ds` from the temp folder and exits 0.
-- [ ] A created system's `package.json` has no `demo:clean` script.
-- [ ] **Runnable:** `node --test cli/demo.test.mjs cli/init-manifest.test.mjs` passes, including a `demo:clean` test in each (on `develop`, `npm run demo:clean` exits 1: the script does not exist), and `npm test` stays green.
+- [x] `npm run demo:clean` removes `demo-ds` from the temp folder and exits 0.
+- [x] A created system's `package.json` has no `demo:clean` script.
+- [x] **Runnable:** `node --test cli/demo.test.mjs cli/init-manifest.test.mjs` passes, including a `demo:clean` test in each (on `develop`, `npm run demo:clean` exits 1: the script does not exist), and `npm test` stays green.
 
 ## Out of scope
 

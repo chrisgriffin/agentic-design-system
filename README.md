@@ -81,8 +81,8 @@ uncommitted changes); the create command itself runs from your files. Flags
 after `--` go to the create command: `npm run demo -- --no-init` stops after
 the copy, and `--dir` sets up, and reports on, a folder of your own instead.
 `--clean` is the demo's own flag, never passed on, and it is taken alone: when
-you are done, `npm run demo -- --clean` removes the `demo-ds` folder and runs
-nothing else; it never removes a folder `--dir` named. The `--` is required:
+you are done, `npm run demo:clean` (the same as `npm run demo -- --clean`)
+removes the `demo-ds` folder and runs nothing else; it never removes a folder `--dir` named. The `--` is required:
 `npm run demo --clean` is a flag to npm, which runs a full demo and rebuilds
 the folder.
 
