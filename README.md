@@ -172,7 +172,7 @@ How the repo fits together, in prose: [docs/architecture.md](docs/architecture.m
 how a change becomes a release: [docs/releasing.md](docs/releasing.md).
 
 The design-delta engine comes from the public npm registry on a caret range
-(`^0.27.0`), so installing the engine needs no git access or credentials and `npm ci`
+(`^0.29.0`), so installing the engine needs no git access or credentials and `npm ci`
 gets exactly the engine the lockfile records. Move to a new minor on purpose,
 with the npm 10 that CI's Node 22 runs:
 `npx npm@10 install design-delta@^<version>`, then `npm run verify`, and read
@@ -193,7 +193,8 @@ call (no force push, no push to `main`), `post-edit-check.sh` after every
 edit (Prettier, and Stylelint on CSS), and `design-delta-verify.mjs`, which
 `design-delta dock` generates and which runs the gate after every edit so an
 agent sees drift before it finishes. `.claude/skills/design-delta/` is the
-dock's stub, pointing at the installed engine's own skill.
+dock's router stub, and each `design-delta-*` folder beside it a stub for
+one of the installed engine's own skills.
 `.claude/skills/agentic-ds-add-component/`, `agentic-ds-add-token/` and `agentic-ds-change-theme/` are the
 system's own procedures for the changes an agent makes most: contract first,
 primitive before semantic, both themes at 4.5:1. `npm run update:skills`

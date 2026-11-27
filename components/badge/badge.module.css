@@ -17,11 +17,9 @@
 }
 
 .success {
-  background: var(--ads-color-bg-muted);
   color: var(--ads-color-success-default);
 }
 
 .danger {
-  background: var(--ads-color-bg-muted);
   color: var(--ads-color-danger-default);
 }
