@@ -153,11 +153,24 @@ test("the copy keeps its MCP server, named for the system, and its test (#94)", 
 })
 
 test("the copy keeps its managed skills, npm run update:skills and its test, and skillsFrom names their source (#96)", () => {
-  for (const name of ["add-component", "add-token", "change-theme"])
-    assert.ok(
-      existsSync(path.join(copy, `.claude/skills/${name}/SKILL.md`)),
-      name,
+  // Named for the system, folder and text, never the template (#96).
+  for (const skill of ["add-component", "add-token", "change-theme"]) {
+    const file = path.join(
+      copy,
+      `.claude/skills/sample-system-${skill}/SKILL.md`,
     )
+    assert.ok(existsSync(file), skill)
+    assert.match(
+      readFileSync(file, "utf8"),
+      new RegExp(`^---\\nname: sample-system-${skill}\\n`),
+    )
+  }
+  assert.deepEqual(
+    readdirSync(path.join(copy, ".claude/skills")).filter(d =>
+      d.startsWith("agentic-ds-"),
+    ),
+    [],
+  )
   assert.ok(existsSync(path.join(copy, "scripts/update-skills.mjs")))
   assert.ok(existsSync(path.join(copy, "scripts/update-skills.test.mjs")))
   assert.equal(pkg.scripts["update:skills"], "node scripts/update-skills.mjs")

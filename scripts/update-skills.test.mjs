@@ -52,6 +52,11 @@ function setup(t, { pkg = {}, env = GIT_ENV } = {}) {
     ".claude/skills/current/SKILL.md": managed("current", "same"),
     ".claude/skills/claimed/SKILL.md": managed("claimed", "upstream"),
     ".claude/skills/unmanaged/SKILL.md": skill("unmanaged", "runs once"),
+    // Named for the source repository, as the template's own skills are.
+    ".claude/skills/source-named/SKILL.md": managed(
+      "source-named",
+      "then the source-fresh step",
+    ),
   })
   const git = (...args) =>
     execFileSync(
@@ -126,6 +131,34 @@ test("#96 with no --from, package.json's skillsFrom is the source", t => {
   const result = run()
   assert.equal(result.status, 0, result.stderr)
   assert.equal(read("fresh"), managed("fresh", "new upstream"))
+})
+
+test("#96 in a created system, a skill named for the source arrives named for the system, folder and text", t => {
+  const base = setup(t)
+  const { system, run, read } = base
+  writeFileSync(
+    path.join(system, "package.json"),
+    JSON.stringify({ name: "acme", skillsFrom: base.source }),
+  )
+  const result = run()
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(
+    result.stdout,
+    /✓ added {4}\.claude\/skills\/acme-named\/SKILL\.md/,
+  )
+  assert.equal(
+    read("acme-named"),
+    managed("acme-named", "then the acme-fresh step"),
+  )
+  assert.ok(!existsSync(path.join(system, ".claude/skills/source-named")))
+})
+
+test("#96 with no skillsFrom (the source itself), names are left as they are", t => {
+  const { source, system, run } = setup(t, { pkg: { name: "acme" } })
+  assert.equal(run("--from", source).status, 0)
+  assert.ok(
+    existsSync(path.join(system, ".claude/skills/source-named/SKILL.md")),
+  )
 })
 
 test("#96 a clone that fails writes nothing and exits 1", t => {

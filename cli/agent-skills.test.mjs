@@ -16,7 +16,11 @@ const read = file =>
     : ""
 // The skills a created system keeps and npm run update:skills manages, and the
 // one it runs once, which deletes itself and must never come back.
-const KEPT = ["add-component", "add-token", "change-theme"]
+// The kept skills carry the template's name, which init rewrites to the
+// system's in their folders and their text alike (#96).
+const KEPT = ["add-component", "add-token", "change-theme"].map(
+  s => `agentic-ds-${s}`,
+)
 const ONCE = "setup-system"
 const file = name => `.claude/skills/${name}/SKILL.md`
 // What init removes from a copy (scripts/init.mjs, `removed`).
@@ -66,7 +70,13 @@ for (const name of [...KEPT, ONCE]) {
       "create.mjs",
       "init-check.yml",
     ])
-      assert.ok(!skill.includes(s), `${name} names ${s}`)
+      // A kept skill's own name and the others' are rewritten with its folder.
+      assert.ok(
+        !KEPT.reduce((text, kept) => text.replaceAll(kept, ""), skill).includes(
+          s,
+        ),
+        `${name} names ${s}`,
+      )
   })
 }
 

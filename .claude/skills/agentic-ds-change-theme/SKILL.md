@@ -1,9 +1,9 @@
 ---
-name: change-theme
+name: agentic-ds-change-theme
 description: Change this system's colors in its light or dark theme without breaking either — move a semantic color's aliases or a ramp's values, keep every component text pair at 4.5:1 in both themes, and rebuild. Use when asked to change a color, the accent, the brand palette, dark mode, or to fix a contrast failure.
 ---
 
-# change-theme
+# agentic-ds-change-theme
 
 Each semantic color has a light and a dark value. Components use only semantic
 colors, so a theme changes in the token sources, never in a stylesheet.
@@ -25,7 +25,7 @@ colors, so a theme changes in the token sources, never in a stylesheet.
   `$extensions.mode.dark` alone.
 - Keep a ramp's step names when changing its values; add a step to a short
   ramp rather than reusing one for two jobs.
-- A new primitive or semantic color is the `add-token` skill.
+- A new primitive or semantic color is the `agentic-ds-add-token` skill.
 - A theme beyond light and dark is not this skill: it touches `modeSelectors`
   and the required modes in `terrazzo.config.mjs`, the themes the manifest
   builds in `tokens/scripts/build-manifest.mjs`, the theme test in

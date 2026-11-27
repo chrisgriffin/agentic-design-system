@@ -56,13 +56,20 @@ function main(args) {
       process.exitCode = 1
       return
     }
+    // A created system's skills carry its own name where the source's carry
+    // the source's (init renames them, #96), so an update maps one onto the
+    // other: the source's name is its repository's, this system's is its
+    // package's. The source itself, with no skillsFrom, maps nothing.
+    const upstream = path.basename(from).replace(/\.git$/, "")
+    const own = (pkg.skillsFrom && pkg.name) || upstream
+    const mapped = text => text.replaceAll(upstream, own)
     const skills = path.join(clone, ".claude/skills")
     const names = existsSync(skills) ? readdirSync(skills).sort() : []
     for (const name of names) {
-      const rel = `.claude/skills/${name}/SKILL.md`
-      const source = path.join(clone, rel)
+      const source = path.join(clone, `.claude/skills/${name}/SKILL.md`)
+      const rel = `.claude/skills/${mapped(name)}/SKILL.md`
       if (!existsSync(source)) continue
-      const text = readFileSync(source, "utf8")
+      const text = mapped(readFileSync(source, "utf8"))
       if (!text.includes(MANAGED)) continue
       const local = path.join(root, rel)
       const mine = existsSync(local) ? readFileSync(local, "utf8") : undefined

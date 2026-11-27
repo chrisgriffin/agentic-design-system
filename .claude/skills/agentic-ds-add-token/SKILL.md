@@ -1,9 +1,9 @@
 ---
-name: add-token
+name: agentic-ds-add-token
 description: Add a design token to this system the way its build expects — a primitive for the raw value, a semantic token aliasing it, both themes for a color, then the build and the gate. Use when asked to add a color, space, size, radius, font or motion value, or when a component needs a value no semantic token has.
 ---
 
-# add-token
+# agentic-ds-add-token
 
 Only semantic tokens ship. A primitive holds a raw value and is inlined at
 build; code never references one. So a new value starts as a primitive, and a
@@ -54,7 +54,7 @@ throws, naming it.
    `styles`: the dot id.
 2. `node --test tokens/scripts/*.test.mjs` for the tokens alone, then
    `npm run verify` until it passes. A new text color used by a component is
-   held to 4.5:1 in both themes; if it falls short, the `change-theme` skill
+   held to 4.5:1 in both themes; if it falls short, the `agentic-ds-change-theme` skill
    says how to fix it.
 
 Managed by `npm run update:skills`, which overwrites this file. Delete this line to keep your own edits: the update then leaves the file alone.

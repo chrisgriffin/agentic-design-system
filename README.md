@@ -194,11 +194,12 @@ edit (Prettier, and Stylelint on CSS), and `design-delta-verify.mjs`, which
 `design-delta dock` generates and which runs the gate after every edit so an
 agent sees drift before it finishes. `.claude/skills/design-delta/` is the
 dock's stub, pointing at the installed engine's own skill.
-`.claude/skills/add-component/`, `add-token/` and `change-theme/` are the
+`.claude/skills/agentic-ds-add-component/`, `agentic-ds-add-token/` and `agentic-ds-change-theme/` are the
 system's own procedures for the changes an agent makes most: contract first,
 primitive before semantic, both themes at 4.5:1. `npm run update:skills`
 brings them up to date from the repository the system was created from, and
-leaves alone any one whose managed line its owner deleted.
+leaves alone any one whose managed line its owner deleted. Each is named
+for the system: init renames them with it.
 `npm run scaffold -- <name>` writes a new component directory in the shape of
 `components/badge` plus the contract the engine drafts from its props.
 `CLAUDE.md` is the rulebook an agent reads first.

@@ -6,6 +6,7 @@ import {
   existsSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -184,6 +185,16 @@ for (const rel of walk("")) {
   for (const [from, to] of swaps) after = after.replaceAll(from, to)
   if (after !== before) (writeFileSync(file, after), changed.add(rel))
 }
+
+// A skill named for the template is renamed for the system, folder and all
+// (#96): the walk above rewrote its contents, and a folder is not a content.
+const skills = path.join(root, ".claude/skills")
+for (const entry of readdirSync(skills))
+  if (entry.startsWith(`${TEMPLATE.name}-`))
+    renameSync(
+      path.join(skills, entry),
+      path.join(skills, name + entry.slice(TEMPLATE.name.length)),
+    )
 
 // The README's intro sentence is the template's description; package.json's
 // and LICENSE's lines are set whole, so any text is safe in them.

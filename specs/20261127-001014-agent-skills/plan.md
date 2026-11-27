@@ -13,7 +13,7 @@ Node 22, ESM, no new dependency. `git` (already required by the create command) 
 
 ## Surfaces touched
 
-- `.claude/skills/add-component/SKILL.md`, `.claude/skills/add-token/SKILL.md`, `.claude/skills/change-theme/SKILL.md`: new.
+- `.claude/skills/agentic-ds-add-component/SKILL.md`, `.claude/skills/agentic-ds-add-token/SKILL.md`, `.claude/skills/agentic-ds-change-theme/SKILL.md`: new.
 - `scripts/update-skills.mjs`, `scripts/update-skills.test.mjs`: new.
 - `cli/agent-skills.test.mjs`: new, template-only content checks (init removes `cli/`).
 - `package.json`: an `update:skills` script.

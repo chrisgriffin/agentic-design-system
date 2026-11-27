@@ -8,9 +8,9 @@
 
 ## Phase 2: the skills
 
-- [x] T004 `.claude/skills/add-component/SKILL.md`.
-- [x] T005 `.claude/skills/add-token/SKILL.md`.
-- [x] T006 `.claude/skills/change-theme/SKILL.md`.
+- [x] T004 `.claude/skills/agentic-ds-add-component/SKILL.md`.
+- [x] T005 `.claude/skills/agentic-ds-add-token/SKILL.md`.
+- [x] T006 `.claude/skills/agentic-ds-change-theme/SKILL.md`.
 - [x] T007 `cli/agent-skills.test.mjs`: each skill's frontmatter, the managed line, every path it names exists and is none init removes, nothing init rewrites.
 
 ## Phase 3: init

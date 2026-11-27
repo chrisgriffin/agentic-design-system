@@ -1,9 +1,9 @@
 ---
-name: add-component
+name: agentic-ds-add-component
 description: Add a component to this design system the way its gate expects — scaffold it, write its contract first, build the code and stylesheet to that contract with semantic tokens only, and finish with drift and the gate green. Use when asked to add, create or build a new component, or a composed part of an existing one.
 ---
 
-# add-component
+# agentic-ds-add-component
 
 The contract is the source of truth: the code conforms to it, never the other
 way around (`CLAUDE.md`, "Non-negotiable invariants"). So the contract is
@@ -40,7 +40,7 @@ Finish `<name>.contract.json` before the code:
 - `styles`: every visual property bound to a semantic token by its dot id
   (`color.fg.default`, `inset.sm`), the base and one entry per variant. Every
   id must exist in `tokens/json/semantics/`. A value the system does not have
-  yet is a new token: use the `add-token` skill first, never a literal.
+  yet is a new token: use the `agentic-ds-add-token` skill first, never a literal.
 
 ## 4. Build to the contract
 
@@ -70,7 +70,7 @@ Finish `<name>.contract.json` before the code:
    changed.
 2. `npm run verify`, until it passes. Fix the cause: never widen Stylelint's
    ignore list, loosen a test or switch off an axe rule. A contrast failure is
-   fixed in a token (the `change-theme` skill), never by lowering the bar.
+   fixed in a token (the `agentic-ds-change-theme` skill), never by lowering the bar.
 3. Add the component's row to the Components table in `README.md`.
 4. Tell the owner to open `npm run storybook` and read the component in both
    themes: the gate checks text pairs, not everything a page shows.
