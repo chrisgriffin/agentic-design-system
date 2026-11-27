@@ -194,7 +194,8 @@ edit (Prettier, and Stylelint on CSS), and `design-delta-verify.mjs`, which
 `design-delta dock` generates and which runs the gate after every edit so an
 agent sees drift before it finishes. `.claude/skills/design-delta/` is the
 dock's router stub, and each `design-delta-*` folder beside it a stub for
-one of the installed engine's own skills.
+one of the installed engine's own skills, except `design-delta-verify/`,
+which carries its own instructions.
 `.claude/skills/agentic-ds-add-component/`, `agentic-ds-add-token/` and `agentic-ds-change-theme/` are the
 system's own procedures for the changes an agent makes most: contract first,
 primitive before semantic, both themes at 4.5:1. `npm run update:skills`

@@ -11,5 +11,6 @@
 - `.claude/skills/design-delta*/`: the stubs `dock` writes.
 - `components/badge/badge.module.css`: two redundant background declarations removed.
 - `README.md`, `docs/architecture.md`: the version and the dock's stubs.
+- `CLAUDE.md` § Agent layer: the `agentic-ds-*` skills take precedence over the engine's token and build stubs.
 - Published surface: none. The packed create command's files are unchanged.
 - CI, required checks: none.
