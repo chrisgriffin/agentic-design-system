@@ -6,6 +6,7 @@ import {
   existsSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -185,6 +186,16 @@ for (const rel of walk("")) {
   if (after !== before) (writeFileSync(file, after), changed.add(rel))
 }
 
+// A skill named for the template is renamed for the system, folder and all
+// (#96): the walk above rewrote its contents, and a folder is not a content.
+const skills = path.join(root, ".claude/skills")
+for (const entry of readdirSync(skills))
+  if (entry.startsWith(`${TEMPLATE.name}-`))
+    renameSync(
+      path.join(skills, entry),
+      path.join(skills, name + entry.slice(TEMPLATE.name.length)),
+    )
+
 // The README's intro sentence is the template's description; package.json's
 // and LICENSE's lines are set whole, so any text is safe in them.
 const readme = path.join(root, "README.md")
@@ -254,6 +265,10 @@ edit(manifest, pkg => {
   // npm run demo and demo:clean run cli/demo.mjs, which goes with cli/ below.
   delete pkg.scripts.demo
   delete pkg.scripts["demo:clean"]
+  // npm run update:skills clones its managed skills from here (#96). Written
+  // after the walk, so the rewrite above never reaches it: the one place a
+  // system names the template, and only as the source of those skills.
+  pkg.skillsFrom = `https://github.com/${TEMPLATE.owner}/${TEMPLATE.name}.git`
 })
 // The lock file is renamed here, not by an install, so it stays the template's:
 // npm install lets the local npm re-resolve it, and npm 11 drops an entry the

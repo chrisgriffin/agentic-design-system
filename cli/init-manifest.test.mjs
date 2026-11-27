@@ -152,6 +152,31 @@ test("the copy keeps its MCP server, named for the system, and its test (#94)", 
   assert.doesNotMatch(pkg.scripts.test, /cli\//)
 })
 
+test("the copy keeps its managed skills, npm run update:skills and its test, and skillsFrom names their source (#96)", () => {
+  // Named for the system, folder and text, never the template (#96).
+  for (const skill of ["add-component", "add-token", "change-theme"]) {
+    const file = path.join(
+      copy,
+      `.claude/skills/sample-system-${skill}/SKILL.md`,
+    )
+    assert.ok(existsSync(file), skill)
+    assert.match(
+      readFileSync(file, "utf8"),
+      new RegExp(`^---\\nname: sample-system-${skill}\\n`),
+    )
+  }
+  assert.deepEqual(
+    readdirSync(path.join(copy, ".claude/skills")).filter(d =>
+      d.startsWith("agentic-ds-"),
+    ),
+    [],
+  )
+  assert.ok(existsSync(path.join(copy, "scripts/update-skills.mjs")))
+  assert.ok(existsSync(path.join(copy, "scripts/update-skills.test.mjs")))
+  assert.equal(pkg.scripts["update:skills"], "node scripts/update-skills.mjs")
+  assert.equal(pkg.skillsFrom, "https://github.com/chrisgriffin/agentic-ds.git")
+})
+
 test("the copy has no demo or demo:clean script, which run the cli/ init removes", () => {
   assert.equal(pkg.scripts.demo, undefined)
   assert.equal(pkg.scripts["demo:clean"], undefined)
@@ -166,9 +191,11 @@ test("#79 no file of the copy names the template or its create command", () => {
         ? files(path.join(dir, e.name))
         : [path.join(dir, e.name)],
     )
+  // package.json's skillsFrom is the one exception: the source of the
+  // managed skills (#96).
   const naming = files(copy).filter(file =>
     /agentic-ds|create-sample-system|npm create/.test(
-      readFileSync(file, "utf8"),
+      readFileSync(file, "utf8").replace(/^ {2}"skillsFrom": ".*",?$/m, ""),
     ),
   )
   assert.deepEqual(
