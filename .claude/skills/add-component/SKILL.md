@@ -13,9 +13,9 @@ written first, and every later step is checked against it.
 
 1. `CLAUDE.md`: the invariants and the component directory shape.
 2. `components/badge/`, the one to copy: all seven files.
-3. A component nearest to the one asked for: `components/button/` for enum
-   props, a slot and a design-only axis; `components/card/` for a composed
-   part (`card-header`) with a contract of its own.
+3. Any other component in `components/` nearest to the one asked for: one
+   with enum props, a slot or a design-only axis, or a parent with a composed
+   part and that part's own contract.
 
 ## 2. Scaffold
 
@@ -24,8 +24,9 @@ into `components/<name>/` and a draft contract from the props census, and
 refuses a name that exists.
 
 A composed part (a header, a footer, an item) is not scaffolded: it adds its
-own `.tsx`, `.module.css` and `.contract.json` to the parent's directory, as
-`components/card/card-header.*` does, and the parent's `index.ts` exports it.
+own `.tsx`, `.module.css` and `.contract.json` to the parent's directory,
+named `<parent>-<part>` (a `header` of `<parent>` is `<parent>-header.tsx`),
+and the parent's `index.ts` exports it.
 
 ## 3. Write the contract
 
@@ -57,7 +58,7 @@ Finish `<name>.contract.json` before the code:
 - `<name>.test.tsx`: keep the scaffold's `variantCases` test, which gives axe
   one case per combination of the contract's code-side enums with no list
   kept by hand. Add a keyboard test with `userEvent` when the component is
-  interactive, as `components/button/button.test.tsx` does.
+  interactive: tab to it, press the keys it answers, assert what each does.
 - `<name>.figma.tsx`: map each prop to its Figma property. The node URL stays
   a placeholder until the system has a Figma file.
 - `index.ts`: export the component and its props type.

@@ -7,6 +7,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs"
 import { tmpdir } from "node:os"
@@ -31,8 +32,19 @@ const write = (dir, files) => {
   }
 }
 
-function setup(pkg = {}) {
+// Every git call ignores the machine's git config, so a global
+// `commit.gpgsign` or `core.hooksPath` cannot make setup fail or prompt.
+const GIT_ENV = {
+  ...process.env,
+  GIT_CONFIG_GLOBAL: "/dev/null",
+  GIT_CONFIG_NOSYSTEM: "1",
+}
+
+// `t` is the running test: the stand-in folder is removed when it ends.
+// `env` replaces GIT_ENV for setup's own git calls (the config test below).
+function setup(t, { pkg = {}, env = GIT_ENV } = {}) {
   const base = mkdtempSync(path.join(tmpdir(), "update-skills-test-"))
+  t.after(() => rmSync(base, { recursive: true, force: true }))
   const source = path.join(base, "source")
   write(source, {
     ".claude/skills/fresh/SKILL.md": managed("fresh", "new upstream"),
@@ -44,8 +56,12 @@ function setup(pkg = {}) {
   const git = (...args) =>
     execFileSync(
       "git",
-      ["-c", "user.name=t", "-c", "user.email=t@t", "-C", source, ...args],
-      { stdio: "ignore" },
+      [
+        ...["-c", "user.name=t", "-c", "user.email=t@t"],
+        ...["-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null"],
+        ...["-C", source, ...args],
+      ],
+      { stdio: "ignore", env },
     )
   git("init", "--quiet")
   git("add", ".")
@@ -66,15 +82,15 @@ function setup(pkg = {}) {
     spawnSync(
       process.execPath,
       [path.join(system, "scripts/update-skills.mjs"), ...args],
-      { encoding: "utf8", env: { ...process.env, TMPDIR: temp } },
+      { encoding: "utf8", env: { ...GIT_ENV, TMPDIR: temp } },
     )
   const read = name =>
     readFileSync(path.join(system, `.claude/skills/${name}/SKILL.md`), "utf8")
-  return { source, system, temp, run, read }
+  return { base, source, system, temp, run, read }
 }
 
-test("#96 adds a missing managed skill, updates a stale one, keeps a claimed one", () => {
-  const { source, temp, run, read } = setup()
+test("#96 adds a missing managed skill, updates a stale one, keeps a claimed one", t => {
+  const { source, temp, run, read } = setup(t)
   const result = run("--from", source)
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /✓ added {4}\.claude\/skills\/fresh\/SKILL\.md/)
@@ -94,14 +110,14 @@ test("#96 adds a missing managed skill, updates a stale one, keeps a claimed one
   assert.deepEqual(readdirSync(temp), [], "the clone is removed")
 })
 
-test("#96 a skill the source carries without the managed line is never copied", () => {
-  const { source, system, run } = setup()
+test("#96 a skill the source carries without the managed line is never copied", t => {
+  const { source, system, run } = setup(t)
   run("--from", source)
   assert.ok(!existsSync(path.join(system, ".claude/skills/unmanaged")))
 })
 
-test("#96 with no --from, package.json's skillsFrom is the source", () => {
-  const base = setup()
+test("#96 with no --from, package.json's skillsFrom is the source", t => {
+  const base = setup(t)
   const { system, run, read } = base
   writeFileSync(
     path.join(system, "package.json"),
@@ -112,8 +128,8 @@ test("#96 with no --from, package.json's skillsFrom is the source", () => {
   assert.equal(read("fresh"), managed("fresh", "new upstream"))
 })
 
-test("#96 a clone that fails writes nothing and exits 1", () => {
-  const { system, temp, run, read } = setup()
+test("#96 a clone that fails writes nothing and exits 1", t => {
+  const { system, temp, run, read } = setup(t)
   const result = run("--from", path.join(system, "no-such-repo"))
   assert.equal(result.status, 1)
   assert.match(result.stderr, /^ {2}✗ cloning .* failed; nothing was written\./)
@@ -122,11 +138,41 @@ test("#96 a clone that fails writes nothing and exits 1", () => {
   assert.deepEqual(readdirSync(temp), [], "the clone is removed")
 })
 
-test("#96 an unknown argument, or --from with no value, exits 1", () => {
-  const { run } = setup()
+test("#96 an unknown argument, or --from with no value, exits 1", t => {
+  const { run } = setup(t)
   for (const args of [["--form", "x"], ["--from"]]) {
     const result = run(...args)
     assert.equal(result.status, 1, args.join(" "))
     assert.match(result.stderr, /^ {2}✗ .*\n\nusage: npm run update:skills/)
   }
+})
+
+test("#96 setup removes its stand-in folder when the test ends", async t => {
+  let base
+  await t.test("a test that uses setup", st => {
+    base = setup(st).base
+    assert.ok(existsSync(base))
+  })
+  assert.ok(!existsSync(base), `${base} is left behind`)
+})
+
+test("#96 setup commits under a global config that signs commits and runs hooks", t => {
+  // A global config with gpgsign on, a signing program that always fails and
+  // a hooks path whose pre-commit refuses: setup's own -c flags must win.
+  const dir = mkdtempSync(path.join(tmpdir(), "update-skills-config-"))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const hooks = path.join(dir, "hooks")
+  write(hooks, { "pre-commit": "#!/bin/sh\nexit 1\n" })
+  execFileSync("chmod", ["+x", path.join(hooks, "pre-commit")])
+  const config = path.join(dir, "gitconfig")
+  writeFileSync(
+    config,
+    `[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = false\n[core]\n\thooksPath = ${hooks}\n`,
+  )
+  const { source, run, read } = setup(t, {
+    env: { ...process.env, GIT_CONFIG_GLOBAL: config },
+  })
+  const result = run("--from", source)
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(read("fresh"), managed("fresh", "new upstream"))
 })

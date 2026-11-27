@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { test } from "node:test"
 
 import { MANAGED } from "../scripts/update-skills.mjs"
@@ -75,6 +75,33 @@ for (const name of KEPT)
     const skill = read(file(name))
     assert.ok(skill.trimEnd().endsWith(MANAGED), `${name} has no managed line`)
     assert.doesNotMatch(skill, /template/i)
+  })
+
+// The examples setup-system lets an owner delete: every component but badge,
+// which scaffold copies and which always stays. An update writes the template's
+// text over a kept skill, so a kept skill that named one would bring back a
+// pointer at a component the system no longer has.
+const EXAMPLES = readdirSync(new URL("components/", root), {
+  withFileTypes: true,
+})
+  .filter(d => d.isDirectory() && d.name !== "badge")
+  .map(d => d.name)
+
+test("the setup skill's droppable examples are found", () => {
+  assert.ok(EXAMPLES.length > 0, "no example component besides badge")
+})
+
+for (const name of KEPT)
+  test(`${name} names no example component setup-system may delete`, () => {
+    const skill = read(file(name))
+    for (const example of EXAMPLES)
+      // A path (`components/card/`), a part (`card-header`), a file
+      // (`button.test.tsx`) or the word in prose: each names the example.
+      assert.doesNotMatch(
+        skill,
+        new RegExp(`\\b${example}\\b`, "i"),
+        `${name} names the ${example} example`,
+      )
   })
 
 test(`${ONCE} carries no managed line, so an update never brings it back`, () => {
