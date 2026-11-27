@@ -42,6 +42,7 @@ Code Connect: `<name>.figma.tsx` carries a placeholder file key until the Figma 
 - `.claude/settings.json` wires three hooks: `bash-guard.sh` before every Bash call, `post-edit-check.sh` (Prettier, and Stylelint on CSS) and `design-delta-verify.mjs` after every edit. A failing hook feeds its text back; fix the cause, never the hook.
 - `.claude/skills/design-delta/SKILL.md` is a stub pointing at the installed engine's own skill; read that one, then `design-delta.json`'s `_`-prefixed keys.
 - `.claude/skills/agentic-ds-add-component/`, `agentic-ds-add-token/` and `agentic-ds-change-theme/` are the procedures for those three changes, named for the system so they never collide with another skill; read the one that fits before starting. `npm run update:skills` (`scripts/update-skills.mjs`) refreshes every skill that carries its managed line; delete that line to keep your own edits.
+- Where an `agentic-ds-*` skill and an engine stub (`design-delta-token`, `design-delta-author`, `design-delta-build`) both fit a change, the `agentic-ds-*` skill takes precedence: it carries this system's primitive-then-semantic and both-themes rules, which the engine's generic procedures do not.
 - `npm run mcp` (`scripts/mcp.mjs`, connected by `.mcp.json`) is the system's MCP server, read-only: `get_component_usage`, `get_theme_tokens` and `get_rules`, plus every `design-delta mcp` tool (contracts, tokens, drift), passed through.
 
 ## CI

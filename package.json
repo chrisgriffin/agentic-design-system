@@ -61,7 +61,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
     "axe-core": "^4.14.0",
-    "design-delta": "^0.27.0",
+    "design-delta": "^0.29.0",
     "eslint": "^9.39.5",
     "globals": "^17.13.0",
     "jsdom": "^31.0.0",

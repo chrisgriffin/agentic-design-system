@@ -1,6 +1,6 @@
 ---
 name: design-delta
-description: Run and interpret a design-delta audit — the deterministic, read-only conformance check between this project's code and its per-component *.contract.json contracts, and (when a design provider is configured) between those contracts and the design tool. Use when asked for a design-delta or design-system audit, when a component or token looks out of sync with its contract, or when a design-delta finding needs validating.
+description: Anything design-delta in a project — run or interpret an audit of its code and its design tool against the per-component *.contract.json contracts, write or change a contract, build a component to its contract, write a component's documentation page, add, rename, deprecate or remove a design token, refresh the design snapshot, or work a list of findings down. Use for any design-delta, design-system, contract or design-token request, or when a component or token looks out of sync with its contract — this skill routes to the packaged procedure for the task.
 ---
 
 # design-delta
