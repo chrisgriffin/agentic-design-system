@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit",
     "scaffold": "node scripts/scaffold-component.mjs",
     "mcp": "node scripts/mcp.mjs",
+    "update:skills": "node scripts/update-skills.mjs",
     "demo": "node cli/demo.mjs",
     "demo:clean": "node cli/demo.mjs --clean",
     "test": "node --test tokens/scripts/*.test.mjs scripts/*.test.mjs cli/*.test.mjs && vitest run",

@@ -24,7 +24,7 @@ This change ships three skills in `.claude/skills/`, kept by init in every creat
 
 ## Success criteria
 
-- [ ] An agent in a created system finds `add-component`, `add-token` and `change-theme` in `.claude/skills/`, each naming only paths the system has and nothing init rewrites: `cli/agent-skills.test.mjs`.
-- [ ] `npm run update:skills` against a template adds a missing managed skill, updates a stale one, leaves a claimed one and names it, and writes nothing when the clone fails: `scripts/update-skills.test.mjs`.
-- [ ] A created system's `package.json` has the `update:skills` script and a `skillsFrom` naming the template: `cli/init-manifest.test.mjs`.
-- [ ] **Runnable:** `node --test cli/agent-skills.test.mjs scripts/update-skills.test.mjs` passes (on `develop` it fails: neither file exists), and `npm test` stays green.
+- [x] An agent in a created system finds `add-component`, `add-token` and `change-theme` in `.claude/skills/`, each naming only paths the system has and nothing init rewrites: `cli/agent-skills.test.mjs`.
+- [x] `npm run update:skills` against a template adds a missing managed skill, updates a stale one, leaves a claimed one and names it, and writes nothing when the clone fails: `scripts/update-skills.test.mjs`.
+- [x] A created system's `package.json` has the `update:skills` script and a `skillsFrom` naming the template: `cli/init-manifest.test.mjs`.
+- [x] **Runnable:** `node --test cli/agent-skills.test.mjs scripts/update-skills.test.mjs` passes (on `develop` it fails: neither file exists), and `npm test` stays green.

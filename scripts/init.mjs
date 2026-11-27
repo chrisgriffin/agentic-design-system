@@ -254,6 +254,10 @@ edit(manifest, pkg => {
   // npm run demo and demo:clean run cli/demo.mjs, which goes with cli/ below.
   delete pkg.scripts.demo
   delete pkg.scripts["demo:clean"]
+  // npm run update:skills clones its managed skills from here (#96). Written
+  // after the walk, so the rewrite above never reaches it: the one place a
+  // system names the template, and only as the source of those skills.
+  pkg.skillsFrom = `https://github.com/${TEMPLATE.owner}/${TEMPLATE.name}.git`
 })
 // The lock file is renamed here, not by an install, so it stays the template's:
 // npm install lets the local npm re-resolve it, and npm 11 drops an entry the
