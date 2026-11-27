@@ -1,0 +1,144 @@
+{
+  "$schema": "../../node_modules/design-delta/schema/contract.schema.json",
+  "id": "button",
+  "title": "Button",
+  "status": "published",
+  "sources": {
+    "code": {
+      "path": "components/button/button.tsx",
+      "styles": "components/button/button.module.css"
+    }
+  },
+  "props": {
+    "children": {
+      "type": "string",
+      "_comment": "The label, text only."
+    },
+    "size": {
+      "type": "enum",
+      "values": ["sm", "md", "lg"],
+      "default": "md",
+      "required": false
+    },
+    "variant": {
+      "type": "enum",
+      "values": ["default", "outline"],
+      "default": "default",
+      "required": false
+    },
+    "state": {
+      "type": "enum",
+      "values": ["resting", "hovered"],
+      "default": "resting",
+      "code": "none",
+      "_comment": "Design-only interaction axis: code realizes it as :hover, never a prop. `code: none` asserts code must NOT carry it."
+    },
+    "iconBefore": {
+      "type": "slot",
+      "required": false,
+      "_comment": "A design slot always occupies space, so a design tool models it as a boolean toggling a preset icon; code takes the node itself."
+    }
+  },
+  "anatomy": {
+    "root": {
+      "type": "container",
+      "element": "button",
+      "codeClass": "button",
+      "content": {
+        "$prop": "children"
+      }
+    }
+  },
+  "styles": {
+    "root": {
+      "base": {
+        "borderRadius": {
+          "token": "radius.md"
+        },
+        "background": {
+          "token": "color.accent.default"
+        },
+        "color": {
+          "token": "color.fg.on-accent"
+        },
+        "padding": {
+          "block": {
+            "token": "inset.sm"
+          },
+          "inline": {
+            "token": "inset.md"
+          }
+        },
+        "border": {
+          "width": {
+            "token": "border.default"
+          },
+          "color": "raw(transparent)"
+        },
+        "fontFamily": {
+          "token": "font-family.body"
+        },
+        "fontSize": {
+          "token": "font-size.md"
+        },
+        "fontWeight": {
+          "token": "font-weight.semibold"
+        },
+        "lineHeight": {
+          "token": "line-height.tight"
+        },
+        "gap": {
+          "token": "inline.sm"
+        }
+      },
+      "variants": [
+        {
+          "when": {
+            "size": "sm"
+          },
+          "padding": {
+            "block": {
+              "token": "inset.xs"
+            },
+            "inline": {
+              "token": "inset.sm"
+            }
+          },
+          "fontSize": {
+            "token": "font-size.sm"
+          }
+        },
+        {
+          "when": {
+            "size": "lg"
+          },
+          "padding": {
+            "block": {
+              "token": "inset.md"
+            },
+            "inline": {
+              "token": "inset.lg"
+            }
+          },
+          "fontSize": {
+            "token": "font-size.lg"
+          }
+        },
+        {
+          "when": {
+            "variant": "outline"
+          },
+          "background": "raw(transparent)",
+          "color": {
+            "token": "color.accent.default"
+          },
+          "border": {
+            "color": {
+              "token": "color.accent.default"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

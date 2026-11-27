@@ -1,0 +1,86 @@
+{
+  "font-family": {
+    "body": {
+      "$type": "fontFamily",
+      "$value": "{font-family.sans}"
+    },
+    "heading": {
+      "$type": "fontFamily",
+      "$value": "{font-family.sans}"
+    },
+    "code": {
+      "$type": "fontFamily",
+      "$value": "{font-family.mono}"
+    }
+  },
+  "font-weight": {
+    "regular": {
+      "$type": "fontWeight",
+      "$value": "{font-weight.400}"
+    },
+    "medium": {
+      "$type": "fontWeight",
+      "$value": "{font-weight.500}"
+    },
+    "semibold": {
+      "$type": "fontWeight",
+      "$value": "{font-weight.600}"
+    },
+    "bold": {
+      "$type": "fontWeight",
+      "$value": "{font-weight.700}"
+    }
+  },
+  "font-size": {
+    "xs": {
+      "$type": "dimension",
+      "$value": "{font-size.12}"
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": "{font-size.14}"
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": "{font-size.16}"
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": "{font-size.18}"
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": "{font-size.20}"
+    },
+    "2xl": {
+      "$type": "dimension",
+      "$value": "{font-size.24}"
+    },
+    "3xl": {
+      "$type": "dimension",
+      "$value": "{font-size.30}"
+    },
+    "4xl": {
+      "$type": "dimension",
+      "$value": "{font-size.36}"
+    },
+    "5xl": {
+      "$type": "dimension",
+      "$value": "{font-size.48}"
+    }
+  },
+  "line-height": {
+    "tight": {
+      "$type": "number",
+      "$value": "{line-height.100}"
+    },
+    "snug": {
+      "$type": "number",
+      "$value": "{line-height.125}"
+    },
+    "body": {
+      "$type": "number",
+      "$value": "{line-height.150}"
+    }
+  }
+}

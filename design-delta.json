@@ -1,0 +1,174 @@
+{
+  "$schema": "./node_modules/design-delta/schema/config.schema.json",
+  "_doc": "The design-delta engine's config, read from the project root. Contracts live beside their components; the design side is Figma with no files yet, so `verify` runs contract-to-code only until a snapshot is gathered.",
+  "design": {
+    "provider": "figma",
+    "files": []
+  },
+  "paths": {
+    "componentsDir": "components",
+    "contractsDir": "components",
+    "tokensFile": "tokens/json",
+    "styleRoots": ["tokens/css"],
+    "reportDir": ".design-delta/reports",
+    "snapshotDir": ".design-delta/snapshots",
+    "stateFile": ".design-delta/state.json"
+  },
+  "conventions": {
+    "cssVarPrefix": "--ads-",
+    "stylesSuffix": ".module.css",
+    "codeConnectSuffix": ".figma.tsx",
+    "contractSuffix": ".contract.json",
+    "nonComponentFileSuffixes": [".stories.tsx", ".test.tsx", ".figma.tsx"]
+  },
+  "rules": {
+    "_doc": "Severities that differ from the engine defaults. coverage/uncontracted-component is error here because CLAUDE.md invariant 2 makes the contract the source of truth: a component with no contract is never audited again, which is the drift this template exists to prevent. Pinned by test-utils/contract-coverage.test.ts. tokens/token-unreferenced ignores the primitive tier, which scopes tokens/token-unemitted too; why is README § Tokens.",
+    "coverage/uncontracted-component": "error",
+    "tokens/token-unreferenced": [
+      "review",
+      {
+        "ignoreSources": ["tokens/json/primitives/*"]
+      }
+    ]
+  },
+  "exemptions": {
+    "_doc": "Semantic tokens no example component uses yet, kept on purpose; why, and when to delete an entry, is README § Tokens.",
+    "tokens/token-unreferenced": [
+      {
+        "entity": "color.bg.canvas",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.bg.surface",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.border.strong",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.danger.hover",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.danger.subtle",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.fg.link",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "color.fg.muted",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "duration.base",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "duration.slow",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "easing.enter",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "easing.exit",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-family.code",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-size.xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-size.2xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-size.3xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-size.4xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-size.5xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-weight.regular",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "font-weight.bold",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "inline.xs",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "inline.lg",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "inset.xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "radius.sm",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "stack.xs",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "stack.sm",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "stack.lg",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      },
+      {
+        "entity": "stack.xl",
+        "decision": "accepted",
+        "reason": "Template headroom: the semantic layer ships whole, for the next component (README § Tokens)."
+      }
+    ]
+  }
+}

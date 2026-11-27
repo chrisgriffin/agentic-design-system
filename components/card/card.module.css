@@ -1,0 +1,14 @@
+.card {
+  padding: var(--ads-inset-lg);
+  border: var(--ads-border-default) solid var(--ads-color-border-default);
+  border-radius: var(--ads-radius-lg);
+  background: var(--ads-color-bg-surface-raised);
+  color: var(--ads-color-fg-default);
+  font-family: var(--ads-font-family-body);
+  font-size: var(--ads-font-size-md);
+  line-height: var(--ads-line-height-body);
+}
+
+.paddingNone {
+  padding: 0;
+}

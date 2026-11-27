@@ -1,0 +1,26 @@
+# Tasks: Take the design-delta engine from the npm registry
+
+## Phase 1 — setup
+
+- [x] T001 Record today's gate to compare against: `npm ci && npm run drift:verify > /tmp/drift-before.txt 2>&1; echo "exit=$?" >> /tmp/drift-before.txt`
+- [x] T002 Confirm the published version to depend on: `curl -sfS https://registry.npmjs.org/design-delta | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s)["dist-tags"].latest))'`. Note it in the PR body. If it is no longer `0.27.0`, use what `latest` says and say so.
+
+## Phase 2 — the swap
+
+- [x] T003 In `package.json`, replace `"design-delta": "github:chrisgriffin/design-delta"` with the registry range `"design-delta": "^<version from T002>"`.
+- [x] T004 Regenerate the lockfile — `rm -rf node_modules package-lock.json && npm install` — and confirm `packages["node_modules/design-delta"].resolved` starts with `https://registry.npmjs.org/`. Do not hand-edit `resolved`. Built with `npm install` after the `package.json` edit, which rewrote only the engine's lockfile entry; a whole-lockfile regeneration would also have floated every other dependency, which the spec's non-goals keep out.
+- [x] T005 Confirm no git fallback survived: `grep -n 'git+ssh\|git+https\|github:' package-lock.json package.json` returns no line naming `design-delta`.
+- [x] T006 `npm run verify`, then diff `drift:verify` against `/tmp/drift-before.txt`: the same findings at the same severities. A difference means the published engine differs from the branch build the gate was reading — report it in the PR body; never change a severity and never add an `exemptions` entry to absorb it.
+
+## Phase 3 — polish
+
+- [x] T007 Check `scripts/init.mjs`: if it writes or validates the engine dependency when turning a copy into a named system, update it to the registry form and extend its test. It does not: it only runs `npx design-delta dock` once the engine is installed, so nothing changed.
+- [x] T008 Confirm the engine needs no credentials: `rm -rf node_modules && npm ci --ignore-scripts` succeeds and the engine's lockfile entry is fetched from the registry, not git. (`@chrisgriffin/config` still resolves over `git+ssh://`; moving it is a non-goal.)
+
+## Phase 4 — surfaces
+
+- [x] T009 A published surface: `README.md` and `docs/architecture.md` say the engine arrives from the public npm registry and how a copy's owner moves the range deliberately.
+- [x] T010 `docs/releasing.md` — move any line that names the engine's version or how it is fetched. It names neither, so nothing changed.
+- [x] T011 `docs/adr/` — add the record: the engine comes from the public npm registry with a caret range. It supersedes the earlier intent to pin an immutable git reference, and says why no git form could satisfy the lockfile criterion. Link the record from this PR.
+- [x] T012 A rule stated in more than one doc: `CLAUDE.md` § CI and § Agent layer keep the rule; the README stays a pointer, not a second copy.
+- [x] T013 Cost: none. Confirm in the PR body that no workflow trigger, cron or scheduled function changed.

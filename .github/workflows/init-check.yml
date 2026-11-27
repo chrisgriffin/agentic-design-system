@@ -1,0 +1,65 @@
+name: Init Check
+
+# Thin stub: proves cli/create.mjs makes a system that passes its gate with
+# no credentials, run under npm 11, whose lock file is the template's renamed
+# and passes npm ci on Node 22's npm 10 (#44), and that scripts/init.mjs turns a fresh copy of the template into a
+# named system that still passes the gate, restoring the committed lock file
+# over one an earlier install re-resolved (#44). The script runs the verify chain
+# and the Storybook build itself and removes itself, this file, the docs
+# passages marked <!-- init --> and the two fleet-only stubs, and drops the
+# template's CHANGELOG.md release entries, keeping only the preamble, and
+# resets its version to 0.0.0 (#81).
+# Both runs fail when the copy keeps the template's specs/, copyright holder
+# or description (#49).
+# Both fail when the copy has no setup skill, and the init run when its
+# closing line does not name it (#59).
+# Both fail when the copy keeps the create command's package name, bin, files
+# list or publish workflow, or is not private (#79).
+# scripts/init.mjs removes this file from a copy, so a copy never runs it.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: init-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  init:
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      packages: read
+    uses: chrisgriffin/workflows/.github/workflows/_reusable-node-ci.yml@v1
+    with:
+      node_version: "22"
+      run: |
+        env -u NODE_AUTH_TOKEN GIT_SSH_COMMAND=false npx -y -p npm@11 -- node cli/create.mjs --prefix cds --owner sample-owner --dir "$RUNNER_TEMP/created-system" --from "$PWD"
+        node -e 'const fs = require("fs"), bare = f => { const l = JSON.parse(fs.readFileSync(f)); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(process.argv[1]) !== bare(process.argv[2])) { console.error("#44: the created lock file differs from the template'"'"'s past its name and bin"); process.exit(1) }' package-lock.json "$RUNNER_TEMP/created-system/package-lock.json"
+        (cd "$RUNNER_TEMP/created-system" && npx -y npm@10 ci --dry-run) || { echo "#44: npm 10 ci refuses the created lock file"; exit 1; }
+        test ! -e "$RUNNER_TEMP/created-system/cli"
+        node -e 'const fs = require("fs"), [dir, name] = process.argv.slice(1), p = JSON.parse(fs.readFileSync(dir + "/package.json")); if (p.name !== name || p.private !== true || p.bin || p.files || p.publishConfig || fs.existsSync(dir + "/.github/workflows/publish.yml")) { console.error("#79: " + name + " inherited the create command'"'"'s package name, bin or publish settings"); process.exit(1) }' "$RUNNER_TEMP/created-system" created-system
+        test ! -e "$RUNNER_TEMP/created-system/scripts/init.mjs"
+        test ! -e "$RUNNER_TEMP/created-system/specs" || { echo "#49: the template's specs/ survived create"; exit 1; }
+        grep -qx 'The created-system design system.' "$RUNNER_TEMP/created-system/README.md" || { echo "#49: create left the template's README description"; exit 1; }
+        ! grep -q 'Chris Griffin' "$RUNNER_TEMP/created-system/LICENSE" || { echo "#49: create left the template's copyright holder"; exit 1; }
+        test -f "$RUNNER_TEMP/created-system/.claude/skills/setup-system/SKILL.md" || { echo "#59: create left no setup skill"; exit 1; }
+        node -e 'const fs = require("fs"), l = JSON.parse(fs.readFileSync("package-lock.json")); delete l.packages["node_modules/design-delta/node_modules/yaml-to-momoa"]; fs.writeFileSync("package-lock.json", JSON.stringify(l, null, 2))'
+        node scripts/init.mjs --name sample-system --prefix sds --owner sample-owner --author "Sample Author" --description "Sample tokens." --figma-file SAMPLEKEY > "$RUNNER_TEMP/init.log" 2>&1 || { cat "$RUNNER_TEMP/init.log"; exit 1; }
+        cat "$RUNNER_TEMP/init.log"
+        tail -1 "$RUNNER_TEMP/init.log" | grep -q '/setup-system' || { echo "#59: init's closing line does not name /setup-system"; exit 1; }
+        test -f .claude/skills/setup-system/SKILL.md || { echo "#59: init left no setup skill"; exit 1; }
+        node -e 'const fs = require("fs"), { execSync } = require("child_process"), bare = t => { const l = JSON.parse(t); delete l.name; delete l.packages[""].name; delete l.packages[""].bin; return JSON.stringify(l) }; if (bare(fs.readFileSync("package-lock.json", "utf8")) !== bare(execSync("git show HEAD:./package-lock.json", { encoding: "utf8" }))) { console.error("#44: init kept a re-resolved lock file instead of the committed one"); process.exit(1) }'
+        test ! -f scripts/init.mjs
+        test ! -e cli
+        node -e 'const fs = require("fs"), [dir, name] = process.argv.slice(1), p = JSON.parse(fs.readFileSync(dir + "/package.json")); if (p.name !== name || p.private !== true || p.bin || p.files || p.publishConfig || fs.existsSync(dir + "/.github/workflows/publish.yml")) { console.error("#79: " + name + " inherited the create command'"'"'s package name, bin or publish settings"); process.exit(1) }' . sample-system
+        test ! -e specs || { echo "#49: the template's specs/ survived init"; exit 1; }
+        grep -qx "Copyright (c) $(date +%Y) Sample Author" LICENSE || { echo "#49: LICENSE does not name --author"; exit 1; }
+        grep -qx 'Sample tokens.' README.md || { echo "#49: the README intro is not --description"; exit 1; }
+        test "$(node -p 'require("./package.json").description')" = 'Sample tokens.' || { echo "#49: package.json description is not --description"; exit 1; }
+        ! grep -q -e 'agent can build in' -e 'built in layers' README.md || { echo "#49: the README still describes the template"; exit 1; }
+        test "$(grep -rl -e '<!-- init -->' -e 'scripts/init.mjs' -e 'cli/create.mjs' -e 'init-check.yml' --include='*.md' --exclude-dir=node_modules --exclude-dir=storybook-static --exclude-dir=specs . | wc -l)" -eq 0
+        test "$(grep -rl -e '--ads-' --exclude-dir=node_modules --exclude-dir=storybook-static --exclude-dir=specs . | wc -l)" -eq 0
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
